@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Space Day Challenge - Buzzer Round</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a0f1f;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            overflow-x: hidden;
+        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .glass-card {
+            background: rgba(16, 24, 45, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .isro-orange { color: #f37021; }
+        .isro-blue { color: #0054a6; }
+        .btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            font-weight: bold;
+            padding: 0.65rem 0.9rem; /* Further reduced padding */
+            font-size: 0.9rem; /* Slightly smaller font */
+            border-radius: 0.5rem;
+            cursor: pointer;
+            white-space: nowrap; /* Prevent text wrapping inside button */
+        }
+        .btn-primary {
+            background-color: #f37021;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(243, 112, 33, 0.4);
+        }
+        .btn-primary:hover {
+            background-color: #ffffff;
+            color: #f37021;
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(243, 112, 33, 0.7);
+        }
+        .btn-primary:disabled {
+            background-color: #f37021;
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid #0054a6;
+            color: #ffffff;
+        }
+        .btn-secondary:hover {
+            background-color: #0054a6;
+            color: #ffffff;
+        }
+        .btn-secondary:disabled {
+            border-color: #0054a6;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-buzzer {
+            background: radial-gradient(circle, #ff4141, #c00);
+            color: white;
+            border: 6px solid #ffc4c4;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            font-size: 4rem;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -5px 10px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+        }
+        .btn-buzzer:hover { transform: scale(1.05); }
+        .btn-buzzer:active { transform: scale(0.95); }
+        .btn-buzzer:disabled {
+            background: #666;
+            border-color: #888;
+            cursor: not-allowed;
+            animation: none;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 65, 65, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 65, 65, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 65, 65, 0); }
+        }
+        .image-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            flex-direction: row; /* Changed to row for landscape layout */
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 0.5rem;
+            border: 1px solid #4a5568;
+            padding: 1rem;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0.375rem;
+            background-color: rgba(0,0,0,0.3);
+            /* FIX: These two properties prevent the image from overflowing its flex container */
+            object-fit: contain; 
+            min-width: 0;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- Login Page -->
+    <div id="login-page" class="min-h-screen flex flex-col items-center justify-center">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-white uppercase font-orbitron">National Space Day</h1>
+            <h2 class="text-xl md:text-2xl isro-orange font-orbitron">Buzzer Round</h2>
+        </header>
+        <div class="glass-card rounded-lg p-8 w-full max-w-md">
+            <h3 class="text-2xl font-bold text-center mb-6">Login</h3>
+            <div class="space-y-4">
+                <input id="team-name-input" type="text" placeholder="Team Name (for Participants)" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-isro-orange">
+                <input id="password-input" type="password" placeholder="Password" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-isro-orange">
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button id="participant-login-btn" class="flex-1 btn btn-secondary">Login as Participant</button>
+                <button id="admin-login-btn" class="flex-1 btn btn-primary">Login as Admin</button>
+            </div>
+            <p id="login-error" class="text-red-500 text-center mt-4 h-4"></p>
+        </div>
+    </div>
+
+    <!-- Admin View -->
+    <div id="admin-view" class="hidden w-full max-w-6xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-white uppercase font-orbitron">Admin Control Panel</h1>
+        </header>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <main class="lg:col-span-2 glass-card rounded-lg p-6">
+                <div id="admin-image-container" class="mb-6 image-container"></div>
+                <div id="admin-answer-container" class="text-center h-auto min-h-[3rem] flex items-center justify-center mb-6 opacity-0 transition-opacity duration-500">
+                    <p id="admin-answer-text" style="color: #000; background-color: #ff9409; padding: 8px; border-radius: 4px;" class="text-lg md:text-xl font-bold"></p>
+                </div>
+                <div class="flex flex-nowrap gap-4 justify-center">
+                    <button id="prev-btn" class="btn btn-secondary">Previous</button>
+                    <button id="toggle-answer-btn" class="btn btn-secondary">Show Answer</button>
+                    <button id="next-btn" class="btn btn-primary">Next</button>
+                    <button id="reset-game-btn" class="btn btn-secondary border-red-500 text-red-500 hover:bg-red-500 hover:text-white">Reset Game</button>
+                </div>
+            </main>
+            <aside class="glass-card rounded-lg p-6">
+                <h2 class="text-2xl font-bold mb-4 text-center font-orbitron">Buzzer Winner</h2>
+                <div id="winner-display" class="text-center">
+                    <!-- Winner will appear here -->
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Participant View -->
+    <div id="participant-view" class="hidden min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="glass-card rounded-lg p-8 w-full max-w-lg">
+            <h1 id="participant-team-name" class="text-4xl font-bold font-orbitron mb-4 text-center"></h1>
+            <div id="participant-buzzer-area" class="h-96 flex flex-col items-center justify-center">
+                 <!-- Buzzer and messages will appear here -->
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Firebase Imports - NOW FOR REALTIME DATABASE
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, set, update, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // --- Configuration ---
+        const ADMIN_PASS = 'terabaap';
+        const PARTICIPANT_PASS = 'nspd25';
+        
+        const spaceObjects = [
+            { images: ['hanle.png', 'hanle1.png'], answer: 'Indian Astronomical Observatory (IAO) | Hanle Observatory, Ladakh' },
+            { images: ['gl.jpg'], answer: 'Gravitational Lensing - Due to Bending of Light' },
+            { images: ['pulsar.jpg'], answer: 'Vela Pulsar | Spins 11 times/sec and is 1000ly away!!' },
+            { images: ['image.jpeg'], answer: 'Mare Crisium | J. S. Dingra' },
+            { images: ['bpt.png'], answer: 'BPT Diagram for Spectral Classification of Galaxies' },
+            { images: ['Bell.jpeg'], answer: 'Jocelyn Bell Burnell | Mother of Pulsars' },
+            { images: ['cartwh.png'], answer: 'Cartwheel Galaxy | JWST' },
+            { images: ['brain.jpg'], answer: 'Brian Schmidt | Noble Prize 2011 -  providing evidence that the expansion of the universe is accelerating' },
+            { images: ['keck.jpg'], answer: 'Keck Observatory, Hawaii | KECK I & KECK II' },
+            { images: ['rose.jpg'], answer: 'Rosette Nebula | HII Emission Nebula' },
+            { images: ['cs.png'], answer: 'Celestial Sphere | https://carina.galamo.org' },
+            { images: ['agn.jpeg'], answer: 'AGN - Active Galactic Nuclei | WISEAJ124634.65+023809.2' },
+            { images: ['sa.jpg'], answer: 'Shadow of Sagitarius A*' },
+            { images: ['images.png'], answer: 'Oumuamua | 1I/2017' },
+            { images: ['rd.jpg'], answer: 'Hertzsprung-Russell Diagram' },
+            { images: ['pune.png'], answer: 'Giant Metrewave Radio Telescope (GMRT), Narayangaon' },
+            { images: ['sdss.jpg','sdss1.jpg'], answer: 'Apache Point Observatory - SDSS (Sloan Digital Sky Survey), Sunspot, New Mexico' }
+        ];
+
+        // --- DOM Elements ---
+        const loginPage = document.getElementById('login-page');
+        const adminView = document.getElementById('admin-view');
+        const participantView = document.getElementById('participant-view');
+        const loginError = document.getElementById('login-error');
+
+        // --- Firebase Setup ---
+        let db, auth;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'buzzer-quiz-app-prod';
+        let gameStateRef;
+
+        // --- App State ---
+        let currentTeamName = '';
+        let unsubscribeGameState = null;
+
+        async function initializeFirebase() {
+            try {
+                const firebaseConfig = {
+                  apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+                  authDomain: "iist-fd6e8.firebaseapp.com",
+                  databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+                  projectId: "iist-fd6e8",
+                  storageBucket: "iist-fd6e8.appspot.com",
+                  messagingSenderId: "692699808449",
+                  appId: "1:692699808449:web:120c8941a940d071f24a40",
+                  measurementId: "G-GPFG8LWF2H"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                db = getDatabase(app);
+                auth = getAuth(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Firebase initialized and user signed in.");
+                gameStateRef = ref(db, `artifacts/${appId}/public/data/quizState`);
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                loginError.textContent = "Error connecting to server. Check console for details.";
+            }
+        }
+        
+        // --- Login Logic ---
+        document.getElementById('admin-login-btn').addEventListener('click', () => {
+            const pass = document.getElementById('password-input').value;
+            if (pass === ADMIN_PASS) {
+                showView('admin');
+                initAdmin();
+            } else {
+                loginError.textContent = 'Incorrect admin password.';
+            }
+        });
+
+        document.getElementById('participant-login-btn').addEventListener('click', () => {
+            const teamName = document.getElementById('team-name-input').value;
+            const pass = document.getElementById('password-input').value;
+            if (pass === PARTICIPANT_PASS && teamName.trim()) {
+                currentTeamName = teamName.trim();
+                showView('participant');
+                initParticipant();
+            } else if (!teamName.trim()) {
+                loginError.textContent = 'Please enter a team name.';
+            } else {
+                loginError.textContent = 'Incorrect participant password.';
+            }
+        });
+
+        function showView(viewName) {
+            loginPage.classList.add('hidden');
+            adminView.classList.add('hidden');
+            participantView.classList.add('hidden');
+
+            if (viewName === 'admin') adminView.classList.remove('hidden');
+            if (viewName === 'participant') participantView.classList.remove('hidden');
+        }
+
+        // --- Admin Logic ---
+        async function initAdmin() {
+            unsubscribeGameState = onValue(gameStateRef, (snapshot) => {
+                const state = snapshot.val();
+                if (state) {
+                    updateAdminUI(state);
+                } else {
+                    resetGameState();
+                }
+            });
+        }
+        
+        function updateAdminUI(state) {
+            const { currentObjectIndex, showAnswer, winnerTeam, winnerTime } = state;
+            
+            const imageContainer = document.getElementById('admin-image-container');
+            const answerContainer = document.getElementById('admin-answer-container');
+            const answerText = document.getElementById('admin-answer-text');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const toggleAnswerBtn = document.getElementById('toggle-answer-btn');
+
+            imageContainer.innerHTML = ''; // Clear previous content
+
+            // Handle the instruction screen state
+            if (currentObjectIndex === -1) {
+                imageContainer.innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-3xl font-orbitron mb-4">Instructions</h2>
+                        <p class="text-lg">Welcome, Admin!</p>
+                        <p>Click "Start First Round" to begin the quiz.</p>
+                        <p>The buzzer will start automatically for each question.</p>
+                    </div>
+                `;
+                imageContainer.style.flexDirection = 'column'; // Ensure instructions are centered vertically
+                answerContainer.classList.add('opacity-0');
+                prevBtn.classList.add('hidden');
+                toggleAnswerBtn.classList.add('hidden');
+                nextBtn.textContent = 'Start First Round';
+            } else {
+                // Handle regular question display
+                imageContainer.style.flexDirection = 'row'; // Set back to row for images
+                const currentObject = spaceObjects[currentObjectIndex];
+                currentObject.images.forEach(imgName => {
+                    const img = document.createElement('img');
+                    img.src = `assets/${imgName}`; // Use local asset path
+                    img.alt = currentObject.answer;
+                    // Add a fallback for broken images
+                    img.onerror = function() { this.src = 'https://placehold.co/800x450/0a0f1f/e0e0e0?text=Image+Not+Found'; };
+                    imageContainer.appendChild(img);
+                });
+                
+                answerText.textContent = currentObject.answer;
+                if (showAnswer) {
+                    answerContainer.classList.remove('opacity-0');
+                    toggleAnswerBtn.textContent = 'Hide Answer';
+                } else {
+                    answerContainer.classList.add('opacity-0');
+                    toggleAnswerBtn.textContent = 'Show Answer';
+                }
+
+                prevBtn.classList.remove('hidden');
+                toggleAnswerBtn.classList.remove('hidden');
+                nextBtn.textContent = 'Next';
+            }
+
+            prevBtn.disabled = currentObjectIndex <= 0; // Disabled on first question and instructions
+            nextBtn.disabled = currentObjectIndex === spaceObjects.length - 1;
+
+            const winnerDisplay = document.getElementById('winner-display');
+            if (winnerTeam) {
+                const timeInSeconds = (winnerTime / 1000).toFixed(3);
+                winnerDisplay.innerHTML = `
+                    <div class="p-4 rounded-lg bg-green-500/30 border border-green-400">
+                        <p class="text-xl font-bold">${winnerTeam}</p>
+                        <p class="text-2xl font-orbitron">${timeInSeconds}s</p>
+                    </div>
+                `;
+            } else {
+                winnerDisplay.innerHTML = '<p class="text-gray-500">No winner yet...</p>';
+            }
+        }
+        
+        async function advanceRound() {
+            let nextIndex;
+            // First, update the index and reset the state for the new question
+            await runTransaction(gameStateRef, (currentState) => {
+                if (currentState) {
+                    let newIndex = currentState.currentObjectIndex + 1;
+                    if (newIndex < spaceObjects.length) {
+                        currentState.currentObjectIndex = newIndex;
+                        currentState.isBuzzerActive = false;
+                        currentState.showAnswer = false;
+                        currentState.winnerTeam = null;
+                        currentState.winnerTime = null;
+                        currentState.buzzerStartTime = null;
+                        nextIndex = newIndex;
+                    }
+                }
+                return currentState;
+            });
+
+            // If the index was successfully updated, now start the buzzer for that new round
+            if (nextIndex !== undefined) {
+                await update(gameStateRef, {
+                    isBuzzerActive: true,
+                    buzzerStartTime: serverTimestamp()
+                });
+            }
+        }
+
+        async function changeQuestion(direction) {
+            await runTransaction(gameStateRef, (currentState) => {
+                if (currentState) {
+                    let newIndex = currentState.currentObjectIndex + direction;
+                    // Only allow moving back, not forward with this function
+                    if (direction === -1 && newIndex >= 0) {
+                        currentState.currentObjectIndex = newIndex;
+                        currentState.isBuzzerActive = false;
+                        currentState.showAnswer = false;
+                        currentState.winnerTeam = null;
+                        currentState.winnerTime = null;
+                        currentState.buzzerStartTime = null;
+                    }
+                }
+                return currentState;
+            });
+        }
+        
+        async function toggleAnswer() {
+            await runTransaction(gameStateRef, (currentState) => {
+                if(currentState) {
+                    currentState.showAnswer = !currentState.showAnswer;
+                }
+                return currentState;
+            });
+        }
+
+        async function resetGameState() {
+            console.log("Resetting game state...");
+            await set(gameStateRef, {
+                currentObjectIndex: -1, // Start at the instruction screen
+                isBuzzerActive: false,
+                showAnswer: false,
+                winnerTeam: null,
+                winnerTime: null,
+                buzzerStartTime: null,
+            });
+        }
+
+        // Admin Event Listeners
+        document.getElementById('prev-btn').addEventListener('click', () => changeQuestion(-1));
+        document.getElementById('next-btn').addEventListener('click', advanceRound);
+        document.getElementById('toggle-answer-btn').addEventListener('click', toggleAnswer);
+        document.getElementById('reset-game-btn').addEventListener('click', resetGameState);
+
+        // --- Participant Logic ---
+        function initParticipant() {
+            document.getElementById('participant-team-name').textContent = currentTeamName;
+            if (unsubscribeGameState) unsubscribeGameState();
+            
+            unsubscribeGameState = onValue(gameStateRef, (snapshot) => {
+                const state = snapshot.val();
+                if (state) {
+                    updateParticipantUI(state);
+                } else {
+                    document.getElementById('participant-buzzer-area').innerHTML = `<p class="text-2xl text-gray-400">Waiting for admin to start the game...</p>`;
+                }
+            }, (error) => {
+                console.error("Error in game state listener:", error);
+                document.getElementById('participant-buzzer-area').innerHTML = `<p class="text-red-500">Connection error.</p>`;
+            });
+        }
+
+        function updateParticipantUI(state) {
+            const { isBuzzerActive, winnerTeam, winnerTime } = state;
+            const buzzerArea = document.getElementById('participant-buzzer-area');
+            
+            buzzerArea.innerHTML = '';
+
+            const buzzerBtn = document.createElement('button');
+            buzzerBtn.className = 'btn btn-buzzer font-orbitron';
+            
+            const messageEl = document.createElement('p');
+            messageEl.className = 'text-2xl isro-orange mt-4';
+
+            if (winnerTeam) {
+                const timeInSeconds = (winnerTime / 1000).toFixed(3);
+                buzzerBtn.textContent = 'STOP';
+                buzzerBtn.disabled = true;
+                if (winnerTeam === currentTeamName) {
+                    messageEl.textContent = `You won in ${timeInSeconds}s!`;
+                } else {
+                    messageEl.textContent = `${winnerTeam} won in ${timeInSeconds}s.`;
+                }
+            } 
+            else if (isBuzzerActive) {
+                buzzerBtn.textContent = 'BUZZ!';
+                buzzerBtn.disabled = false;
+                buzzerBtn.onclick = () => pressBuzzer();
+                messageEl.textContent = 'Press the buzzer NOW!';
+            } 
+            else {
+                buzzerBtn.textContent = 'WAIT';
+                buzzerBtn.disabled = true;
+                messageEl.textContent = 'Waiting for admin...';
+            }
+
+            buzzerArea.appendChild(buzzerBtn);
+            buzzerArea.appendChild(messageEl);
+        }
+        
+        async function pressBuzzer() {
+            await runTransaction(gameStateRef, (currentState) => {
+                if (currentState && currentState.isBuzzerActive && !currentState.winnerTeam) {
+                    const buzzTime = new Date();
+                    const startTime = new Date(currentState.buzzerStartTime);
+                    const timeTakenMs = buzzTime.getTime() - startTime.getTime();
+
+                    currentState.isBuzzerActive = false;
+                    currentState.winnerTeam = currentTeamName;
+                    currentState.winnerTime = timeTakenMs;
+                }
+                return currentState;
+            });
+        }
+
+        // --- Initial Load ---
+        window.addEventListener('DOMContentLoaded', initializeFirebase);
+    </script>
+</body>
+</html>
