@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSpD 2025 - Registration</title>
+    <style>
+        /* --- General XP Theme & Body --- */
+        body {
+            background-color: #3A6EA5; /* Windows XP default blue wallpaper color */
+            background-position: center;
+            font-family: "Tahoma", sans-serif;
+            font-size: 11px;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* --- Window Container Styling --- */
+        .window {
+            background: #ECE9D8;
+            border: 1px solid #000;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #666;
+            border-bottom: 1px solid #666;
+            min-width: 300px;
+            max-width: 900px;
+            width: 100%;
+            display: none; /* Initially hidden */
+            flex-direction: column;
+            max-height: 90vh;
+        }
+        
+        .window.active {
+            display: flex;
+        }
+
+        /* --- Window Title Bar --- */
+        .title-bar {
+            background: linear-gradient(to bottom, #0058E1, #3A83F1);
+            color: white;
+            padding: 4px 6px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+        }
+
+        .title-bar-text {
+            text-shadow: 1px 1px #000;
+        }
+        
+        .title-bar-controls {
+            display: flex;
+        }
+
+        .title-bar-controls button {
+            width: 18px;
+            height: 18px;
+            background-color: #D4D0C8;
+            border: 1px outset #fff;
+            margin-left: 2px;
+            font-family: 'Arial Black', sans-serif; /* Using a more common font */
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            padding-bottom: 2px;
+            box-sizing: border-box;
+        }
+        
+        .title-bar-controls button:active {
+            border-style: inset;
+        }
+
+        /* --- Window Content --- */
+        .window-body {
+            padding: 12px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .window-body.scrollable {
+            background: #FFF;
+            border: 1px inset #7F9DB9;
+            padding: 5px;
+        }
+
+        /* --- Form Elements --- */
+        .field-row {
+            margin-bottom: 10px;
+        }
+        
+        .field-row label {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: calc(100% - 10px);
+            padding: 3px;
+            border: 1px inset #7F9DB9;
+            font-family: "Tahoma", sans-serif;
+            font-size: 11px;
+        }
+        
+        .window-footer {
+            padding: 8px 12px;
+            text-align: right;
+            border-top: 1px solid #fff;
+            background: #ECE9D8;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        
+        button.xp-button {
+            background-color: #ECE9D8;
+            border: 1px outset #fff;
+            padding: 4px 12px;
+            min-width: 70px;
+        }
+        
+        button.xp-button:hover {
+            border: 1px outset #0078D7;
+        }
+
+        button.xp-button:active {
+            border-style: inset;
+        }
+        
+        /* --- Admin Panel Table --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #D4D0C8;
+        }
+
+        th, td {
+            border: 1px solid #D4D0C8;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ECE9D8;
+            font-weight: normal;
+        }
+        
+        td {
+            word-break: break-all;
+        }
+        
+        .status-message {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        
+        .status-message.success {
+            background-color: #e6ffed;
+            border-color: #b7e1cd;
+            color: #2b643f;
+        }
+
+        .status-message.error {
+            background-color: #ffeded;
+            border-color: #e1b7b7;
+            color: #642b2b;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Admin Login Window -->
+    <div id="loginWindow" class="window">
+        <div class="title-bar">
+            <div class="title-bar-text">Admin Login</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close">&times;</button>
+            </div>
+        </div>
+        <div class="window-body">
+            <p>Please enter the passcode to access the admin panel.</p>
+            <div class="field-row">
+                <label for="passcode">Passcode:</label>
+                <input type="password" id="passcode" />
+            </div>
+            <div id="loginError" class="status-message error" style="display: none;"></div>
+        </div>
+        <div class="window-footer">
+            <button id="loginButton" class="xp-button">OK</button>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="appContainer">
+        <!-- User Registration Form Window -->
+        <div id="userWindow" class="window active" style="margin-bottom: 20px;">
+            <div class="title-bar">
+                <div class="title-bar-text">NSpD 2025 Certificate Correction Form</div>
+            </div>
+            <form id="registrationForm">
+                <div class="window-body">
+                    <p>Please fill in your details below.</p>
+                    <div class="field-row">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" required />
+                    </div>
+                    <div class="field-row">
+                        <label for="affiliation">College/University:</label>
+                        <input type="text" id="affiliation" required />
+                    </div>
+                    <div class="field-row">
+                        <label for="competition">Competition:</label>
+                        <input type="text" id="competition" required />
+                    </div>
+                    <div id="formStatus" class="status-message" style="display: none;"></div>
+                </div>
+                <div class="window-footer">
+                    <button type="submit" class="xp-button">Submit</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Admin Panel Window -->
+        <div id="adminWindow" class="window">
+            <div class="title-bar">
+                <div class="title-bar-text">Admin Panel - Registrations</div>
+                 <div class="title-bar-controls">
+                      <button aria-label="Minimize">0</button>
+                      <button aria-label="Maximize”>-</button>
+                      <button aria-label="Close">&times;</button>
+                 </div>
+            </div>
+            <div class="window-body scrollable">
+                 <table id="entriesTable">
+                      <thead>
+                          <tr>
+                              <th>Name</th>
+                              <th>College/University</th>
+                              <th>Competition</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr><td colspan="3" style="text-align:center;">Loading entries...</td></tr>
+                      </tbody>
+                 </table>
+            </div>
+             <div class="window-footer">
+                 <span id="adminStatus" style="flex-grow: 1; text-align: left;"></span>
+                 <button id="exportCsvButton" class="xp-button">Export to CSV</button>
+             </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // --- Firebase SDK Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+            authDomain: "iist-fd6e8.firebaseapp.com",
+            databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+            projectId: "iist-fd6e8",
+            storageBucket: "iist-fd6e8.appspot.com",
+            messagingSenderId: "692699808449",
+            appId: "1:692699808449:web:120c8941a940d071f24a40",
+            measurementId: "G-GPFG8LWF2H"
+        };
+
+        // --- App Initialization ---
+        let db, auth;
+        let allEntries = []; // To hold current entries for export
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            auth = getAuth(app);
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+                console.log("Firebase initialized and user signed in with custom token.");
+            } else {
+                await signInAnonymously(auth);
+                console.log("Firebase initialized and user signed in anonymously.");
+            }
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            document.body.innerHTML = `<div class="window active" style="margin: auto;"><div class="title-bar"><div class="title-bar-text">Fatal Error</div></div><div class="window-body"><p>Could not connect to the database. The application cannot start.</p><p><b>Error:</b> ${error.message}</p></div></div>`;
+        }
+        
+        // --- DOM Elements ---
+        const loginWindow = document.getElementById('loginWindow');
+        const appContainer = document.getElementById('appContainer');
+        const userWindow = document.getElementById('userWindow');
+        const adminWindow = document.getElementById('adminWindow');
+        const loginButton = document.getElementById('loginButton');
+        const passcode = document.getElementById('passcode');
+        const loginError = document.getElementById('loginError');
+        const registrationForm = document.getElementById('registrationForm');
+        const formStatus = document.getElementById('formStatus');
+        const entriesTableBody = document.querySelector('#entriesTable tbody');
+        const adminStatus = document.getElementById('adminStatus');
+        const userWindowTitle = document.querySelector('#userWindow .title-bar-text');
+        const exportCsvButton = document.getElementById('exportCsvButton');
+
+        // --- UI Flow & View Management ---
+        function initializeUI() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'true') {
+                showLoginView();
+            } else {
+                showUserFormView();
+            }
+        }
+
+        function showLoginView() {
+            appContainer.style.display = 'none';
+            loginWindow.style.display = 'flex';
+            loginWindow.classList.add('active');
+        }
+
+        function showUserFormView() {
+            loginWindow.style.display = 'none';
+            appContainer.style.display = 'block';
+            adminWindow.style.display = 'none';
+            adminWindow.classList.remove('active');
+            userWindow.style.display = 'flex';
+            userWindow.classList.add('active');
+        }
+
+        function showAdminPanelView() {
+            loginWindow.style.display = 'none';
+            appContainer.style.display = 'block';
+            userWindow.style.display = 'none';
+            userWindow.classList.remove('active');
+            adminWindow.style.display = 'flex';
+            adminWindow.classList.add('active');
+            fetchAndDisplayEntries();
+        }
+
+        // --- Event Listeners ---
+        loginButton.addEventListener('click', () => {
+            if (passcode.value === 'qwertyjohn') {
+                showAdminPanelView();
+            } else {
+                loginError.textContent = "Incorrect passcode. Please try again.";
+                loginError.style.display = 'block';
+            }
+        });
+        
+        passcode.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') loginButton.click();
+        });
+
+        if (userWindowTitle) {
+            userWindowTitle.addEventListener('dblclick', () => {
+                showLoginView();
+            });
+        }
+
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const affiliation = document.getElementById('affiliation').value.trim();
+            const competition = document.getElementById('competition').value.trim();
+
+            if (!name || !affiliation || !competition) {
+                showStatusMessage(formStatus, 'Please fill out all fields.', 'error');
+                return;
+            }
+
+            try {
+                const registrationsRef = ref(db, 'registrations');
+                await push(registrationsRef, {
+                    name: name,
+                    affiliation: affiliation,
+                    competition: competition,
+                    timestamp: new Date().toISOString()
+                });
+                console.log("Data submitted to Realtime Database.");
+                showStatusMessage(formStatus, 'Registration successful!', 'success');
+                registrationForm.reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                const userMessage = `Error: Could not submit. (${error.code || error.message})`;
+                showStatusMessage(formStatus, userMessage, 'error');
+            }
+        });
+        
+        exportCsvButton.addEventListener('click', exportToCsv);
+
+
+        // --- Admin Panel Data Fetching ---
+        function fetchAndDisplayEntries() {
+            if (!db) {
+                entriesTableBody.innerHTML = '<tr><td colspan="3">Database not connected.</td></tr>';
+                return;
+            }
+            const registrationsRef = ref(db, 'registrations');
+
+            onValue(registrationsRef, (snapshot) => {
+                entriesTableBody.innerHTML = ''; // Clear previous entries
+                const data = snapshot.val();
+                if(!data) {
+                    allEntries = []; // Clear entries if no data
+                    entriesTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No entries found.</td></tr>';
+                    return;
+                }
+                
+                // Store raw data for export
+                allEntries = Object.values(data);
+
+                // Sort entries for display by timestamp in descending order (newest first)
+                const sortedEntries = [...allEntries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                sortedEntries.forEach((entry) => {
+                    const row = document.createElement('tr');
+                    
+                    const safeName = escapeHtml(entry.name);
+                    const safeAffiliation = escapeHtml(entry.affiliation);
+                    const safeCompetition = escapeHtml(entry.competition);
+                    
+                    row.innerHTML = `
+                        <td>${safeName}</td>
+                        <td>${safeAffiliation}</td>
+                        <td>${safeCompetition}</td>
+                    `;
+                    
+                    entriesTableBody.appendChild(row);
+                });
+            }, (error) => {
+                console.error("Error fetching entries:", error);
+                entriesTableBody.innerHTML = `<tr><td colspan="3">Error loading data: ${error.message}. Check console.</td></tr>`;
+            });
+        }
+        
+        // --- CSV Export Functionality ---
+        function exportToCsv() {
+            if (allEntries.length === 0) {
+                adminStatus.textContent = 'No entries to export.';
+                setTimeout(() => { adminStatus.textContent = ''; }, 3000);
+                return;
+            }
+
+            // Helper to format a CSV field, handling commas, quotes, and newlines
+            const formatCsvField = (field) => {
+                const str = String(field || '');
+                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                    const escapedStr = str.replace(/"/g, '""');
+                    return `"${escapedStr}"`;
+                }
+                return str;
+            };
+
+            const headers = ['Name', 'College/University', 'Competition'];
+            const csvHeader = headers.join(',') + '\n';
+
+            const csvRows = allEntries.map(entry => {
+                const rowData = [
+                    formatCsvField(entry.name),
+                    formatCsvField(entry.affiliation),
+                    formatCsvField(entry.competition)
+                ];
+                return rowData.join(',');
+            }).join('\n');
+
+            const csvContent = csvHeader + csvRows;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'nspd_2025_registrations.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            adminStatus.textContent = `${allEntries.length} entries exported.`;
+            setTimeout(() => { adminStatus.textContent = ''; }, 3000);
+        }
+
+        // --- Utility Functions ---
+        function showStatusMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `status-message ${type}`;
+            element.style.display = 'block';
+            setTimeout(() => { element.style.display = 'none'; }, 4000);
+        }
+
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return '';
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // --- Initial Load ---
+        if (db) { // Only initialize UI if Firebase connection was successful
+            initializeUI();
+        }
+
+    </script>
+</body>
+</html>
+
