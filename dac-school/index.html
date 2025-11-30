@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AGNS SCHOOL - Winter Registration</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 
@@ -80,7 +84,6 @@
 
     <nav class="w-full p-6 flex justify-between items-center z-50">
         <div class="flex items-center gap-3">
-            
             <div class="leading-tight">
                 <h1 class="font-space font-bold text-xl tracking-wider">DAC AGNS SCHOOL</h1>
                 <p class="text-[10px] text-gray-400 uppercase tracking-widest">Space Tutor Program</p>
@@ -94,7 +97,6 @@
     <main class="flex-grow container mx-auto px-4 py-8 flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
         
         <div class="lg:w-1/2 space-y-8 text-center lg:text-left pt-6">
-            
             <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-900/30 border border-red-500/30 text-red-300 text-xs font-bold tracking-wide">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -130,7 +132,7 @@
                     </div>
                     <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
                 </a>
-
+                
                 <a href="https://github.com/pyastrolab" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
                     <i class="fa-brands fa-github text-2xl group-hover:text-white transition"></i>
                     <div class="text-left leading-tight">
@@ -140,7 +142,7 @@
                     <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
                 </a>
             </div>
-
+            
             <div class="mt-10 pt-8 border-t border-gray-800">
                 <h3 class="font-space text-lg font-bold mb-4 text-gray-300">Meet Your Mentor</h3>
                 <div class="glass-card p-4 rounded-xl flex items-center gap-4 hover:bg-white/5 transition duration-300">
@@ -166,7 +168,8 @@
         </div>
 
         <div class="lg:w-1/2 w-full max-w-md float-anim mt-6 lg:mt-0">
-            <div class="glass-card rounded-2xl p-8 relative overflow-hidden">
+            
+            <div id="form-card" class="glass-card rounded-2xl p-8 relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-red-600 rounded-full blur-[80px] opacity-30 pointer-events-none"></div>
 
                 <h3 class="font-space text-2xl font-bold mb-1">Secure Your Seat</h3>
@@ -193,11 +196,15 @@
 
                     <div class="pt-4 border-t border-gray-700/50 flex items-center justify-between">
                         <div>
-                            <p class="text-xs text-gray-400">Total Fee</p>
+                           
+ <p class="text-xs text-gray-400">Total Fee</p>
+
                             <div class="flex items-baseline gap-2">
                                 <span class="font-space text-2xl font-bold text-white" id="finalPrice">₹1299</span>
                                 <span class="text-sm text-gray-500 line-through hidden" id="originalPrice">₹1299</span>
-                            </div>
+
+
+                            </div> <p class="text-xs text-gray-400">Account Name: Sitee</p>
                         </div>
                         <button type="submit" class="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-red-900/30 transition transform hover:scale-105">
                             PAY NOW <i class="fa-solid fa-arrow-right ml-2"></i>
@@ -205,6 +212,24 @@
                     </div>
                 </form>
             </div>
+
+            <div id="success-card" class="hidden glass-card rounded-2xl p-8 relative overflow-hidden text-center min-h-[400px] flex flex-col justify-center items-center">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-green-600 rounded-full blur-[80px] opacity-30 pointer-events-none"></div>
+                
+                <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-6 drop-shadow-lg"></i>
+                <h2 class="text-3xl font-space font-bold text-white mb-2">Registration Successful!</h2>
+                <p class="text-gray-400 mb-6">Welcome aboard, <span id="success-name" class="text-white font-bold"></span>.</p>
+                
+                <div class="bg-white/5 border border-white/10 p-4 rounded-lg w-full mb-6">
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Payment ID</p>
+                    <p id="success-payid" class="font-mono text-sm text-green-300"></p>
+                </div>
+
+                <a href="https://chat.whatsapp.com/H1GTT0N0BYm5Xn26E6m7xX?mode=hqrt3" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold w-full transition">
+                    <i class="fa-brands fa-whatsapp mr-2"></i> Join Class Group
+                </a>
+            </div>
+
         </div>
     </main>
 
@@ -261,16 +286,17 @@
 
     <script>
         // --- 1. CONFIGURATION ---
+        // These are your specific details from your original code
         const firebaseConfig = {
-            apiKey: "AIzaSyCut-Qi7scoHnjHyE8UBuN53PHWnMMKqSE",
-            authDomain: "sitee-f6a0c.firebaseapp.com",
-            databaseURL: "https://sitee-f6a0c-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "sitee-f6a0c",
-            storageBucket: "sitee-f6a0c.firebasestorage.app",
-            messagingSenderId: "284183052545",
-            appId: "1:284183052545:web:ef85ecc7be844cede8db00",
-            measurementId: "G-HZHS31QH07"
-        };
+  apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+  authDomain: "iist-fd6e8.firebaseapp.com",
+  databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+  projectId: "iist-fd6e8",
+  storageBucket: "iist-fd6e8.firebasestorage.app",
+  messagingSenderId: "692699808449",
+  appId: "1:692699808449:web:120c8941a940d071f24a40",
+  measurementId: "G-GPFG8LWF2H"
+};
         
         // Initialize Firebase
         if (!firebase.apps.length) {
@@ -284,7 +310,7 @@
 
         function checkCode() {
             const inputRaw = document.getElementById('referral').value.trim();
-            const input = inputRaw.toLowerCase(); // Case insensitive check
+            const input = inputRaw.toLowerCase(); 
             const btn = document.querySelector('#referral + button');
             const msg = document.getElementById('discountMsg');
             
@@ -292,17 +318,16 @@
             let percent = 0;
 
             if (input === "astrodingra") {
-                currentAmount = 1169; // ~10% off
+                currentAmount = 1169; 
                 percent = 10;
                 valid = true;
             } else if (input === "gndu") {
-                currentAmount = 909; // ~30% off (1299 * 0.7 = 909.3)
+                currentAmount = 909; 
                 percent = 30;
                 valid = true;
             }
 
             if (valid) {
-                // UI Feedback
                 document.getElementById('originalPrice').classList.remove('hidden');
                 document.getElementById('finalPrice').innerText = "₹" + currentAmount;
                 
@@ -330,13 +355,14 @@
             };
 
             const options = {
-                "key": "rzp_live_ROEwepn6yDqGCa", 
+                "key": "rzp_live_ROEwepn6yDqGCa", // Your Razorpay Live Key
                 "amount": currentAmount * 100, 
                 "currency": "INR",
                 "name": "Astronomy School",
                 "description": "AGNS Registration",
                 "image": "https://cdn-icons-png.flaticon.com/512/4249/4249944.png",
                 "handler": function (response){
+                    console.log("Payment Successful. ID: " + response.razorpay_payment_id);
                     saveOrder(customer, currentAmount, response.razorpay_payment_id);
                 },
                 "prefill": { "name": customer.name, "email": customer.email, "contact": customer.phone },
@@ -350,24 +376,43 @@
             rzp1.open();
         });
 
-        function saveOrder(customer, amount, payId) {
-            const newRef = db.ref('agns_registrations').push();
-            newRef.set({
-                ...customer,
+        function saveOrder(customerData, amount, payId) {
+            console.log("Attempting to save order...", customerData);
+            
+            // Create a simple object to avoid reference issues
+            const dataToSave = {
+                name: customerData.name,
+                phone: customerData.phone,
+                email: customerData.email,
+                college: customerData.college,
+                course: customerData.course,
+                date: customerData.date,
                 amountPaid: amount,
                 paymentId: payId,
                 status: 'paid'
-            }).then(() => {
-                // Success UI
-                document.querySelector('main').innerHTML = `
-                    <div class="text-center w-full py-20 animate-pulse">
-                        <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
-                        <h2 class="text-4xl font-space font-bold">Registration Successful!</h2>
-                        <p class="text-gray-400 mt-2">Welcome to the AGNS School, ${customer.name}.</p>
-                    </div>
-                `;
-            }).catch((error) => {
-                alert("Database Error: " + error.message);
+            };
+
+            // Attempt to save to Firebase Realtime Database
+            db.ref('agns_registrations').push(dataToSave)
+            .then(() => {
+                console.log("Data saved successfully!");
+                // 1. Hide the form
+                document.getElementById('form-card').classList.add('hidden');
+                
+                // 2. Populate and Show Success Card
+                document.getElementById('success-name').innerText = dataToSave.name;
+                document.getElementById('success-payid').innerText = payId;
+                document.getElementById('success-card').classList.remove('hidden');
+            })
+            .catch((error) => {
+                console.error("Firebase Error:", error);
+                // Even if database fails, we want to show the user their payment worked
+                alert("Payment Successful (ID: " + payId + ") but we couldn't auto-save to database. Please screenshot this message!");
+                
+                document.getElementById('form-card').classList.add('hidden');
+                document.getElementById('success-name').innerText = dataToSave.name;
+                document.getElementById('success-payid').innerText = payId;
+                document.getElementById('success-card').classList.remove('hidden');
             });
         }
 
