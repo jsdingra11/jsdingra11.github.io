@@ -196,7 +196,7 @@
 
                     <div class="pt-4 border-t border-gray-700/50 flex items-center justify-between">
                         <div>
-                           
+                            
  <p class="text-xs text-gray-400">Total Fee</p>
 
                             <div class="flex items-baseline gap-2">
@@ -243,7 +243,7 @@
     </footer>
 
     <div id="adminPanel" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-5xl h-[80vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-6xl h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
             
             <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-950">
                 <h2 class="text-xl font-space font-bold text-white"><i class="fa-solid fa-user-shield text-red-500 mr-2"></i> Admin Dashboard</h2>
@@ -263,8 +263,29 @@
                 </div>
             </div>
 
-            <div id="dataView" class="hidden flex-grow overflow-auto p-6 bg-gray-900">
-                <div class="overflow-x-auto rounded-lg border border-gray-800">
+            <div id="dataView" class="hidden flex-grow flex flex-col p-6 bg-gray-900">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl">
+                        <p class="text-gray-400 text-xs uppercase tracking-widest">Total Registrations</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="totalCount">0</h3>
+                    </div>
+                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl">
+                        <p class="text-gray-400 text-xs uppercase tracking-widest">Total Revenue</p>
+                        <h3 class="text-2xl font-bold text-green-400 mt-1" id="totalMoney">₹0</h3>
+                    </div>
+                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-xs uppercase tracking-widest">Export Data</p>
+                            <h3 class="text-sm font-bold text-white mt-1">Download List</h3>
+                        </div>
+                        <button onclick="downloadCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition">
+                            <i class="fa-solid fa-file-csv mr-2"></i> CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-auto rounded-lg border border-gray-800 flex-grow">
                     <table class="w-full text-left">
                         <thead class="bg-gray-950 text-gray-400 text-xs uppercase tracking-wider sticky top-0">
                             <tr>
@@ -274,7 +295,7 @@
                                 <th class="p-4">College</th>
                                 <th class="p-4">Amt</th>
                                 <th class="p-4">Date</th>
-                            </tr>
+                                <th class="p-4 text-center">Action</th> </tr>
                         </thead>
                         <tbody id="studentTableBody" class="text-sm text-gray-300 divide-y divide-gray-800">
                             </tbody>
@@ -286,17 +307,16 @@
 
     <script>
         // --- 1. CONFIGURATION ---
-        // These are your specific details from your original code
         const firebaseConfig = {
-  apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
-  authDomain: "iist-fd6e8.firebaseapp.com",
-  databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
-  projectId: "iist-fd6e8",
-  storageBucket: "iist-fd6e8.firebasestorage.app",
-  messagingSenderId: "692699808449",
-  appId: "1:692699808449:web:120c8941a940d071f24a40",
-  measurementId: "G-GPFG8LWF2H"
-};
+          apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+          authDomain: "iist-fd6e8.firebaseapp.com",
+          databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+          projectId: "iist-fd6e8",
+          storageBucket: "iist-fd6e8.firebasestorage.app",
+          messagingSenderId: "692699808449",
+          appId: "1:692699808449:web:120c8941a940d071f24a40",
+          measurementId: "G-GPFG8LWF2H"
+        };
         
         // Initialize Firebase
         if (!firebase.apps.length) {
@@ -305,6 +325,7 @@
         const db = firebase.database();
 
         let currentAmount = 1299;
+        let allStudentsData = []; // To store data for CSV export
 
         // --- 2. LOGIC ---
 
@@ -379,7 +400,6 @@
         function saveOrder(customerData, amount, payId) {
             console.log("Attempting to save order...", customerData);
             
-            // Create a simple object to avoid reference issues
             const dataToSave = {
                 name: customerData.name,
                 phone: customerData.phone,
@@ -392,23 +412,17 @@
                 status: 'paid'
             };
 
-            // Attempt to save to Firebase Realtime Database
             db.ref('agns_registrations').push(dataToSave)
             .then(() => {
                 console.log("Data saved successfully!");
-                // 1. Hide the form
                 document.getElementById('form-card').classList.add('hidden');
-                
-                // 2. Populate and Show Success Card
                 document.getElementById('success-name').innerText = dataToSave.name;
                 document.getElementById('success-payid').innerText = payId;
                 document.getElementById('success-card').classList.remove('hidden');
             })
             .catch((error) => {
                 console.error("Firebase Error:", error);
-                // Even if database fails, we want to show the user their payment worked
                 alert("Payment Successful (ID: " + payId + ") but we couldn't auto-save to database. Please screenshot this message!");
-                
                 document.getElementById('form-card').classList.add('hidden');
                 document.getElementById('success-name').innerText = dataToSave.name;
                 document.getElementById('success-payid').innerText = payId;
@@ -425,7 +439,7 @@
 
         function verifyAdmin() {
             const pass = document.getElementById('adminPass').value;
-            if(pass === "qwertyuiop") {
+            if(pass === "qwertyuiopasdfghjklzxcvbnm") {
                 document.getElementById('loginView').classList.add('hidden');
                 document.getElementById('dataView').classList.remove('hidden');
                 loadData();
@@ -437,17 +451,42 @@
 
         function loadData() {
             const table = document.getElementById('studentTableBody');
-            table.innerHTML = "<tr><td colspan='6' class='p-4 text-center text-gray-500'>Loading data from space...</td></tr>";
+            table.innerHTML = "<tr><td colspan='7' class='p-4 text-center text-gray-500'>Loading data from space...</td></tr>";
             
+            // Counters
+            let count = 0;
+            let totalRevenue = 0;
+            allStudentsData = []; // Clear array
+
             db.ref('agns_registrations').once('value', (snapshot) => {
                 table.innerHTML = "";
                 if(!snapshot.exists()) {
-                    table.innerHTML = "<tr><td colspan='6' class='p-4 text-center text-gray-500'>No students registered yet.</td></tr>";
+                    table.innerHTML = "<tr><td colspan='7' class='p-4 text-center text-gray-500'>No students registered yet.</td></tr>";
+                    document.getElementById('totalCount').innerText = "0";
+                    document.getElementById('totalMoney').innerText = "₹0";
                     return;
                 }
                 
                 snapshot.forEach((child) => {
                     const data = child.val();
+                    const key = child.key; // Unique Firebase Key for deleting
+                    
+                    // Update stats
+                    count++;
+                    totalRevenue += parseInt(data.amountPaid || 0);
+
+                    // Add to CSV Array
+                    allStudentsData.push({
+                        Name: data.name,
+                        Phone: data.phone,
+                        Email: data.email,
+                        College: data.college,
+                        Course: data.course,
+                        Amount: data.amountPaid,
+                        Date: data.date,
+                        PaymentID: data.paymentId
+                    });
+
                     const row = `
                         <tr class="hover:bg-gray-800 transition">
                             <td class="p-4 font-bold text-white">${data.name}</td>
@@ -456,11 +495,68 @@
                             <td class="p-4">${data.college}</td>
                             <td class="p-4"><span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs">₹${data.amountPaid}</span></td>
                             <td class="p-4 text-xs text-gray-500">${data.date}</td>
+                            <td class="p-4 text-center">
+                                <button onclick="deleteUser('${key}')" class="text-gray-500 hover:text-red-500 transition" title="Delete User">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                     `;
                     table.innerHTML += row;
                 });
+
+                // Update Dashboard Numbers
+                document.getElementById('totalCount').innerText = count;
+                document.getElementById('totalMoney').innerText = "₹" + totalRevenue.toLocaleString();
             });
+        }
+
+        // --- NEW FUNCTIONS ---
+
+        function deleteUser(key) {
+            if(confirm("Are you sure you want to permanently delete this registration? This cannot be undone.")) {
+                db.ref('agns_registrations').child(key).remove()
+                .then(() => {
+                    alert("User deleted successfully.");
+                    loadData(); // Reload table
+                })
+                .catch((error) => {
+                    alert("Error deleting: " + error.message);
+                });
+            }
+        }
+
+        function downloadCSV() {
+            if(allStudentsData.length === 0) {
+                alert("No data to export!");
+                return;
+            }
+
+            // 1. Create CSV Header
+            const headers = Object.keys(allStudentsData[0]);
+            const csvRows = [];
+            csvRows.push(headers.join(','));
+
+            // 2. Loop Data
+            for (const row of allStudentsData) {
+                const values = headers.map(header => {
+                    const escaped = ('' + row[header]).replace(/"/g, '\\"');
+                    return `"${escaped}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+
+            // 3. Create Blob and Download Link
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'agns_students_2026.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 </body>
