@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGNS SCHOOL - Premium Registration</title>
+    <title>AGNS SCHOOL - Winter Registration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -114,36 +114,31 @@
                 Join our 10-day intensive bootcamp on <b>Computational Astrophysics</b>. Master Python, SDSS, HST & Keck data, and galaxy analysis (active galactic nuclei) with hands-on projects.
             </p>
 
-<div class="flex justify-center lg:justify-start">
-                    <a href="winter-astro.png" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
-                        <i class="fa-solid fa-file-lines text-2xl group-hover:text-white transition"></i>
-                        <div class="text-left leading-tight">
-                            <span class="block font-bold text-sm text-white">Poster 2026</span>
-                        </div>
-                        <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
-                    </a>
-                </div>
-                
-<div class="flex justify-center lg:justify-start">
-                    <a href="syllabus.pdf" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
-                        <i class="fa-solid fa-file-lines text-2xl group-hover:text-white transition"></i>
-                        <div class="text-left leading-tight">
-                            <span class="block font-bold text-sm text-white">Syllabus 2026</span>
-                        </div>
-                        <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
-                    </a>
-                </div>
+            <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+                 <a href="winter-astro.png" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
+                    <i class="fa-solid fa-file-lines text-2xl group-hover:text-white transition"></i>
+                    <div class="text-left leading-tight">
+                        <span class="block font-bold text-sm text-white">Poster 2026</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
+                </a>
 
-                <div class="flex justify-center lg:justify-start">
-                    <a href="https://github.com/pyastrolab" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
-                        <i class="fa-brands fa-github text-2xl group-hover:text-white transition"></i>
-                        <div class="text-left leading-tight">
-                            <span class="block text-xs text-gray-400 group-hover:text-gray-300">View Coursework &</span>
-                            <span class="block font-bold text-sm text-white">Previous Year Archive</span>
-                        </div>
-                        <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
-                    </a>
-                </div>
+                <a href="syllabus.pdf" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
+                    <i class="fa-solid fa-file-lines text-2xl group-hover:text-white transition"></i>
+                    <div class="text-left leading-tight">
+                        <span class="block font-bold text-sm text-white">Syllabus 2026</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
+                </a>
+
+                <a href="https://github.com/pyastrolab" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
+                    <i class="fa-brands fa-github text-2xl group-hover:text-white transition"></i>
+                    <div class="text-left leading-tight">
+                        <span class="block text-xs text-gray-400 group-hover:text-gray-300">View Coursework &</span>
+                        <span class="block font-bold text-sm text-white">Previous Year Archive</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-gray-500"></i>
+                </a>
             </div>
 
             <div class="mt-10 pt-8 border-t border-gray-800">
@@ -194,9 +189,7 @@
                         <input type="text" id="referral" placeholder="Have a referral code?" class="input-field w-full rounded-lg p-3 text-sm uppercase pr-20">
                         <button type="button" onclick="checkCode()" class="absolute right-1 top-1 bottom-1 px-3 bg-gray-800 hover:bg-gray-700 rounded-md text-xs font-bold transition">APPLY</button>
                     </div>
-                    <p id="discountMsg" class="text-green-400 text-xs hidden flex items-center gap-1">
-                        <i class="fa-solid fa-circle-check"></i> Code 'astrodingra' applied! (10% Off)
-                    </p>
+                    <p id="discountMsg" class="text-green-400 text-xs hidden flex items-center gap-1"></p>
 
                     <div class="pt-4 border-t border-gray-700/50 flex items-center justify-between">
                         <div>
@@ -286,21 +279,36 @@
         const db = firebase.database();
 
         let currentAmount = 1299;
-        const discountCode = "astrodingra";
 
         // --- 2. LOGIC ---
 
         function checkCode() {
-            const input = document.getElementById('referral').value.trim();
+            const inputRaw = document.getElementById('referral').value.trim();
+            const input = inputRaw.toLowerCase(); // Case insensitive check
             const btn = document.querySelector('#referral + button');
+            const msg = document.getElementById('discountMsg');
             
-            if (input === discountCode) {
-                currentAmount = 1169;
+            let valid = false;
+            let percent = 0;
+
+            if (input === "astrodingra") {
+                currentAmount = 1169; // ~10% off
+                percent = 10;
+                valid = true;
+            } else if (input === "gndu") {
+                currentAmount = 909; // ~30% off (1299 * 0.7 = 909.3)
+                percent = 30;
+                valid = true;
+            }
+
+            if (valid) {
+                // UI Feedback
                 document.getElementById('originalPrice').classList.remove('hidden');
                 document.getElementById('finalPrice').innerText = "₹" + currentAmount;
-                document.getElementById('discountMsg').classList.remove('hidden');
                 
-                // UI Feedback
+                msg.classList.remove('hidden');
+                msg.innerHTML = `<i class="fa-solid fa-circle-check"></i> Code '${inputRaw}' applied! (${percent}% Off)`;
+                
                 document.getElementById('referral').disabled = true;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i>';
                 btn.classList.add('bg-green-600', 'text-white');
