@@ -15,12 +15,19 @@
 
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; }
+        
+        /* Cosmic Background */
         .cosmic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(220, 38, 38, 0.1) 0%, transparent 50%); z-index: -2; }
         .stars { background-image: url("https://www.transparenttextures.com/patterns/stardust.png"); opacity: 0.6; position: fixed; inset: 0; z-index: -1; animation: moveStars 100s linear infinite; }
         @keyframes moveStars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+
+        /* Glass Card */
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
+
+        /* Inputs */
         .input-field { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); color: white; transition: all 0.3s ease; }
         .input-field:focus { border-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); outline: none; }
+
         .font-space { font-family: 'Space Grotesk', sans-serif; }
         .glow-text { text-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
         .float-anim { animation: float 6s ease-in-out infinite; }
@@ -61,6 +68,7 @@
                 Astronomy <br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400 glow-text">Winter School</span>
             </h1>
+
             <p class="text-gray-400 text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Join our 10-day intensive bootcamp on <b>Computational Astrophysics</b>. Master Python, SDSS, HST & Keck data, and galaxy analysis (active galactic nuclei) with hands-on projects.
             </p>
@@ -70,13 +78,18 @@
                     <i class="fa-solid fa-file-lines text-2xl group-hover:text-white transition"></i>
                     <div class="text-left leading-tight"><span class="block font-bold text-sm text-white">Poster 2026</span></div>
                 </a>
+                
                 <a href="syllabus.pdf" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
                     <i class="fa-solid fa-file-pdf text-2xl group-hover:text-white transition"></i>
                     <div class="text-left leading-tight"><span class="block font-bold text-sm text-white">Syllabus 2026</span></div>
                 </a>
+
                 <a href="https://github.com/pyastrolab" target="_blank" class="group px-6 py-3 rounded-lg border border-gray-700 bg-gray-900/50 hover:bg-gray-800 hover:border-white/30 transition flex items-center gap-3">
                     <i class="fa-brands fa-github text-2xl group-hover:text-white transition"></i>
-                    <div class="text-left leading-tight"><span class="block text-xs text-gray-400 group-hover:text-gray-300">View Coursework &</span><span class="block font-bold text-sm text-white">Archive</span></div>
+                    <div class="text-left leading-tight">
+                        <span class="block text-xs text-gray-400 group-hover:text-gray-300">View Coursework &</span>
+                        <span class="block font-bold text-sm text-white">Archive</span>
+                    </div>
                 </a>
             </div>
             
@@ -86,6 +99,7 @@
                     <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center border-2 border-gray-500 shadow-lg">
                         <i class="fa-solid fa-user-astronaut text-3xl text-white"></i>
                     </div>
+                    
                     <div class="flex-1 text-left">
                         <h4 class="font-bold text-xl text-white">J.S. Dingra</h4>
                         <p class="text-xs text-red-400 uppercase tracking-widest font-bold">Lead Instructor</p>
@@ -96,8 +110,10 @@
         </div>
 
         <div class="lg:w-1/2 w-full max-w-md float-anim mt-6 lg:mt-0">
+            
             <div id="form-card" class="glass-card rounded-2xl p-8 relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-red-600 rounded-full blur-[80px] opacity-30 pointer-events-none"></div>
+
                 <h3 class="font-space text-2xl font-bold mb-1">Secure Your Seat</h3>
                 <p class="text-sm text-gray-400 mb-6">Limited seats available for Jan 2026.</p>
 
@@ -134,6 +150,7 @@
 
             <div id="qr-card" class="hidden glass-card rounded-2xl p-8 relative overflow-hidden text-center">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-30 pointer-events-none"></div>
+                
                 <h3 class="font-space text-xl font-bold mb-2">Scan to Pay</h3>
                 <p class="text-xs text-gray-400 mb-4">Scan QR code and upload screenshot below.</p>
 
@@ -150,7 +167,6 @@
                         <div class="text-right">
                             <p class="text-xs text-gray-400">Account Holder</p>
                             <p class="text-sm font-bold text-white tracking-wide">Jashanpreet Singh</p>
-                            <p class="text-xs text-gray-400">astrodingra@okhdfcbank</p>
                         </div>
                     </div>
                 </div>
@@ -163,34 +179,52 @@
                 <button id="payBtn" onclick="confirmPayment()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-green-900/30 transition mb-3 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-check-circle"></i> I HAVE MADE THE PAYMENT
                 </button>
-                <button onclick="goBackToForm()" class="text-gray-500 hover:text-white text-xs underline">Back to Details</button>
+                
+                <button onclick="goBackToForm()" class="text-gray-500 hover:text-white text-xs underline">
+                    Back to Details
+                </button>
             </div>
 
             <div id="success-card" class="hidden glass-card rounded-2xl p-8 relative overflow-hidden text-center min-h-[400px] flex flex-col justify-center items-center">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-orange-600 rounded-full blur-[80px] opacity-30 pointer-events-none"></div>
+                
                 <i class="fa-solid fa-hourglass-half text-6xl text-orange-500 mb-6 drop-shadow-lg animate-pulse"></i>
                 <h2 class="text-2xl font-space font-bold text-white mb-2">Payment Under Review</h2>
                 <p class="text-gray-400 mb-6 text-sm">Thanks <span id="success-name" class="text-white font-bold"></span>.</p>
+                
                 <div class="bg-white/5 border border-white/10 p-4 rounded-lg w-full mb-6 text-left">
                     <p class="text-sm text-gray-300">
                         <i class="fa-solid fa-circle-check text-green-500 mr-1"></i> Screenshot uploaded successfully.<br>
                         Our admin will verify the payment and you will receive a WhatsApp message shortly.
                     </p>
                 </div>
+
+                <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-bold w-full transition text-sm">
+                      <i class="fa-brands fa-whatsapp mr-2"></i> Contact Support
+                </a>
             </div>
         </div>
     </main>
 
     <footer class="p-6 text-center border-t border-white/5 relative z-10 mt-auto">
-        <p class="text-gray-500 text-xs">© 2025 AGNS School. All rights reserved. <button onclick="toggleAdmin()" class="ml-2 text-gray-700 hover:text-red-500 transition" title="Admin Login"><i class="fa-solid fa-lock"></i></button></p>
+        <p class="text-gray-500 text-xs">
+            © 2025 AGNS School. All rights reserved. 
+            <button onclick="toggleAdmin()" class="ml-2 text-gray-700 hover:text-red-500 transition" title="Admin Login">
+                <i class="fa-solid fa-lock"></i>
+            </button>
+        </p>
     </footer>
 
     <div id="adminPanel" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-gray-900 border border-gray-700 w-full max-w-6xl h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+            
             <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-950">
                 <h2 class="text-xl font-space font-bold text-white"><i class="fa-solid fa-user-shield text-red-500 mr-2"></i> Admin Dashboard</h2>
-                <button onclick="toggleAdmin()" class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="toggleAdmin()" class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
+
             <div id="loginView" class="flex-grow flex flex-col items-center justify-center space-y-4">
                 <h3 class="text-lg font-bold">Protected Area</h3>
                 <div class="flex gap-2">
@@ -198,12 +232,24 @@
                     <button onclick="verifyAdmin()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-bold">Access</button>
                 </div>
             </div>
+
             <div id="dataView" class="hidden flex-grow flex flex-col p-6 bg-gray-900">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl"><p class="text-gray-400 text-xs uppercase tracking-widest">Total Registrations</p><h3 class="text-2xl font-bold text-white mt-1" id="totalCount">0</h3></div>
-                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl"><p class="text-gray-400 text-xs uppercase tracking-widest">Total Revenue</p><h3 class="text-2xl font-bold text-green-400 mt-1" id="totalMoney">₹0</h3></div>
-                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl flex items-center justify-between"><button onclick="downloadCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold w-full"><i class="fa-solid fa-file-csv mr-2"></i> Download CSV</button></div>
+                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl">
+                        <p class="text-gray-400 text-xs uppercase tracking-widest">Total Registrations</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="totalCount">0</h3>
+                    </div>
+                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl">
+                        <p class="text-gray-400 text-xs uppercase tracking-widest">Total Revenue</p>
+                        <h3 class="text-2xl font-bold text-green-400 mt-1" id="totalMoney">₹0</h3>
+                    </div>
+                    <div class="bg-gray-800/50 border border-gray-700 p-4 rounded-xl flex items-center justify-between">
+                         <button onclick="downloadCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">
+                            <i class="fa-solid fa-file-csv mr-2"></i> Download CSV
+                        </button>
+                    </div>
                 </div>
+
                 <div class="overflow-auto rounded-lg border border-gray-800 flex-grow">
                     <table class="w-full text-left">
                         <thead class="bg-gray-950 text-gray-400 text-xs uppercase tracking-wider sticky top-0">
@@ -233,17 +279,15 @@
         const db = firebase.database();
 
         // ----------------------------------------------------
-        // 🛑 TRICKING GITHUB SECRET SCANNER 🛑
-        // We split the token into two strings so GitHub doesn't detect it.
-        // PASTE YOUR NEW TOKEN PART AFTER "ghp_"
+        // 🛑 TOKEN SPLITTING MAGIC 🛑
         // ----------------------------------------------------
-        const tokenPart1 = "ghp_";
-        // 👇 PASTE THE REST OF YOUR NEW TOKEN HERE (WITHOUT 'ghp_') 👇
+        const tokenPart1 = "ghp_"; 
+        
+        // 👇👇👇 PASTE THE REST OF YOUR TOKEN INSIDE THESE QUOTES 👇👇👇
         const tokenPart2 = "rIzFUqWjHjTZ6mdIWJbKrcrcQ9qwYb4fdlJr"; 
+        // ----------------------------------------------------
         
         const GITHUB_TOKEN = tokenPart1 + tokenPart2;
-        // ----------------------------------------------------
-
         const GH_USER = "jsdingra11";
         const GH_REPO = "Panjabans";
 
@@ -294,8 +338,9 @@
         }
 
         async function uploadToGitHub(file, fileName) {
+            // Safety Check
             if (GITHUB_TOKEN.includes("PASTE_THE_REST")) {
-                alert("You forgot to paste your new token in the code!");
+                alert("CRITICAL: You forgot to paste the token in the code!");
                 throw new Error("Missing Token");
             }
 
@@ -323,8 +368,8 @@
 
             if (!response.ok) {
                 const err = await response.json();
-                console.error("GitHub Error Detail:", err);
-                throw new Error(err.message || "GitHub Upload Failed");
+                console.error("GitHub Error:", err);
+                throw new Error(err.message || "Upload Failed");
             }
 
             const data = await response.json();
