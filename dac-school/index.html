@@ -158,25 +158,47 @@
                 </form>
             </div>
 
-            <div id="qr-card" class="hidden glass-card rounded-2xl p-8 relative overflow-hidden text-center">
+            <div id="qr-card" class="hidden glass-card rounded-2xl p-6 relative overflow-hidden text-center max-h-[85vh] overflow-y-auto custom-scroll">
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-30 pointer-events-none"></div>
                 
-                <h3 class="font-space text-xl font-bold mb-2">Scan to Pay</h3>
-                <p class="text-xs text-gray-400 mb-4">Scan QR code and upload screenshot below.</p>
+                <h3 class="font-space text-xl font-bold mb-1">Make Payment</h3>
+                <p class="text-2xl font-bold text-white mb-4" id="qr-amount-display">₹1299</p>
 
-                <div class="bg-white p-2 rounded-lg inline-block mb-4 shadow-xl">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=astrodingra@okhdfcbank&pn=AGNSCHOOL&am=1299" alt="Payment QR" class="w-48 h-48 object-contain"> 
-                </div>
-
-                <div class="bg-gray-800/50 rounded-lg p-4 mb-4 text-left">
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <p class="text-xs text-gray-400 uppercase">Amount to Pay</p>
-                            <p class="text-2xl font-bold text-white" id="qr-amount-display">₹1299</p>
+                <div class="flex flex-col gap-6">
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Option 1: UPI / QR</span>
+                        <div class="bg-white p-2 rounded-lg inline-block shadow-xl">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=astrodingra@okhdfcbank&pn=AGNSCHOOL&am=1299" alt="Payment QR" class="w-32 h-32 object-contain"> 
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs text-gray-400">Account Holder</p>
-                            <p class="text-sm font-bold text-white tracking-wide">Jashanpreet Singh</p>
+                        <p class="text-xs text-gray-400 mt-2">Scan with GPay, Paytm, or PhonePe</p>
+                    </div>
+
+                    <div class="bg-gray-900/60 border border-gray-700 rounded-xl p-4 text-left shadow-inner">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-widest block mb-3 border-b border-gray-700 pb-2">Option 2: Bank Transfer</span>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <p class="text-[10px] text-gray-500 uppercase">Beneficiary Name</p>
+                                <p class="text-white font-bold tracking-wide">JASHANPREET SINGH</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-black/30 p-2 rounded border border-gray-700">
+                                    <p class="text-[10px] text-gray-500 uppercase">Account Number</p>
+                                    <p class="text-white font-mono select-all">50100731652765</p>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded border border-gray-700">
+                                    <p class="text-[10px] text-gray-500 uppercase">IFSC Code</p>
+                                    <p class="text-white font-mono select-all">HDFC0008921</p>
+                                </div>
+                            </div>
+
+                            <div class="text-xs text-gray-400 leading-relaxed">
+                                <span class="text-gray-500">Bank:</span> HDFC Bank Ltd<br>
+                                <span class="text-gray-500">Branch:</span> Mini Secretariat, Patiala<br>
+                                <span class="text-gray-500">SWIFT:</span> HDFCINBB<br>
+                                <span class="text-gray-500">Res:</span> #40, Royal Valley, Patiala
+                            </div>
                         </div>
                     </div>
                 </div>
