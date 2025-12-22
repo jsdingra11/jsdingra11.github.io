@@ -28,7 +28,7 @@
         body { font-family: 'Inter', sans-serif; }
         .hero-bg {
             /* Coffee/Brown Gradient Overlay */
-            background-image: linear-gradient(rgba(47, 27, 18, 0.85), rgba(47, 27, 18, 0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-image: linear-gradient(rgba(47, 27, 18, 0.85), rgba(47, 27, 18, 0.8)), url('https://scientificsummits.org/slider_path/materialscience.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -50,15 +50,15 @@
     <!-- Navigation -->
     <nav class="bg-primary text-white sticky top-0 z-50 shadow-lg border-b border-[#5d4037]">
         <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-20">
+            <div class="flex justify-between items-center h-16 md:h-20">
                 <!-- Logo / Title -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary font-bold text-xl shadow-md">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg md:text-xl shadow-md flex-shrink-0">
                         <i class="fas fa-atom"></i>
                     </div>
                     <div class="leading-tight">
-                        <span class="block font-bold text-lg md:text-xl">IC-EMTSD-2026</span>
-                        <span class="block text-xs text-orange-100">GNDU Amritsar</span>
+                        <span class="block font-bold text-base md:text-xl truncate max-w-[200px] md:max-w-none">IC-EMTSD-2026</span>
+                        <span class="block text-[10px] md:text-xs text-orange-100">GNDU Amritsar</span>
                     </div>
                 </div>
 
@@ -74,41 +74,41 @@
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button class="md:hidden text-white focus:outline-none" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
-                    <i class="fas fa-bars text-2xl"></i>
+                <button class="md:hidden text-white focus:outline-none p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                    <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-accent pb-4 border-t border-stone-700">
-            <a href="#home" class="block px-4 py-2 hover:bg-primary">Home</a>
-            <a href="#about" class="block px-4 py-2 hover:bg-primary">About</a>
-            <a href="#topics" class="block px-4 py-2 hover:bg-primary">Topics</a>
-            <a href="#abstract" class="block px-4 py-2 hover:bg-primary">Abstract</a>
-            <a href="#committee" class="block px-4 py-2 hover:bg-primary">Committee</a>
-            <a href="#registration" class="block px-4 py-2 hover:bg-primary">Registration</a>
-            <a href="#contact" class="block px-4 py-2 hover:bg-primary">Contact</a>
+        <div id="mobile-menu" class="hidden md:hidden bg-accent pb-4 border-t border-stone-700 absolute w-full left-0 top-16 shadow-xl">
+            <a href="#home" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Home</a>
+            <a href="#about" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">About</a>
+            <a href="#topics" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Topics</a>
+            <a href="#abstract" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Abstract</a>
+            <a href="#committee" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Committee</a>
+            <a href="#registration" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Registration</a>
+            <a href="#contact" class="block px-4 py-3 hover:bg-primary" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Contact</a>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-bg h-[650px] flex items-center justify-center text-center px-4">
+    <section id="home" class="hero-bg min-h-[500px] md:h-[650px] flex items-center justify-center text-center px-4 py-16 md:py-0">
         <div class="max-w-4xl text-white">
-            <span class="inline-block py-1 px-3 rounded-full bg-secondary text-primary text-sm font-bold mb-6 animate-bounce shadow-lg">
+            <span class="inline-block py-1 px-3 rounded-full bg-secondary text-primary text-xs md:text-sm font-bold mb-4 md:mb-6 animate-bounce shadow-lg">
                 February 26-27, 2026
             </span>
-            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight drop-shadow-md">
+            <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-md">
                 International Conference on Emerging Materials and Technologies for Sustainable Development
             </h1>
-            <p class="text-xl md:text-2xl mb-8 text-orange-50">
+            <p class="text-lg md:text-2xl mb-6 md:mb-8 text-orange-50">
                 Organized by Department of Physics, Guru Nanak Dev University, Amritsar
                 <br><span class="text-sm italic opacity-80">(Under RUSA 2.0)</span>
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#abstract" class="bg-secondary text-primary hover:bg-[#c6934b] px-8 py-3 rounded-lg font-bold transition duration-300 text-lg shadow-lg">
+                <a href="#abstract" class="bg-secondary text-primary hover:bg-[#c6934b] px-6 md:px-8 py-3 rounded-lg font-bold transition duration-300 text-base md:text-lg shadow-lg">
                     Submit Abstract
                 </a>
-                <a href="#registration" class="bg-white text-primary hover:bg-stone-100 px-8 py-3 rounded-lg font-bold transition duration-300 text-lg shadow-lg">
+                <a href="#registration" class="bg-white text-primary hover:bg-stone-100 px-6 md:px-8 py-3 rounded-lg font-bold transition duration-300 text-base md:text-lg shadow-lg">
                     Register Now
                 </a>
             </div>
@@ -118,7 +118,7 @@
     <!-- Important Dates Banner -->
     <div class="bg-white border-b border-stone-200 py-4 shadow-sm">
         <div class="container mx-auto px-4">
-            <div class="flex flex-wrap justify-center gap-6 md:gap-12 text-sm md:text-base">
+            <div class="flex flex-col md:flex-row justify-center gap-3 md:gap-12 text-sm md:text-base items-center">
                 <div class="flex items-center gap-2">
                     <i class="far fa-calendar-alt text-primary"></i>
                     <span class="font-semibold text-primary">Abstract Submission:</span> <span class="text-gray-600">Open Now</span>
@@ -136,24 +136,24 @@
     </div>
 
     <!-- About Section -->
-    <section id="about" class="py-20 bg-surface">
+    <section id="about" class="py-12 md:py-20 bg-surface">
         <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-2 gap-12 items-start">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
                 <div>
-                    <h2 class="text-3xl font-bold text-primary mb-6 border-l-4 border-secondary pl-4">About The Conference</h2>
-                    <p class="text-gray-700 mb-4 leading-relaxed text-justify">
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-6 border-l-4 border-secondary pl-4">About The Conference</h2>
+                    <p class="text-gray-700 mb-4 leading-relaxed text-justify text-sm md:text-base">
                         The International Conference on Emerging Materials and Technologies for Sustainable Development (IC-EMTSD-2026) aims to bring together leading researchers, academicians, and industry professionals to discuss recent advances and future directions in materials science and technology that support sustainable development.
                     </p>
-                    <p class="text-gray-700 mb-4 leading-relaxed text-justify">
+                    <p class="text-gray-700 mb-4 leading-relaxed text-justify text-sm md:text-base">
                         The conference focuses on cutting-edge research in advanced two-dimensional and quantum materials, nanomaterials and nanotechnology, thin-film technologies, magnetic and dielectric materials, and sustainable glass and environmental technologies. It serves as a multidisciplinary platform for knowledge exchange, fostering collaboration between fundamental science and applied technologies.
                     </p>
                 </div>
-                <div class="bg-white p-8 rounded-2xl shadow-lg border border-stone-100">
-                    <h3 class="text-2xl font-bold text-primary mb-4">About GNDU</h3>
-                    <p class="text-gray-600 mb-6 leading-relaxed text-justify">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100">
+                    <h3 class="text-xl md:text-2xl font-bold text-primary mb-4">About GNDU</h3>
+                    <p class="text-gray-600 mb-6 leading-relaxed text-justify text-sm md:text-base">
                         Established in 1969, Guru Nanak Dev University (GNDU), Amritsar, is a state public university recognized by the UGC. The university has been re-accredited with an "A++" grade by NAAC, scoring 3.85 out of 4.00, the highest in India's accreditation framework at the university level.
                     </p>
-                    <ul class="space-y-3">
+                    <ul class="space-y-3 text-sm md:text-base">
                         <li class="flex items-start gap-3">
                             <i class="fas fa-award text-secondary mt-1"></i>
                             <span class="text-gray-800">University with Potential for Excellence (UGC)</span>
@@ -173,16 +173,16 @@
     </section>
 
     <!-- Topics of Interest -->
-    <section id="topics" class="py-20 bg-stone-100">
+    <section id="topics" class="py-12 md:py-20 bg-stone-100">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-primary mb-4">Topics of Interest</h2>
+            <div class="text-center mb-8 md:mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Topics of Interest</h2>
                 <div class="w-24 h-1 bg-secondary mx-auto mb-6"></div>
-                <p class="text-gray-600 max-w-2xl mx-auto">Exploring the frontiers of materials science and sustainable technologies.</p>
+                <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">Exploring the frontiers of materials science and sustainable technologies.</p>
             </div>
             
-            <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-8 md:p-12">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 md:gap-y-6 text-sm md:text-base">
                     <!-- Advanced Materials -->
                     <div class="flex items-start gap-3">
                         <i class="fas fa-atom text-secondary mt-1 flex-shrink-0"></i>
@@ -266,19 +266,19 @@
     </section>
 
     <!-- Abstract Submission Section -->
-    <section id="abstract" class="py-20 bg-surface">
+    <section id="abstract" class="py-12 md:py-20 bg-surface">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-primary mb-4">Abstract Submission</h2>
-                    <p class="text-gray-600">Submit your research for review by the scientific committee.</p>
+                <div class="text-center mb-8 md:mb-12">
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Abstract Submission</h2>
+                    <p class="text-gray-600 text-sm md:text-base">Submit your research for review by the scientific committee.</p>
                     <div class="w-24 h-1 bg-secondary mx-auto mt-4"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-xl p-8 border border-stone-200">
-                    <form class="space-y-6">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-stone-200">
+                    <form class="space-y-4 md:space-y-6">
                         <!-- Personal Info -->
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <div class="grid md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
                                 <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition bg-stone-50" placeholder="Dr./Prof./Mr./Ms. Name">
@@ -298,7 +298,7 @@
                         </div>
 
                         <!-- Paper Details -->
-                        <div class="space-y-6 pt-4 border-t border-gray-100">
+                        <div class="space-y-4 md:space-y-6 pt-4 border-t border-gray-100">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Paper Title</label>
                                 <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition bg-stone-50" placeholder="Title of your research paper">
@@ -337,9 +337,9 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Abstract File (PDF/DOC)</label>
                                 <div class="flex items-center justify-center w-full">
-                                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition">
+                                    <label class="flex flex-col items-center justify-center w-full h-24 md:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition">
                                         <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                                            <i class="fas fa-cloud-upload-alt text-2xl md:text-3xl text-gray-400 mb-3"></i>
                                             <p class="text-sm text-gray-500"><span class="font-semibold text-secondary">Click to upload</span> or drag and drop</p>
                                             <p class="text-xs text-gray-500">PDF, DOC, DOCX (Max 5MB)</p>
                                         </div>
@@ -350,7 +350,7 @@
                         </div>
 
                         <div class="pt-4">
-                            <button type="button" class="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-opacity-90 transition shadow-lg flex items-center justify-center gap-2">
+                            <button type="button" class="w-full bg-primary text-white font-bold py-3 md:py-4 rounded-lg hover:bg-opacity-90 transition shadow-lg flex items-center justify-center gap-2 text-base md:text-lg">
                                 <i class="fas fa-paper-plane"></i> Submit Abstract
                             </button>
                         </div>
@@ -361,52 +361,52 @@
     </section>
 
     <!-- Committee Section -->
-    <section id="committee" class="py-20 bg-stone-100">
+    <section id="committee" class="py-12 md:py-20 bg-stone-100">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-primary mb-4">Organizing Committee</h2>
+            <div class="text-center mb-10 md:mb-16">
+                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Organizing Committee</h2>
                 <div class="w-24 h-1 bg-secondary mx-auto"></div>
             </div>
 
             <!-- Patrons -->
-            <div class="mb-16">
-                <h3 class="text-2xl font-bold text-center mb-8 text-gray-700">Patrons</h3>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            <div class="mb-10 md:mb-16">
+                <h3 class="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8 text-gray-700">Patrons</h3>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 text-center">
                     <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-24 h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-tie text-3xl"></i>
+                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                            <i class="fas fa-user-tie text-2xl md:text-3xl"></i>
                         </div>
-                        <h4 class="font-bold text-lg text-primary">Prof. (Dr.) Karamjeet Singh</h4>
-                        <p class="text-sm text-gray-500">Vice Chancellor, GNDU</p>
+                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Karamjeet Singh</h4>
+                        <p class="text-xs md:text-sm text-gray-500 mt-1">Vice Chancellor, GNDU</p>
                     </div>
                     <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-24 h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-graduate text-3xl"></i>
+                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                            <i class="fas fa-user-graduate text-2xl md:text-3xl"></i>
                         </div>
-                        <h4 class="font-bold text-lg text-primary">Prof. (Dr.) Palwinder Singh</h4>
-                        <p class="text-sm text-gray-500">Dean Academic Affairs</p>
+                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Palwinder Singh</h4>
+                        <p class="text-xs md:text-sm text-gray-500 mt-1">Dean Academic Affairs</p>
                     </div>
                     <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-24 h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-tie text-3xl"></i>
+                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                            <i class="fas fa-user-tie text-2xl md:text-3xl"></i>
                         </div>
-                        <h4 class="font-bold text-lg text-primary">Prof. (Dr.) Karamjit Singh Chahal</h4>
-                        <p class="text-sm text-gray-500">Registrar, GNDU</p>
+                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Karamjit Singh Chahal</h4>
+                        <p class="text-xs md:text-sm text-gray-500 mt-1">Registrar, GNDU</p>
                     </div>
                     <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-24 h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-graduate text-3xl"></i>
+                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                            <i class="fas fa-user-graduate text-2xl md:text-3xl"></i>
                         </div>
-                        <h4 class="font-bold text-lg text-primary">Prof. (Dr.) Vandana Bhalla</h4>
-                        <p class="text-sm text-gray-500">Director Research, GNDU</p>
+                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Vandana Bhalla</h4>
+                        <p class="text-xs md:text-sm text-gray-500 mt-1">Director Research, GNDU</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-12">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
                 <!-- Local Organizing Committee -->
-                <div class="bg-white p-8 rounded-xl shadow-md border-l-4 border-primary">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border-l-4 border-primary">
+                    <h3 class="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-primary">
                         <i class="fas fa-users text-secondary"></i> Organizing Team
                     </h3>
                     <ul class="grid grid-cols-1 gap-3 text-sm md:text-base text-gray-700">
@@ -425,8 +425,8 @@
                 </div>
 
                 <!-- Advisory Committee -->
-                <div class="bg-white p-8 rounded-xl shadow-md border-l-4 border-secondary">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border-l-4 border-secondary">
+                    <h3 class="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-primary">
                         <i class="fas fa-globe-asia text-secondary"></i> Advisory Committee
                     </h3>
                     <ul class="space-y-3 text-sm text-gray-700 h-80 overflow-y-auto pr-2 custom-scrollbar">
@@ -453,61 +453,61 @@
     </section>
 
     <!-- Registration Section -->
-    <section id="registration" class="py-20 bg-primary text-white">
+    <section id="registration" class="py-12 md:py-20 bg-primary text-white">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4">Registration</h2>
-                <p class="text-orange-100">Secure your spot at IC-EMTSD-2026</p>
+            <div class="text-center mb-10 md:mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">Registration</h2>
+                <p class="text-orange-100 text-sm md:text-base">Secure your spot at IC-EMTSD-2026</p>
             </div>
 
             <div class="max-w-4xl mx-auto bg-white text-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
                         <thead>
                             <tr class="bg-stone-100 border-b border-secondary">
-                                <th rowspan="2" class="p-4 font-bold border-r border-stone-200">Category</th>
-                                <th colspan="2" class="p-4 font-bold text-center bg-[#f3e5f5] bg-opacity-20 border-r border-stone-200">
-                                    <div class="text-primary">Early Bird Registration</div>
-                                    <div class="text-xs font-normal text-gray-500">(Till 20 November 2025)</div>
+                                <th rowspan="2" class="p-2 md:p-4 font-bold border-r border-stone-200 text-xs md:text-base">Category</th>
+                                <th colspan="2" class="p-2 md:p-4 font-bold text-center bg-[#f3e5f5] bg-opacity-20 border-r border-stone-200">
+                                    <div class="text-primary text-xs md:text-base">Early Bird Registration</div>
+                                    <div class="text-[10px] md:text-xs font-normal text-gray-500">(Till 20 November 2025)</div>
                                 </th>
-                                <th colspan="2" class="p-4 font-bold text-center">
-                                    <div class="text-primary">Regular Registration</div>
-                                    <div class="text-xs font-normal text-gray-500">(After 20 November 2025)</div>
+                                <th colspan="2" class="p-2 md:p-4 font-bold text-center">
+                                    <div class="text-primary text-xs md:text-base">Regular Registration</div>
+                                    <div class="text-[10px] md:text-xs font-normal text-gray-500">(After 20 November 2025)</div>
                                 </th>
                             </tr>
-                            <tr class="bg-stone-50 text-xs font-semibold text-gray-500 uppercase text-center border-b-2 border-secondary">
-                                <th class="p-3 border-r border-stone-200">Indian Authors (INR)</th>
-                                <th class="p-3 border-r border-stone-200">Foreign Authors (USD)</th>
-                                <th class="p-3 border-r border-stone-200">Indian Authors (INR)</th>
-                                <th class="p-3">Foreign Authors (USD)</th>
+                            <tr class="bg-stone-50 text-[10px] md:text-xs font-semibold text-gray-500 uppercase text-center border-b-2 border-secondary">
+                                <th class="p-2 md:p-3 border-r border-stone-200">Indian Authors (INR)</th>
+                                <th class="p-2 md:p-3 border-r border-stone-200">Foreign Authors (USD)</th>
+                                <th class="p-2 md:p-3 border-r border-stone-200">Indian Authors (INR)</th>
+                                <th class="p-2 md:p-3">Foreign Authors (USD)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 text-center">
+                        <tbody class="divide-y divide-gray-200 text-center text-xs md:text-sm">
                             <tr class="hover:bg-stone-50 transition">
-                                <td class="p-4 font-semibold text-left border-r border-stone-100">UG/P.G. Students / Research Scholar</td>
-                                <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹600</td>
-                                <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$76</td>
-                                <td class="p-4 border-r border-stone-100 text-gray-600">₹760</td>
-                                <td class="p-4 text-gray-600">$86</td>
+                                <td class="p-2 md:p-4 font-semibold text-left border-r border-stone-100">UG/P.G. Students / Research Scholar</td>
+                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹600</td>
+                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$76</td>
+                                <td class="p-2 md:p-4 border-r border-stone-100 text-gray-600">₹760</td>
+                                <td class="p-2 md:p-4 text-gray-600">$86</td>
                             </tr>
                             <tr class="hover:bg-stone-50 transition">
-                                <td class="p-4 font-semibold text-left border-r border-stone-100">Academician / Faculty / Scientist</td>
-                                <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹1000</td>
-                                <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$100</td>
-                                <td class="p-4 border-r border-stone-100 text-gray-600">₹1600</td>
-                                <td class="p-4 text-gray-600">$110</td>
+                                <td class="p-2 md:p-4 font-semibold text-left border-r border-stone-100">Academician / Faculty / Scientist</td>
+                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹1000</td>
+                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$100</td>
+                                <td class="p-2 md:p-4 border-r border-stone-100 text-gray-600">₹1600</td>
+                                <td class="p-2 md:p-4 text-gray-600">$110</td>
                             </tr>
                             <tr class="hover:bg-stone-50 transition">
-                                <td class="p-4 font-semibold text-left border-r border-stone-100">Industry Professional</td>
-                                <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹2500</td>
-                                <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$120</td>
-                                <td class="p-4 border-r border-stone-100 text-gray-600">₹4000</td>
-                                <td class="p-4 text-gray-600">$130</td>
+                                <td class="p-2 md:p-4 font-semibold text-left border-r border-stone-100">Industry Professional</td>
+                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹2500</td>
+                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$120</td>
+                                <td class="p-2 md:p-4 border-r border-stone-100 text-gray-600">₹4000</td>
+                                <td class="p-2 md:p-4 text-gray-600">$130</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 bg-stone-50 text-xs text-gray-500 text-center border-t border-stone-200">
+                <div class="p-4 bg-stone-50 text-[10px] md:text-xs text-gray-500 text-center border-t border-stone-200">
                     *Fees subject to confirmation. Please check official brochure for exact foreign currency rates.
                 </div>
             </div>
@@ -515,8 +515,8 @@
             <!-- Bank Details -->
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <div class="bg-accent p-6 rounded-xl border border-stone-600 shadow-xl">
-                    <h3 class="text-xl font-bold mb-4 text-secondary">Bank Account Details</h3>
-                    <div class="space-y-3 font-mono text-sm text-orange-50">
+                    <h3 class="text-lg md:text-xl font-bold mb-4 text-secondary">Bank Account Details</h3>
+                    <div class="space-y-3 font-mono text-xs md:text-sm text-orange-50">
                         <div class="flex justify-between border-b border-stone-600 pb-2">
                             <span>Account Name:</span>
                             <span class="text-white text-right">UGC GRANTS REGISTRAR GNDU</span>
@@ -546,10 +546,10 @@
                 
                 <div class="flex flex-col justify-center text-center space-y-6">
                     <div>
-                        <h3 class="text-xl font-bold mb-2">Have Questions?</h3>
-                        <p class="text-orange-100">Reach out to the organizing committee.</p>
+                        <h3 class="text-lg md:text-xl font-bold mb-2">Have Questions?</h3>
+                        <p class="text-orange-100 text-sm md:text-base">Reach out to the organizing committee.</p>
                     </div>
-                    <a href="mailto:Icemtsd2026@gmail.com" class="inline-block bg-white text-primary hover:bg-gray-100 px-8 py-3 rounded-full font-bold transition shadow-lg">
+                    <a href="mailto:Icemtsd2026@gmail.com" class="inline-block bg-white text-primary hover:bg-gray-100 px-6 md:px-8 py-3 rounded-full font-bold transition shadow-lg text-sm md:text-base">
                         Contact Us via Email
                     </a>
                 </div>
@@ -560,13 +560,13 @@
     <!-- Footer -->
     <footer id="contact" class="bg-accent text-gray-400 py-12 border-t border-stone-800">
         <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
                 <div>
                     <h4 class="text-white font-bold text-lg mb-4">IC-EMTSD-2026</h4>
                     <p class="text-sm mb-4">
                         International Conference on Emerging Materials and Technologies for Sustainable Development.
                     </p>
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-4 justify-center md:justify-start">
                         <a href="#" class="hover:text-white transition"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="hover:text-white transition"><i class="fab fa-linkedin"></i></a>
                         <a href="#" class="hover:text-white transition"><i class="fab fa-facebook"></i></a>
@@ -575,15 +575,15 @@
                 <div>
                     <h4 class="text-white font-bold text-lg mb-4">Contact</h4>
                     <ul class="space-y-2 text-sm">
-                        <li class="flex items-center gap-2">
+                        <li class="flex items-center gap-2 justify-center md:justify-start">
                             <i class="fas fa-envelope text-secondary"></i>
                             <a href="mailto:Icemtsd2026@gmail.com" class="hover:text-white">Icemtsd2026@gmail.com</a>
                         </li>
-                        <li class="flex items-center gap-2">
+                        <li class="flex items-center gap-2 justify-center md:justify-start">
                             <i class="fas fa-phone text-secondary"></i>
                             <span>+91-XXXXXXXXXX</span>
                         </li>
-                        <li class="flex items-start gap-2">
+                        <li class="flex items-start gap-2 justify-center md:justify-start">
                             <i class="fas fa-map-marker-alt text-secondary mt-1"></i>
                             <span>Guru Nanak Dev University,<br>Amritsar, Punjab, India</span>
                         </li>
