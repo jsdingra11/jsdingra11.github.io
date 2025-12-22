@@ -43,11 +43,37 @@
             background: #4a3426;
             border-radius: 4px;
         }
+        /* Page Transition Utility */
+        .page-content {
+            transition: opacity 0.3s ease-in-out;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .hidden-page {
+            display: none !important;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Active Nav Link Style - Color Only */
+        .nav-active {
+            color: #d4a373 !important; /* Secondary Color */
+        }
+        
+        /* Marquee Animation */
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+            animation: scroll 20s linear infinite;
+        }
     </style>
 </head>
-<body class="bg-stone-50 text-gray-800">
+<body class="bg-stone-50 text-gray-800 flex flex-col min-h-screen">
 
-    <!-- Navigation -->
+    <!-- Navigation (Always Visible) -->
     <nav class="bg-primary text-white sticky top-0 z-50 shadow-lg border-b border-[#5d4037]">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center h-14 md:h-16">
@@ -58,247 +84,424 @@
                     </div>
                     <div class="leading-tight">
                         <span class="block font-bold text-base md:text-lg truncate max-w-[200px] md:max-w-none">IC-EMTSD-2026</span>
-                        <span class="block text-[10px] md:text-xs text-orange-100">GNDU Amritsar</span>
                     </div>
                 </div>
 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex space-x-6 text-sm font-semibold">
-                    <a href="#home" class="hover:text-secondary transition duration-300">Home</a>
-                    <a href="#about" class="hover:text-secondary transition duration-300">About</a>
-                    <a href="#topics" class="hover:text-secondary transition duration-300">Topics</a>
-                    <a href="#abstract" class="hover:text-secondary transition duration-300">Abstract</a>
-                    <a href="#committee" class="hover:text-secondary transition duration-300">Committee</a>
-                    <a href="#registration" class="hover:text-secondary transition duration-300">Registration</a>
-                    <a href="#contact" class="hover:text-secondary transition duration-300">Contact</a>
+                <div class="hidden lg:flex space-x-1 text-sm font-semibold" id="desktop-nav">
+                    <button onclick="switchPage('main', 'home')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="main" data-section="home">Home</button>
+                    <button onclick="switchPage('main', 'about')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="main" data-section="about">About</button>
+                    <button onclick="switchPage('main', 'topics')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="main" data-section="topics">Topics</button>
+                    <button onclick="switchPage('main', 'keynote')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="main" data-section="keynote">Speakers</button>
+                    <button onclick="switchPage('main', 'committee')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="main" data-section="committee">Committee</button>
+                    
+                    <!-- Separate Pages -->
+                    <button onclick="switchPage('abstract')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="abstract">Abstract</button>
+                    <button onclick="switchPage('registration')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="registration">Registration</button>
+                    <button onclick="switchPage('travel')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="travel">Travel</button>
+                    
+                    <button onclick="switchPage('main', 'contact')" class="nav-link hover:text-secondary px-3 py-2 rounded transition duration-300 relative" data-page="main" data-section="contact">Contact</button>
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button class="md:hidden text-white focus:outline-none p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <button class="lg:hidden text-white focus:outline-none p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                     <i class="fas fa-bars text-lg"></i>
                 </button>
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-accent pb-4 border-t border-stone-700 absolute w-full left-0 top-14 shadow-xl">
-            <a href="#home" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Home</a>
-            <a href="#about" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">About</a>
-            <a href="#topics" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Topics</a>
-            <a href="#abstract" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Abstract</a>
-            <a href="#committee" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Committee</a>
-            <a href="#registration" class="block px-4 py-3 hover:bg-primary border-b border-white/5" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Registration</a>
-            <a href="#contact" class="block px-4 py-3 hover:bg-primary" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Contact</a>
+        <div id="mobile-menu" class="hidden lg:hidden bg-accent pb-4 border-t border-stone-700 absolute w-full left-0 top-14 shadow-xl z-50">
+            <button onclick="switchPage('main', 'home'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">Home</button>
+            <button onclick="switchPage('main', 'about'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">About</button>
+            <button onclick="switchPage('main', 'topics'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">Topics</button>
+            <button onclick="switchPage('main', 'keynote'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">Speakers</button>
+            <button onclick="switchPage('abstract'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">Abstract Submission</button>
+            <button onclick="switchPage('registration'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">Registration</button>
+            <button onclick="switchPage('travel'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary border-b border-white/5">Travel Guide</button>
+            <button onclick="switchPage('main', 'contact'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 hover:bg-primary">Contact</button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero-bg min-h-[500px] md:h-[650px] flex items-center justify-center text-center px-4 py-16 md:py-0">
-        <div class="max-w-4xl text-white">
-            <span class="inline-block py-1 px-3 rounded-full bg-secondary text-primary text-xs md:text-sm font-bold mb-4 md:mb-6 animate-bounce shadow-lg">
-                February 26-27, 2026
-            </span>
-            <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-md">
-                International Conference on Emerging Materials and Technologies for Sustainable Development
-            </h1>
-            <p class="text-lg md:text-2xl mb-6 md:mb-8 text-orange-50">
-                Organized by Department of Physics, Guru Nanak Dev University, Amritsar
-                <br><span class="text-sm italic opacity-80">(Under RUSA 2.0)</span>
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#abstract" class="bg-secondary text-primary hover:bg-[#c6934b] px-6 md:px-8 py-3 rounded-lg font-bold transition duration-300 text-base md:text-lg shadow-lg">
-                    Submit Abstract
-                </a>
-                <a href="#registration" class="bg-white text-primary hover:bg-stone-100 px-6 md:px-8 py-3 rounded-lg font-bold transition duration-300 text-base md:text-lg shadow-lg">
-                    Register Now
-                </a>
+    <!-- ========================================= -->
+    <!-- 1. MAIN CONFERENCE PAGE VIEW -->
+    <!-- ========================================= -->
+    <div id="main-page" class="page-content flex-grow">
+
+        <!-- Hero Section -->
+        <section id="home" class="hero-bg min-h-[500px] md:h-[650px] flex items-center justify-center text-center px-4 py-16 md:py-0">
+            <div class="max-w-4xl text-white">
+                <span class="inline-block py-1 px-3 rounded-full bg-secondary text-primary text-xs md:text-sm font-bold mb-4 md:mb-6 animate-bounce shadow-lg">
+                    February 26-27, 2026
+                </span>
+                <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-md">
+                    International Conference on Emerging Materials and Technologies for Sustainable Development
+                </h1>
+                <p class="text-lg md:text-2xl mb-6 md:mb-8 text-orange-50">
+                    Organized by Department of Physics, Guru Nanak Dev University, Amritsar
+                    <br><span class="text-sm italic opacity-80">(Under RUSA 2.0)</span>
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="switchPage('abstract')" class="bg-secondary text-primary hover:bg-[#c6934b] px-6 md:px-8 py-3 rounded-lg font-bold transition duration-300 text-base md:text-lg shadow-lg">
+                        Submit Abstract
+                    </button>
+                    <button onclick="switchPage('registration')" class="bg-white text-primary hover:bg-stone-100 px-6 md:px-8 py-3 rounded-lg font-bold transition duration-300 text-base md:text-lg shadow-lg">
+                        Register Now
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Organizers Strip -->
+        <section class="bg-white py-8 border-b border-stone-200">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Organized By & Supported Under</p>
+                <div class="flex flex-wrap justify-center items-center gap-12 md:gap-20 grayscale hover:grayscale-0 transition-all duration-500">
+                    <!-- GNDU -->
+                    <a href="https://online.gndu.ac.in/" target="_blank" class="group flex flex-col items-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/1/1a/Guru_Nanak_Dev_University_Logo.png?20250513000205" alt="GNDU Logo" class="h-20 md:h-24 w-auto object-contain group-hover:scale-105 transition duration-300">
+                    </a>
+                    
+                    <!-- RUSA -->
+                     <div class="flex flex-col items-center group">
+                        <img src="https://mkurusa.in/img/rusa-logo1.png" alt="RUSA Logo" class="h-16 md:h-20 w-auto object-contain group-hover:scale-105 transition duration-300">
+                        <span class="text-[10px] text-gray-500 font-bold mt-2">RUSA 2.0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Important Dates Banner -->
+        <div class="bg-stone-100 border-b border-stone-200 py-4 shadow-inner">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-center gap-3 md:gap-12 text-sm md:text-base items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="far fa-calendar-alt text-primary"></i>
+                        <span class="font-semibold text-primary">Abstract Submission:</span> <span class="text-gray-600">Open Now</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="far fa-check-circle text-primary"></i>
+                        <span class="font-semibold text-primary">Early Bird Deadline:</span> <span class="text-red-700 font-bold">20 Nov 2025</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                        <span class="font-semibold text-primary">Venue:</span> <span class="text-gray-600">GNDU, Amritsar</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
 
-    <!-- Partners & Organizers Strip -->
-    <section class="bg-white py-8 border-b border-stone-200">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Organized By & Supported Under</p>
-            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 grayscale hover:grayscale-0 transition-all duration-500">
-                <!-- GNDU -->
-                <a href="https://online.gndu.ac.in/" target="_blank" class="group flex flex-col items-center">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/1/1a/Guru_Nanak_Dev_University_Logo.png?20250513000205" alt="GNDU Logo" class="h-20 md:h-24 w-auto object-contain group-hover:scale-105 transition duration-300">
-                </a>
+        <!-- About Section -->
+        <section id="about" class="py-12 md:py-20 bg-surface">
+            <div class="container mx-auto px-4">
+                <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-primary mb-6 border-l-4 border-secondary pl-4">About The Conference</h2>
+                        <p class="text-gray-700 mb-4 leading-relaxed text-justify text-sm md:text-base">
+                            The International Conference on Emerging Materials and Technologies for Sustainable Development (IC-EMTSD-2026) aims to bring together leading researchers, academicians, and industry professionals to discuss recent advances and future directions in materials science and technology that support sustainable development.
+                        </p>
+                        <p class="text-gray-700 mb-4 leading-relaxed text-justify text-sm md:text-base">
+                            The conference focuses on cutting-edge research in advanced two-dimensional and quantum materials, nanomaterials and nanotechnology, thin-film technologies, magnetic and dielectric materials, and sustainable glass and environmental technologies. It serves as a multidisciplinary platform for knowledge exchange, fostering collaboration between fundamental science and applied technologies.
+                        </p>
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100">
+                        <h3 class="text-xl md:text-2xl font-bold text-primary mb-4">About GNDU</h3>
+                        <p class="text-gray-600 mb-6 leading-relaxed text-justify text-sm md:text-base">
+                            Established in 1969, Guru Nanak Dev University (GNDU), Amritsar, is a state public university recognized by the UGC. The university has been re-accredited with an "A++" grade by NAAC, scoring 3.85 out of 4.00, the highest in India's accreditation framework at the university level.
+                        </p>
+                        <ul class="space-y-3 text-sm md:text-base">
+                            <li class="flex items-start gap-3">
+                                <i class="fas fa-award text-secondary mt-1"></i>
+                                <span class="text-gray-800">University with Potential for Excellence (UGC)</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fas fa-star text-secondary mt-1"></i>
+                                <span class="text-gray-800">Distinguished reputation in Science & Technology</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fas fa-university text-secondary mt-1"></i>
+                                <span class="text-gray-800">Holistic education & Sustainable Development focus</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topics of Interest -->
+        <section id="topics" class="py-12 md:py-20 bg-stone-100">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-8 md:mb-12">
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Topics of Interest</h2>
+                    <div class="w-24 h-1 bg-secondary mx-auto mb-6"></div>
+                    <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">Exploring the frontiers of materials science and sustainable technologies.</p>
+                </div>
                 
-                <!-- RUSA -->
-                 <div class="flex flex-col items-center group">
-                    <img src="https://mkurusa.in/img/rusa-logo1.png" alt="RUSA Logo" class="h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition duration-300">
-                </div>
+                <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 md:p-12">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 md:gap-y-6 text-sm md:text-base">
+                        <!-- Advanced Materials -->
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-atom text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Advanced 2D and Quantum Materials</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-dna text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Nanomaterials and Nanotechnology</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-layer-group text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Surface Engineering and Thin film Technologies</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-magnet text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Magnetic and Dielectric Materials</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-wine-glass-alt text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable glass Technology</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-leaf text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable Environmental Technology</span>
+                        </div>
 
-                <!-- Golden Jubilee -->
-                 <div class="flex flex-col items-center group">
-                    <img src="https://www.astrodingra.in/temp/gj.png" alt="Golden Jubilee Logo" class="h-16 md:h-20 w-auto object-contain group-hover:scale-105 transition duration-300">
+                        <!-- Energy -->
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-solar-panel text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Renewable and sustainable Energy Materials</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-recycle text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable and green practices in Energy</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-bolt text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable Energy Storage & Conversion devices</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-car-battery text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Batteries, Supercapacitors, and Energy Storage Systems</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-sun text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Solar Cells and Photovoltaic Technologies</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-burn text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Catalytic Hydrogen production and Fuel Cell Technologies</span>
+                        </div>
+                        
+                        <!-- Advanced Tech & Computational -->
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-temperature-high text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Thermoelectric Materials</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-cloud-meatball text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Carbon capture and storage</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-microchip text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Emerging Quantum Technologies</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-brain text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Theoretical AI and ML approaches in Materials</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-laptop-code text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">Computational Materials Science and Materials Informatics</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-project-diagram text-secondary mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium hover:text-primary transition">First-Principles Calculations, DFT and Atomistic Modelling</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Important Dates Banner -->
-    <div class="bg-stone-100 border-b border-stone-200 py-4 shadow-inner">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-center gap-3 md:gap-12 text-sm md:text-base items-center">
-                <div class="flex items-center gap-2">
-                    <i class="far fa-calendar-alt text-primary"></i>
-                    <span class="font-semibold text-primary">Abstract Submission:</span> <span class="text-gray-600">Open Now</span>
+        <!-- Keynote Speakers Section -->
+        <section id="keynote" class="py-12 md:py-20 bg-surface">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-10 md:mb-16">
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Keynote Speakers</h2>
+                    <div class="w-24 h-1 bg-secondary mx-auto mb-6"></div>
+                    <p class="text-gray-600">Distinguished scientists and visionaries in the field.</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <i class="far fa-check-circle text-primary"></i>
-                    <span class="font-semibold text-primary">Early Bird Deadline:</span> <span class="text-red-700 font-bold">20 Nov 2025</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-map-marker-alt text-primary"></i>
-                    <span class="font-semibold text-primary">Venue:</span> <span class="text-gray-600">GNDU, Amritsar</span>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Placeholder Card 1 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-stone-100 group hover:shadow-xl transition">
+                        <div class="h-48 bg-stone-200 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-6xl text-gray-400"></i>
+                        </div>
+                        <div class="p-6 text-center">
+                            <h3 class="font-bold text-lg text-primary mb-1">Speaker To Be Announced</h3>
+                            <p class="text-sm text-secondary font-semibold mb-3">Distinguished Professor</p>
+                            <p class="text-xs text-gray-500">Renowned expert in Quantum Materials and their applications in sustainable energy.</p>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder Card 2 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-stone-100 group hover:shadow-xl transition">
+                        <div class="h-48 bg-stone-200 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-6xl text-gray-400"></i>
+                        </div>
+                        <div class="p-6 text-center">
+                            <h3 class="font-bold text-lg text-primary mb-1">Speaker To Be Announced</h3>
+                            <p class="text-sm text-secondary font-semibold mb-3">Senior Scientist</p>
+                            <p class="text-xs text-gray-500">Leading researcher in Nanotechnology and surface engineering techniques.</p>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder Card 3 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-stone-100 group hover:shadow-xl transition">
+                        <div class="h-48 bg-stone-200 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-6xl text-gray-400"></i>
+                        </div>
+                        <div class="p-6 text-center">
+                            <h3 class="font-bold text-lg text-primary mb-1">Speaker To Be Announced</h3>
+                            <p class="text-sm text-secondary font-semibold mb-3">Industry Leader</p>
+                            <p class="text-xs text-gray-500">Pioneer in sustainable energy storage and conversion devices.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Committee Section -->
+        <section id="committee" class="py-12 md:py-20 bg-stone-100">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-10 md:mb-16">
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Organizing Committee</h2>
+                    <div class="w-24 h-1 bg-secondary mx-auto"></div>
+                </div>
+
+                <!-- Patrons -->
+                <div class="mb-10 md:mb-16">
+                    <h3 class="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8 text-gray-700">Patrons</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 text-center">
+                        <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
+                            <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                                <i class="fas fa-user-tie text-2xl md:text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Karamjeet Singh</h4>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Vice Chancellor, GNDU</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
+                            <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                                <i class="fas fa-user-graduate text-2xl md:text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Palwinder Singh</h4>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Dean Academic Affairs</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
+                            <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                                <i class="fas fa-user-tie text-2xl md:text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Karamjit Singh Chahal</h4>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Registrar, GNDU</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
+                            <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
+                                <i class="fas fa-user-graduate text-2xl md:text-3xl"></i>
+                            </div>
+                            <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Vandana Bhalla</h4>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Director Research, GNDU</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                    <!-- Local Organizing Committee -->
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border-l-4 border-primary">
+                        <h3 class="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+                            <i class="fas fa-users text-secondary"></i> Organizing Team
+                        </h3>
+                        <ul class="grid grid-cols-1 gap-3 text-sm md:text-base text-gray-700">
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Aman Mahajan</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Anupinder Singh</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Harpreet Singh</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Bindiya Arora</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Neeraj Bansal</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Sukhdeep Kaur</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Atul Khanna</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Paramjit Kaur</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Harjeet Kaur</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Mandeep Singh</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Karamveer Kaur</li>
+                        </ul>
+                    </div>
+
+                    <!-- Advisory Committee -->
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border-l-4 border-secondary">
+                        <h3 class="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+                            <i class="fas fa-globe-asia text-secondary"></i> Advisory Committee
+                        </h3>
+                        <ul class="space-y-3 text-sm text-gray-700 h-80 overflow-y-auto pr-2 custom-scrollbar">
+                            <li class="pb-2 border-b border-stone-100">Prof. Yasuhiro Hayakawa, Shizuoka University, Japan</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Mohamed M. Chehimi, Université de Paris, France</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. B.S. Murty, Director, IIT Hyderabad</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Rajeev Ahuja, Director, IIT Ropar</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. A.J. Pal, Director, UGC DAE CSR, Indore</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Sujeet Chaudhary, IIT Delhi</li>
+                            <li class="pb-2 border-b border-stone-100">Dr. P.S.R. Krishna, BARC Mumbai</li>
+                            <li class="pb-2 border-b border-stone-100">Dr. Ajay Singh, BARC Mumbai</li>
+                            <li class="pb-2 border-b border-stone-100">Dr. Pratishtha Pandey, SERC, DST</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Sikha Varma, IOP Bhubaneswar</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Kanishka Biswas, JNCASR Bengaluru</li>
+                            <li class="pb-2 border-b border-stone-100">Dr. Pabitra Nayak, TIFR Mumbai</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Awadhesh Mani, IGCAR Kalpakkam</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Arvind, IISER Mohali</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Rajesh Kumar, IPU Delhi</li>
+                            <li class="pb-2 border-b border-stone-100">Prof. Santosh Mahapatra, CUP Bathinda</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
-    <!-- About Section -->
-    <section id="about" class="py-12 md:py-20 bg-surface">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-6 border-l-4 border-secondary pl-4">About The Conference</h2>
-                    <p class="text-gray-700 mb-4 leading-relaxed text-justify text-sm md:text-base">
-                        The International Conference on Emerging Materials and Technologies for Sustainable Development (IC-EMTSD-2026) aims to bring together leading researchers, academicians, and industry professionals to discuss recent advances and future directions in materials science and technology that support sustainable development.
-                    </p>
-                    <p class="text-gray-700 mb-4 leading-relaxed text-justify text-sm md:text-base">
-                        The conference focuses on cutting-edge research in advanced two-dimensional and quantum materials, nanomaterials and nanotechnology, thin-film technologies, magnetic and dielectric materials, and sustainable glass and environmental technologies. It serves as a multidisciplinary platform for knowledge exchange, fostering collaboration between fundamental science and applied technologies.
-                    </p>
+    <!-- ========================================= -->
+    <!-- 2. ABSTRACT PAGE VIEW -->
+    <!-- ========================================= -->
+    <div id="abstract-page" class="page-content hidden-page flex-grow">
+        <!-- Abstract Header -->
+        <header class="bg-primary text-white py-4 shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-file-alt text-secondary text-2xl"></i>
+                    <span class="font-bold text-lg">Abstract Submission</span>
                 </div>
-                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-100">
-                    <h3 class="text-xl md:text-2xl font-bold text-primary mb-4">About GNDU</h3>
-                    <p class="text-gray-600 mb-6 leading-relaxed text-justify text-sm md:text-base">
-                        Established in 1969, Guru Nanak Dev University (GNDU), Amritsar, is a state public university recognized by the UGC. The university has been re-accredited with an "A++" grade by NAAC, scoring 3.85 out of 4.00, the highest in India's accreditation framework at the university level.
-                    </p>
-                    <ul class="space-y-3 text-sm md:text-base">
-                        <li class="flex items-start gap-3">
-                            <i class="fas fa-award text-secondary mt-1"></i>
-                            <span class="text-gray-800">University with Potential for Excellence (UGC)</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="fas fa-star text-secondary mt-1"></i>
-                            <span class="text-gray-800">Distinguished reputation in Science & Technology</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="fas fa-university text-secondary mt-1"></i>
-                            <span class="text-gray-800">Holistic education & Sustainable Development focus</span>
-                        </li>
+                <button onclick="switchPage('main')" class="text-sm bg-secondary text-primary px-4 py-2 rounded-lg font-bold hover:bg-[#c6934b] transition flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </header>
+
+        <!-- Abstract Guidelines (Added) -->
+        <section class="py-12 px-4 bg-stone-100 border-b border-stone-200">
+            <div class="container mx-auto max-w-4xl">
+                <div class="bg-white p-8 rounded-xl shadow-md border-l-4 border-secondary">
+                    <h3 class="text-xl font-bold text-primary mb-4 flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> Submission Guidelines
+                    </h3>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-700 text-sm md:text-base">
+                        <li><strong>Word Limit:</strong> The abstract should not exceed 300 words.</li>
+                        <li><strong>Formatting:</strong> Use Times New Roman, 12pt font size, single spacing.</li>
+                        <li><strong>Structure:</strong> Title (Bold, Centered), Author Name(s), Affiliation, Email ID, and Keywords (3-5).</li>
+                        <li><strong>File Format:</strong> Only .doc, .docx, or .pdf files are accepted.</li>
+                        <li><strong>Review Process:</strong> All abstracts will be peer-reviewed by the scientific committee. Acceptance notification will be sent via email.</li>
                     </ul>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Topics of Interest -->
-    <section id="topics" class="py-12 md:py-20 bg-stone-100">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-8 md:mb-12">
-                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Topics of Interest</h2>
-                <div class="w-24 h-1 bg-secondary mx-auto mb-6"></div>
-                <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">Exploring the frontiers of materials science and sustainable technologies.</p>
-            </div>
-            
-            <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 md:p-12">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 md:gap-y-6 text-sm md:text-base">
-                    <!-- Advanced Materials -->
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-atom text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Advanced 2D and Quantum Materials</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-dna text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Nanomaterials and Nanotechnology</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-layer-group text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Surface Engineering and Thin film Technologies</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-magnet text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Magnetic and Dielectric Materials</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-wine-glass-alt text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable glass Technology</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-leaf text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable Environmental Technology</span>
-                    </div>
-
-                    <!-- Energy -->
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-solar-panel text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Renewable and sustainable Energy Materials</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-recycle text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable and green practices in Energy</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-bolt text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Sustainable Energy Storage & Conversion devices</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-car-battery text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Batteries, Supercapacitors, and Energy Storage Systems</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-sun text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Solar Cells and Photovoltaic Technologies</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-burn text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Catalytic Hydrogen production and Fuel Cell Technologies</span>
-                    </div>
-                    
-                    <!-- Advanced Tech & Computational -->
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-temperature-high text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Thermoelectric Materials</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-cloud-meatball text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Carbon capture and storage</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-microchip text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Emerging Quantum Technologies</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-brain text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Theoretical AI and ML approaches in Materials</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-laptop-code text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">Computational Materials Science and Materials Informatics</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-project-diagram text-secondary mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium hover:text-primary transition">First-Principles Calculations, DFT and Atomistic Modelling</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Abstract Submission Section -->
-    <section id="abstract" class="py-12 md:py-20 bg-surface">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <div class="text-center mb-8 md:mb-12">
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Abstract Submission</h2>
-                    <p class="text-gray-600 text-sm md:text-base">Submit your research for review by the scientific committee.</p>
-                    <div class="w-24 h-1 bg-secondary mx-auto mt-4"></div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-stone-200">
+        <!-- Abstract Form -->
+        <section class="py-12 md:py-20 bg-surface">
+            <div class="container mx-auto px-4">
+                <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-stone-200">
                     <form class="space-y-4 md:space-y-6">
                         <!-- Personal Info -->
                         <div class="grid md:grid-cols-2 gap-4 md:gap-6">
@@ -380,213 +583,313 @@
                     </form>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
-    <!-- Committee Section -->
-    <section id="committee" class="py-12 md:py-20 bg-stone-100">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-10 md:mb-16">
-                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Organizing Committee</h2>
-                <div class="w-24 h-1 bg-secondary mx-auto"></div>
+    <!-- ========================================= -->
+    <!-- 3. REGISTRATION PAGE VIEW -->
+    <!-- ========================================= -->
+    <div id="registration-page" class="page-content hidden-page flex-grow">
+        <!-- Registration Header -->
+        <header class="bg-primary text-white py-4 shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-id-card text-secondary text-2xl"></i>
+                    <span class="font-bold text-lg">Registration Details</span>
+                </div>
+                <button onclick="switchPage('main')" class="text-sm bg-secondary text-primary px-4 py-2 rounded-lg font-bold hover:bg-[#c6934b] transition flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
             </div>
+        </header>
 
-            <!-- Patrons -->
-            <div class="mb-10 md:mb-16">
-                <h3 class="text-xl md:text-2xl font-bold text-center mb-6 md:mb-8 text-gray-700">Patrons</h3>
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 text-center">
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-tie text-2xl md:text-3xl"></i>
-                        </div>
-                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Karamjeet Singh</h4>
-                        <p class="text-xs md:text-sm text-gray-500 mt-1">Vice Chancellor, GNDU</p>
+        <section class="py-12 md:py-20 bg-stone-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-primary mb-4">Registration Fees</h2>
+                    <p class="text-gray-600">Secure your participation by registering before the deadline.</p>
+                    <div class="w-16 h-1 bg-secondary mx-auto mt-4"></div>
+                </div>
+
+                <div class="max-w-4xl mx-auto bg-white text-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-stone-100 border-b border-secondary">
+                                    <th rowspan="2" class="p-4 font-bold border-r border-stone-200">Category</th>
+                                    <th colspan="2" class="p-4 font-bold text-center bg-[#f3e5f5] bg-opacity-20 border-r border-stone-200">
+                                        <div class="text-primary">Early Bird Registration</div>
+                                        <div class="text-xs font-normal text-gray-500">(Till 20 November 2025)</div>
+                                    </th>
+                                    <th colspan="2" class="p-4 font-bold text-center">
+                                        <div class="text-primary">Regular Registration</div>
+                                        <div class="text-xs font-normal text-gray-500">(After 20 November 2025)</div>
+                                    </th>
+                                </tr>
+                                <tr class="bg-stone-50 text-xs font-semibold text-gray-500 uppercase text-center border-b-2 border-secondary">
+                                    <th class="p-3 border-r border-stone-200">Indian (INR)</th>
+                                    <th class="p-3 border-r border-stone-200">Foreign (USD)</th>
+                                    <th class="p-3 border-r border-stone-200">Indian (INR)</th>
+                                    <th class="p-3">Foreign (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-center">
+                                <tr class="hover:bg-stone-50 transition">
+                                    <td class="p-4 font-semibold text-left border-r border-stone-100">UG/P.G. Students / Research Scholar</td>
+                                    <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹600</td>
+                                    <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$76</td>
+                                    <td class="p-4 border-r border-stone-100 text-gray-600">₹760</td>
+                                    <td class="p-4 text-gray-600">$86</td>
+                                </tr>
+                                <tr class="hover:bg-stone-50 transition">
+                                    <td class="p-4 font-semibold text-left border-r border-stone-100">Academician / Faculty / Scientist</td>
+                                    <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹1000</td>
+                                    <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$100</td>
+                                    <td class="p-4 border-r border-stone-100 text-gray-600">₹1600</td>
+                                    <td class="p-4 text-gray-600">$110</td>
+                                </tr>
+                                <tr class="hover:bg-stone-50 transition">
+                                    <td class="p-4 font-semibold text-left border-r border-stone-100">Industry Professional</td>
+                                    <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹2500</td>
+                                    <td class="p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$120</td>
+                                    <td class="p-4 border-r border-stone-100 text-gray-600">₹4000</td>
+                                    <td class="p-4 text-gray-600">$130</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-graduate text-2xl md:text-3xl"></i>
-                        </div>
-                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Palwinder Singh</h4>
-                        <p class="text-xs md:text-sm text-gray-500 mt-1">Dean Academic Affairs</p>
-                    </div>
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-tie text-2xl md:text-3xl"></i>
-                        </div>
-                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Karamjit Singh Chahal</h4>
-                        <p class="text-xs md:text-sm text-gray-500 mt-1">Registrar, GNDU</p>
-                    </div>
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition">
-                        <div class="w-16 h-16 md:w-24 md:h-24 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-primary">
-                            <i class="fas fa-user-graduate text-2xl md:text-3xl"></i>
-                        </div>
-                        <h4 class="font-bold text-base md:text-lg text-primary leading-tight">Prof. (Dr.) Vandana Bhalla</h4>
-                        <p class="text-xs md:text-sm text-gray-500 mt-1">Director Research, GNDU</p>
+                    <div class="p-4 bg-stone-50 text-xs text-gray-500 text-center border-t border-stone-200">
+                        *Fees subject to confirmation. Please check official brochure for exact foreign currency rates.
                     </div>
                 </div>
-            </div>
 
-            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
-                <!-- Local Organizing Committee -->
-                <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border-l-4 border-primary">
-                    <h3 class="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-primary">
-                        <i class="fas fa-users text-secondary"></i> Organizing Team
-                    </h3>
-                    <ul class="grid grid-cols-1 gap-3 text-sm md:text-base text-gray-700">
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Aman Mahajan</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Anupinder Singh</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Harpreet Singh</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Bindiya Arora</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Neeraj Bansal</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Sukhdeep Kaur</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Atul Khanna</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Paramjit Kaur</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Harjeet Kaur</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Mandeep Singh</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check text-secondary text-xs"></i> Dr. Karamveer Kaur</li>
-                    </ul>
-                </div>
-
-                <!-- Advisory Committee -->
-                <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border-l-4 border-secondary">
-                    <h3 class="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-primary">
-                        <i class="fas fa-globe-asia text-secondary"></i> Advisory Committee
-                    </h3>
-                    <ul class="space-y-3 text-sm text-gray-700 h-80 overflow-y-auto pr-2 custom-scrollbar">
-                        <li class="pb-2 border-b border-stone-100">Prof. Yasuhiro Hayakawa, Shizuoka University, Japan</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Mohamed M. Chehimi, Université de Paris, France</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. B.S. Murty, Director, IIT Hyderabad</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Rajeev Ahuja, Director, IIT Ropar</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. A.J. Pal, Director, UGC DAE CSR, Indore</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Sujeet Chaudhary, IIT Delhi</li>
-                        <li class="pb-2 border-b border-stone-100">Dr. P.S.R. Krishna, BARC Mumbai</li>
-                        <li class="pb-2 border-b border-stone-100">Dr. Ajay Singh, BARC Mumbai</li>
-                        <li class="pb-2 border-b border-stone-100">Dr. Pratishtha Pandey, SERC, DST</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Sikha Varma, IOP Bhubaneswar</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Kanishka Biswas, JNCASR Bengaluru</li>
-                        <li class="pb-2 border-b border-stone-100">Dr. Pabitra Nayak, TIFR Mumbai</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Awadhesh Mani, IGCAR Kalpakkam</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Arvind, IISER Mohali</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Rajesh Kumar, IPU Delhi</li>
-                        <li class="pb-2 border-b border-stone-100">Prof. Santosh Mahapatra, CUP Bathinda</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Registration Section -->
-    <section id="registration" class="py-12 md:py-20 bg-primary text-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-10 md:mb-12">
-                <h2 class="text-2xl md:text-3xl font-bold mb-4">Registration</h2>
-                <p class="text-orange-100 text-sm md:text-base">Secure your spot at IC-EMTSD-2026</p>
-            </div>
-
-            <div class="max-w-4xl mx-auto bg-white text-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[600px]">
-                        <thead>
-                            <tr class="bg-stone-100 border-b border-secondary">
-                                <th rowspan="2" class="p-2 md:p-4 font-bold border-r border-stone-200 text-xs md:text-base">Category</th>
-                                <th colspan="2" class="p-2 md:p-4 font-bold text-center bg-[#f3e5f5] bg-opacity-20 border-r border-stone-200">
-                                    <div class="text-primary text-xs md:text-base">Early Bird Registration</div>
-                                    <div class="text-[10px] md:text-xs font-normal text-gray-500">(Till 20 November 2025)</div>
-                                </th>
-                                <th colspan="2" class="p-2 md:p-4 font-bold text-center">
-                                    <div class="text-primary text-xs md:text-base">Regular Registration</div>
-                                    <div class="text-[10px] md:text-xs font-normal text-gray-500">(After 20 November 2025)</div>
-                                </th>
-                            </tr>
-                            <tr class="bg-stone-50 text-[10px] md:text-xs font-semibold text-gray-500 uppercase text-center border-b-2 border-secondary">
-                                <th class="p-2 md:p-3 border-r border-stone-200">Indian Authors (INR)</th>
-                                <th class="p-2 md:p-3 border-r border-stone-200">Foreign Authors (USD)</th>
-                                <th class="p-2 md:p-3 border-r border-stone-200">Indian Authors (INR)</th>
-                                <th class="p-2 md:p-3">Foreign Authors (USD)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 text-center text-xs md:text-sm">
-                            <tr class="hover:bg-stone-50 transition">
-                                <td class="p-2 md:p-4 font-semibold text-left border-r border-stone-100">UG/P.G. Students / Research Scholar</td>
-                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹600</td>
-                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$76</td>
-                                <td class="p-2 md:p-4 border-r border-stone-100 text-gray-600">₹760</td>
-                                <td class="p-2 md:p-4 text-gray-600">$86</td>
-                            </tr>
-                            <tr class="hover:bg-stone-50 transition">
-                                <td class="p-2 md:p-4 font-semibold text-left border-r border-stone-100">Academician / Faculty / Scientist</td>
-                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹1000</td>
-                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$100</td>
-                                <td class="p-2 md:p-4 border-r border-stone-100 text-gray-600">₹1600</td>
-                                <td class="p-2 md:p-4 text-gray-600">$110</td>
-                            </tr>
-                            <tr class="hover:bg-stone-50 transition">
-                                <td class="p-2 md:p-4 font-semibold text-left border-r border-stone-100">Industry Professional</td>
-                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-gray-700">₹2500</td>
-                                <td class="p-2 md:p-4 bg-stone-50/50 border-r border-stone-100 font-bold text-primary">$120</td>
-                                <td class="p-2 md:p-4 border-r border-stone-100 text-gray-600">₹4000</td>
-                                <td class="p-2 md:p-4 text-gray-600">$130</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="p-4 bg-stone-50 text-[10px] md:text-xs text-gray-500 text-center border-t border-stone-200">
-                    *Fees subject to confirmation. Please check official brochure for exact foreign currency rates.
-                </div>
-            </div>
-
-            <!-- Bank Details -->
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div class="bg-accent p-6 rounded-xl border border-stone-600 shadow-xl">
-                    <h3 class="text-lg md:text-xl font-bold mb-4 text-secondary">Bank Account Details</h3>
-                    <div class="space-y-3 font-mono text-xs md:text-sm text-orange-50">
-                        <div class="flex justify-between border-b border-stone-600 pb-2">
-                            <span>Account Name:</span>
-                            <span class="text-white text-right">UGC GRANTS REGISTRAR GNDU</span>
+                <!-- Bank Details -->
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-accent p-6 rounded-xl border border-stone-600 shadow-xl">
+                        <h3 class="text-xl font-bold mb-4 text-secondary">Bank Account Details</h3>
+                        <div class="space-y-3 font-mono text-sm text-orange-50">
+                            <div class="flex justify-between border-b border-stone-600 pb-2">
+                                <span>Account Name:</span>
+                                <span class="text-white text-right">UGC GRANTS REGISTRAR GNDU</span>
+                            </div>
+                            <div class="flex justify-between border-b border-stone-600 pb-2">
+                                <span>Account No:</span>
+                                <span class="text-white text-right">02881000007953</span>
+                            </div>
+                            <div class="flex justify-between border-b border-stone-600 pb-2">
+                                <span>Bank Name:</span>
+                                <span class="text-white text-right">Punjab & Sind Bank</span>
+                            </div>
+                            <div class="flex justify-between border-b border-stone-600 pb-2">
+                                <span>Branch:</span>
+                                <span class="text-white text-right">GNDU Campus, Amritsar</span>
+                            </div>
+                            <div class="flex justify-between border-b border-stone-600 pb-2">
+                                <span>IFSC Code:</span>
+                                <span class="text-white text-right">PSIB0000288</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>MICR No:</span>
+                                <span class="text-white text-right">143023013</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between border-b border-stone-600 pb-2">
-                            <span>Account No:</span>
-                            <span class="text-white text-right">02881000007953</span>
+                    </div>
+                    
+                    <div class="flex flex-col justify-center text-center space-y-6">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Registration Confirmation</h3>
+                            <p class="text-gray-600 text-sm">After payment, please send the receipt to:</p>
                         </div>
-                        <div class="flex justify-between border-b border-stone-600 pb-2">
-                            <span>Bank Name:</span>
-                            <span class="text-white text-right">Punjab & Sind Bank</span>
-                        </div>
-                        <div class="flex justify-between border-b border-stone-600 pb-2">
-                            <span>Branch:</span>
-                            <span class="text-white text-right">GNDU Campus, Amritsar</span>
-                        </div>
-                        <div class="flex justify-between border-b border-stone-600 pb-2">
-                            <span>IFSC Code:</span>
-                            <span class="text-white text-right">PSIB0000288</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>MICR No:</span>
-                            <span class="text-white text-right">143023013</span>
+                        <div class="flex flex-col gap-4 items-center">
+                            <a href="mailto:Icemtsd2026@gmail.com" class="inline-block bg-white text-primary hover:bg-gray-100 px-8 py-3 rounded-full font-bold transition shadow-lg w-fit border border-gray-200">
+                                <i class="fas fa-envelope mr-2"></i> Icemtsd2026@gmail.com
+                            </a>
                         </div>
                     </div>
                 </div>
-                
-                <div class="flex flex-col justify-center text-center space-y-6">
-                    <div>
-                        <h3 class="text-lg md:text-xl font-bold mb-2">Have Questions?</h3>
-                        <p class="text-orange-100 text-sm md:text-base">Reach out to the organizing committee.</p>
-                    </div>
-                    <div class="flex flex-col gap-4 items-center">
-                        <a href="mailto:Icemtsd2026@gmail.com" class="inline-block bg-white text-primary hover:bg-gray-100 px-6 md:px-8 py-3 rounded-full font-bold transition shadow-lg text-sm md:text-base w-fit">
-                            <i class="fas fa-envelope mr-2"></i> Email Us
-                        </a>
-                        <a href="tel:+919417932547" class="inline-block bg-secondary text-primary hover:bg-[#c6934b] px-6 md:px-8 py-3 rounded-full font-bold transition shadow-lg text-sm md:text-base w-fit">
-                            <i class="fas fa-phone mr-2"></i> +91 94179 32547
-                        </a>
+
+                <!-- Sponsors Marquee (Added to Registration Page) -->
+                <div class="mt-12 pt-8 border-t border-secondary/30">
+                    <h3 class="text-center text-primary font-bold mb-6 uppercase tracking-widest text-sm">Our Sponsors</h3>
+                    <div class="relative flex overflow-x-hidden group">
+                        <div class="py-2 animate-scroll whitespace-nowrap flex gap-12 items-center">
+                            <!-- Logos repeated twice for seamless loop -->
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-flask text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">SciLab</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-microchip text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">TechCore</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-leaf text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">EcoMat</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-university text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">UniGrant</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-atom text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">QuantumSol</span></div>
+                            
+                            <!-- Duplicate for loop -->
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-flask text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">SciLab</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-microchip text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">TechCore</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-leaf text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">EcoMat</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-university text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">UniGrant</span></div>
+                            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition"><i class="fas fa-atom text-3xl text-primary"></i> <span class="text-xl font-bold text-gray-600">QuantumSol</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
-    <!-- Footer -->
-    <footer id="contact" class="bg-accent text-gray-400 py-12 border-t border-stone-800">
+    <!-- ========================================= -->
+    <!-- 4. TRAVEL PAGE VIEW -->
+    <!-- ========================================= -->
+    <div id="travel-page" class="page-content hidden-page flex-grow">
+        <!-- Travel Header -->
+        <header class="bg-primary text-white py-4 shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marked-alt text-secondary text-2xl"></i>
+                    <span class="font-bold text-lg">Amritsar Travel Guide</span>
+                </div>
+                <button onclick="switchPage('main')" class="text-sm bg-secondary text-primary px-4 py-2 rounded-lg font-bold hover:bg-[#c6934b] transition flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </header>
+
+        <!-- How to Reach Section -->
+        <section class="py-12 px-4">
+            <div class="container mx-auto max-w-5xl">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-bold text-primary mb-3">How to Reach GNDU</h1>
+                    <p class="text-gray-600">Guru Nanak Dev University is located on the Grand Trunk Road (NH1), well-connected to all major transit points.</p>
+                    <div class="w-16 h-1 bg-secondary mx-auto mt-4"></div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Airport -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-secondary hover:-translate-y-1 transition duration-300">
+                        <div class="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-primary mb-4 mx-auto">
+                            <i class="fas fa-plane text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-center mb-2">From Airport</h3>
+                        <p class="text-xs text-gray-400 text-center font-bold uppercase mb-4">Sri Guru Ram Dass Jee Intl. Airport</p>
+                        <ul class="text-sm text-gray-600 space-y-2">
+                            <li class="flex justify-between border-b border-gray-100 pb-1">
+                                <span>Distance:</span> <span class="font-semibold">~11 km</span>
+                            </li>
+                            <li class="flex justify-between border-b border-gray-100 pb-1">
+                                <span>Time:</span> <span class="font-semibold">20-25 Mins</span>
+                            </li>
+                            <li class="pt-2">
+                                <span class="block font-semibold mb-1 text-primary">Transport:</span>
+                                Prepaid taxis, Uber, and Ola are easily available at the terminal.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Train -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-primary hover:-translate-y-1 transition duration-300">
+                        <div class="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-primary mb-4 mx-auto">
+                            <i class="fas fa-train text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-center mb-2">From Railway Station</h3>
+                        <p class="text-xs text-gray-400 text-center font-bold uppercase mb-4">Amritsar Junction (ASR)</p>
+                        <ul class="text-sm text-gray-600 space-y-2">
+                            <li class="flex justify-between border-b border-gray-100 pb-1">
+                                <span>Distance:</span> <span class="font-semibold">~4-5 km</span>
+                            </li>
+                            <li class="flex justify-between border-b border-gray-100 pb-1">
+                                <span>Time:</span> <span class="font-semibold">10-15 Mins</span>
+                            </li>
+                            <li class="pt-2">
+                                <span class="block font-semibold mb-1 text-primary">Transport:</span>
+                                Auto-rickshaws and E-rickshaws are plentiful outside the station.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Bus -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-secondary hover:-translate-y-1 transition duration-300">
+                        <div class="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-primary mb-4 mx-auto">
+                            <i class="fas fa-bus text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-center mb-2">From Bus Stand</h3>
+                        <p class="text-xs text-gray-400 text-center font-bold uppercase mb-4">ISBT Amritsar</p>
+                        <ul class="text-sm text-gray-600 space-y-2">
+                            <li class="flex justify-between border-b border-gray-100 pb-1">
+                                <span>Distance:</span> <span class="font-semibold">~5-6 km</span>
+                            </li>
+                            <li class="flex justify-between border-b border-gray-100 pb-1">
+                                <span>Time:</span> <span class="font-semibold">15-20 Mins</span>
+                            </li>
+                            <li class="pt-2">
+                                <span class="block font-semibold mb-1 text-primary">Transport:</span>
+                                Local buses and auto-rickshaws connect ISBT directly to GNDU Gate.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sightseeing Section -->
+        <section class="bg-stone-100 py-12 px-4">
+            <div class="container mx-auto max-w-5xl">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-primary mb-3">Explore Amritsar</h2>
+                    <p class="text-gray-600">Experience the spiritual and historical heart of Punjab.</p>
+                    <div class="w-16 h-1 bg-secondary mx-auto mt-4"></div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Golden Temple -->
+                    <div class="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col md:flex-row group h-auto md:h-48">
+                        <div class="md:w-2/5 h-48 md:h-full overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1580816223788-1442c55452f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="Golden Temple" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        </div>
+                        <div class="p-6 md:w-3/5 flex flex-col justify-center">
+                            <h3 class="font-bold text-xl text-primary mb-2">Golden Temple</h3>
+                            <p class="text-sm text-gray-600 mb-3 line-clamp-3">Sri Harmandir Sahib is the holiest Gurdwara of Sikhism. It is famous for its full golden dome and the holy Sarovar.</p>
+                            <span class="text-xs font-bold text-secondary uppercase tracking-wide">~10 km from Venue</span>
+                        </div>
+                    </div>
+
+                    <!-- Jallianwala Bagh -->
+                    <div class="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col md:flex-row group h-auto md:h-48">
+                        <div class="md:w-2/5 h-48 md:h-full overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1587883262060-3164a2c5a242?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="Jallianwala Bagh" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        </div>
+                        <div class="p-6 md:w-3/5 flex flex-col justify-center">
+                            <h3 class="font-bold text-xl text-primary mb-2">Jallianwala Bagh</h3>
+                            <p class="text-sm text-gray-600 mb-3 line-clamp-3">A historic garden and memorial of national importance, preserved in the memory of those wounded and killed in the 1919 massacre.</p>
+                            <span class="text-xs font-bold text-secondary uppercase tracking-wide">Near Golden Temple</span>
+                        </div>
+                    </div>
+
+                    <!-- Wagah Border -->
+                    <div class="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col md:flex-row group h-auto md:h-48">
+                        <div class="md:w-2/5 h-48 md:h-full overflow-hidden relative">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Wagah_Border_Ceremony.jpg/640px-Wagah_Border_Ceremony.jpg" alt="Wagah Border" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        </div>
+                        <div class="p-6 md:w-3/5 flex flex-col justify-center">
+                            <h3 class="font-bold text-xl text-primary mb-2">Wagah Border</h3>
+                            <p class="text-sm text-gray-600 mb-3 line-clamp-3">Famous for the daily beating retreat ceremony held before sunset. It is the international border between India and Pakistan.</p>
+                            <span class="text-xs font-bold text-secondary uppercase tracking-wide">~35 km from Venue</span>
+                        </div>
+                    </div>
+
+                    <!-- Durgiana Temple -->
+                    <div class="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col md:flex-row group h-auto md:h-48">
+                        <div class="md:w-2/5 h-48 md:h-full overflow-hidden relative">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Durgiana_Temple_Amritsar.jpg/640px-Durgiana_Temple_Amritsar.jpg" alt="Durgiana Temple" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        </div>
+                        <div class="p-6 md:w-3/5 flex flex-col justify-center">
+                            <h3 class="font-bold text-xl text-primary mb-2">Durgiana Temple</h3>
+                            <p class="text-sm text-gray-600 mb-3 line-clamp-3">A premier Hindu temple of Punjab situated in the city of Amritsar. Its architecture is similar to the Golden Temple.</p>
+                            <span class="text-xs font-bold text-secondary uppercase tracking-wide">~5 km from Venue</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer (Always Visible) -->
+    <footer id="contact" class="bg-accent text-gray-400 py-12 border-t border-stone-800 mt-auto">
         <div class="container mx-auto px-4">
             <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
                 <div>
@@ -620,10 +923,10 @@
                 <div>
                     <h4 class="text-white font-bold text-lg mb-4">Quick Links</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="#home" class="hover:text-secondary">Home</a></li>
-                        <li><a href="#abstract" class="hover:text-secondary">Abstract Submission</a></li>
-                        <li><a href="#registration" class="hover:text-secondary">Registration</a></li>
-                        <li><a href="#topics" class="hover:text-secondary">Topics of Interest</a></li>
+                        <li><button onclick="switchPage('main', 'home')" class="hover:text-secondary">Home</button></li>
+                        <li><button onclick="switchPage('abstract')" class="hover:text-secondary">Abstract Submission</button></li>
+                        <li><button onclick="switchPage('registration')" class="hover:text-secondary">Registration</button></li>
+                        <li><button onclick="switchPage('main', 'topics')" class="hover:text-secondary">Topics of Interest</button></li>
                         <li><a href="https://online.gndu.ac.in/" target="_blank" class="hover:text-secondary">GNDU Official Website</a></li>
                     </ul>
                 </div>
@@ -635,18 +938,95 @@
     </footer>
 
     <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+        // Page Switching Logic
+        function switchPage(pageId, sectionId = null) {
+            const pages = ['main-page', 'abstract-page', 'registration-page', 'travel-page'];
+            const targetPage = document.getElementById(pageId + '-page');
+
+            if (!targetPage) return; // Guard clause
+
+            // Hide all pages
+            pages.forEach(pid => {
+                const el = document.getElementById(pid);
+                if (el) {
+                    el.classList.add('hidden-page');
+                    el.classList.remove('flex-grow'); // Remove flex-grow from hidden pages
                 }
+            });
+
+            // Show target page
+            targetPage.classList.remove('hidden-page');
+            targetPage.classList.add('flex-grow'); // Add flex-grow to active page
+
+            // Scroll Logic or Top
+            if (sectionId) {
+                // If a specific section is requested (e.g., 'about' or 'contact' on main page)
+                setTimeout(() => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 100); 
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // Highlight logic for pages like Abstract/Reg/Travel that don't have scroll spy
+            if (pageId !== 'main') {
+                updateActiveLink(pageId, null);
+            } else if (!sectionId) {
+                // If switching to main without specific section, imply 'home'
+                updateActiveLink('main', 'home');
+            }
+        }
+
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Helper to manually update active link
+        function updateActiveLink(pageId, sectionId) {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const isPageMatch = link.getAttribute('data-page') === pageId;
+                const isSectionMatch = !sectionId || link.getAttribute('data-section') === sectionId;
+                
+                if (isPageMatch && (link.getAttribute('data-page') !== 'main' || isSectionMatch)) {
+                    link.classList.add('nav-active');
+                } else {
+                    link.classList.remove('nav-active');
+                }
+            });
+        }
+
+        // Scroll Spy Logic for Main Page
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.3 // Trigger when 30% of section is visible
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            // Check if we are on main page
+            if (document.getElementById('main-page').classList.contains('hidden-page')) return;
+
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    updateActiveLink('main', id);
+                }
+            });
+        }, observerOptions);
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            switchPage('main');
+            
+            // Observe sections on main page
+            const sections = document.querySelectorAll('section[id]');
+            sections.forEach(section => {
+                observer.observe(section);
             });
         });
     </script>
