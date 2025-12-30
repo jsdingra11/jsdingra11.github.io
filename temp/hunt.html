@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GNDU Jumanji Hunt</title>
 
     <!-- Tailwind CSS -->
@@ -190,11 +190,12 @@
             <!-- Overlays -->
             
             <!-- TEAM HUD (Bottom Panel) -->
-            <div id="teamHud" class="hidden absolute bottom-0 left-0 right-0 p-4 z-10 bg-gradient-to-t from-[#2d1b15] to-transparent">
-                <div class="vintage-card p-4 flex flex-col gap-2">
+            <!-- UPDATED CSS: Added 'mb-4' and adjusted padding for mobile to ensure visibility -->
+            <div id="teamHud" class="hidden absolute bottom-0 left-0 right-0 z-10 p-2 md:p-4 mb-safe bg-gradient-to-t from-[#2d1b15] to-transparent pointer-events-none">
+                <div class="vintage-card p-3 md:p-4 flex flex-col gap-2 pointer-events-auto max-w-lg mx-auto w-full">
                     <div class="flex justify-between items-center border-b border-[#5D4037] pb-2">
-                        <span id="displayTeamName" class="font-bold text-lg text-[#2E4C2D]">Team Name</span>
-                        <div id="statusIndicator" class="px-3 py-1 bg-green-700 text-white text-xs rounded-full shadow font-sans font-bold tracking-wider">SAFE ZONE</div>
+                        <span id="displayTeamName" class="font-bold text-lg text-[#2E4C2D] truncate">Team Name</span>
+                        <div id="statusIndicator" class="px-3 py-1 bg-green-700 text-white text-xs rounded-full shadow font-sans font-bold tracking-wider shrink-0">SAFE ZONE</div>
                     </div>
                     <div class="flex justify-between items-center text-xs mt-1">
                         <div class="flex flex-col">
@@ -206,7 +207,7 @@
                             <span id="lngDisplay" class="font-mono">--</span>
                         </div>
                     </div>
-                    <div id="outOfBoundsAlert" class="hidden bg-[#8B0000] text-[#D4AF37] p-2 text-center text-sm font-bold animate-pulse mt-2 border-2 border-[#D4AF37]">
+                    <div id="outOfBoundsAlert" class="hidden bg-[#8B0000] text-[#D4AF37] p-2 text-center text-sm font-bold animate-pulse mt-2 border-2 border-[#D4AF37] rounded">
                         ⚠ WARNING: RETURN TO CAMPUS! ⚠
                     </div>
                 </div>
@@ -258,6 +259,18 @@
         </div>
     </div>
 
+    <!-- Custom Confirm Modal (New) -->
+    <div id="confirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay p-4">
+        <div class="vintage-card w-full max-w-sm p-6 text-center">
+            <h3 class="text-xl font-bold mb-2 text-[#5D4037]">Confirm Action</h3>
+            <p id="confirmMessage" class="mb-6 font-sans">Are you sure?</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 border-2 border-[#5D4037] text-[#5D4037] font-bold rounded hover:bg-[#eaddcf]">Cancel</button>
+                <button id="confirmBtn" class="bg-[#8B0000] text-[#D4AF37] px-4 py-2 border-2 border-[#281814] font-bold rounded shadow-lg hover:bg-red-800">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -292,16 +305,28 @@
         const COLLECTION_TEAMS = `artifacts/${APP_ID}/public/data/gndu_teams`;
         const MASTER_PASSWORD = "qwertyjohn";
 
-        // --- BADGES ---
+        // --- BADGES (20 Distinct Items) ---
         const BADGES = [
             { icon: 'fa-dragon', color: '#8B0000', name: 'Red Dragon' },
-            { icon: 'fa-gem', color: '#2E4C2D', name: 'Green Gem' },
+            { icon: 'fa-gem', color: '#2E4C2D', name: 'Emerald' },
             { icon: 'fa-skull-crossbones', color: '#000000', name: 'Black Skull' },
             { icon: 'fa-crown', color: '#D4AF37', name: 'Gold Crown' },
-            { icon: 'fa-hat-wizard', color: '#4B0082', name: 'Wizard Hat' },
+            { icon: 'fa-hat-wizard', color: '#4B0082', name: 'Wizard' },
             { icon: 'fa-anchor', color: '#000080', name: 'Navy Anchor' },
-            { icon: 'fa-feather-alt', color: '#A52A2A', name: 'Eagle Feather' },
-            { icon: 'fa-paw', color: '#FF4500', name: 'Tiger Paw' }
+            { icon: 'fa-feather-alt', color: '#A52A2A', name: 'Eagle' },
+            { icon: 'fa-paw', color: '#FF4500', name: 'Tiger Paw' },
+            { icon: 'fa-bolt', color: '#FFD700', name: 'Thunder' },
+            { icon: 'fa-fire', color: '#FF5722', name: 'Fire' },
+            { icon: 'fa-leaf', color: '#4CAF50', name: 'Nature' },
+            { icon: 'fa-moon', color: '#607D8B', name: 'Night Wolf' },
+            { icon: 'fa-star', color: '#FFC107', name: 'Star' },
+            { icon: 'fa-heart', color: '#E91E63', name: 'Heart' },
+            { icon: 'fa-shield-alt', color: '#3F51B5', name: 'Guardian' },
+            { icon: 'fa-ghost', color: '#9E9E9E', name: 'Phantom' },
+            { icon: 'fa-spider', color: '#212121', name: 'Spider' },
+            { icon: 'fa-robot', color: '#00BCD4', name: 'Cyborg' },
+            { icon: 'fa-rocket', color: '#673AB7', name: 'Rocket' },
+            { icon: 'fa-tree', color: '#1B5E20', name: 'Forest' }
         ];
 
         // --- STATE ---
@@ -313,6 +338,7 @@
         let allTeamMarkers = {}; // Admin only
         let db = null;
         let auth = null;
+        let deleteTargetId = null; // For delete modal
 
         // --- INITIALIZATION ---
         function initApp() {
@@ -354,6 +380,19 @@
                 if(watchId) navigator.geolocation.clearWatch(watchId);
                 localStorage.clear();
                 window.location.reload();
+            });
+
+            // Confirm Delete Listener
+            document.getElementById('confirmBtn').addEventListener('click', async () => {
+                if(deleteTargetId) {
+                    try {
+                        await db.collection(COLLECTION_TEAMS).doc(deleteTargetId).delete();
+                        closeConfirmModal();
+                    } catch(e) {
+                        closeConfirmModal();
+                        showAlert("Error", "Could not delete team.");
+                    }
+                }
             });
         }
 
@@ -409,7 +448,7 @@
             // Generate 5-char code
             const code = Math.random().toString(36).substring(2, 7).toUpperCase();
             
-            // Assign Random Badge
+            // Assign Random Badge (from 0 to 19)
             const badgeId = Math.floor(Math.random() * BADGES.length);
 
             try {
@@ -513,13 +552,11 @@
 
             // Fit map to boundary initially
             map.fitBounds(campusPolygon.getBounds());
-            
-            // REMOVED setMaxBounds to allow tracking users even if they go far out of bounds
         }
 
         // --- HELPER: CREATE ICON ---
         function createBadgeIcon(badgeId) {
-            const badge = BADGES[badgeId] || BADGES[0]; // Fallback to dragon
+            const badge = BADGES[badgeId] || BADGES[0]; // Fallback
             return L.divIcon({
                 className: 'custom-badge-icon',
                 html: `<div style="
@@ -689,7 +726,7 @@
                     <div class="${isDanger ? 'text-red-700 font-bold' : 'text-green-700'} text-xs uppercase mr-2">
                         ${isDanger ? 'OUT!' : 'SAFE'}
                     </div>
-                    <button onclick="deleteTeam('${id}', '${data.name}')" class="text-red-600 hover:text-red-800 p-1" title="Delete Team">
+                    <button onclick="triggerDelete('${id}', '${data.name}')" class="text-red-600 hover:text-red-800 p-1" title="Delete Team">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -705,15 +742,17 @@
             }
         };
 
-        window.deleteTeam = async function(id, name) {
-            if(confirm(`Are you sure you want to PERMANENTLY delete team "${name}"?`)) {
-                try {
-                    await db.collection(COLLECTION_TEAMS).doc(id).delete();
-                } catch(e) {
-                    showAlert("Error", "Could not delete team.");
-                }
-            }
+        // Replaced direct delete with modal trigger
+        window.triggerDelete = function(id, name) {
+            deleteTargetId = id;
+            document.getElementById('confirmMessage').innerText = `Permanently delete team "${name}"?`;
+            document.getElementById('confirmModal').classList.remove('hidden');
         };
+
+        window.closeConfirmModal = function() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            deleteTargetId = null;
+        }
 
         function showAlert(title, message) {
             document.getElementById('modalTitle').innerText = title;
