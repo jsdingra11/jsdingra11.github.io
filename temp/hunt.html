@@ -145,7 +145,6 @@
         <!-- LOGIN SCREEN -->
         <div id="loginView" class="absolute inset-0 z-30 flex items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/dark-wood.png')]">
             <div class="vintage-card w-full max-w-md p-8 text-center space-y-6">
-                <!-- Changed from fa-gem to fa-map-marked-alt -->
                 <div class="text-4xl text-[#5D4037] mb-2"><i class="fas fa-map-marked-alt"></i></div>
                 <h2 class="text-2xl font-bold text-[#5D4037] uppercase">Enter the Jungle</h2>
                 <p class="text-sm">Guru Nanak Dev University</p>
@@ -157,23 +156,26 @@
                 </div>
 
                 <form id="authForm" class="space-y-4">
-                    <input type="email" id="email" value="astrodingra@gmail.com" placeholder="Explorer Email" class="w-full bg-transparent border-b-2 border-[#5D4037] p-2 outline-none font-bold placeholder-[#8d6e63]" required>
-                    <input type="password" id="password" value="qwertyjohn" placeholder="Secret Code" class="w-full bg-transparent border-b-2 border-[#5D4037] p-2 outline-none font-bold placeholder-[#8d6e63]" required>
-                    
-                    <div id="teamNameGroup" class="text-left">
-                        <label class="text-xs font-bold uppercase">Team Name</label>
-                        <input type="text" id="teamName" placeholder="e.g., The Lions" class="w-full bg-[#eaddcf] border border-[#5D4037] p-2 rounded">
+                    <!-- Admin Fields -->
+                    <div id="adminFields" class="hidden space-y-4">
+                        <!-- REMOVED EMAIL FIELD -->
+                        <div class="text-left">
+                            <label class="text-xs font-bold uppercase text-[#5D4037]">Master Password</label>
+                            <input type="password" id="password" value="qwertyjohn" placeholder="Enter Secret Key" class="w-full bg-transparent border-b-2 border-[#5D4037] p-2 outline-none font-bold placeholder-[#8d6e63]">
+                        </div>
+                    </div>
+
+                    <!-- Hunter Fields -->
+                    <div id="hunterFields" class="space-y-4">
+                        <div class="text-left">
+                            <label class="text-xs font-bold uppercase text-[#5D4037]">Access Code</label>
+                            <input type="text" id="accessCode" placeholder="ABCDE" maxlength="5" class="w-full text-center text-2xl tracking-[0.5em] uppercase font-mono bg-[#eaddcf] border-2 border-[#5D4037] p-2 rounded outline-none focus:border-[#2E4C2D]">
+                            <p class="text-[10px] text-center mt-1 text-[#5D4037]">Enter the 5-letter code provided by the Game Master.</p>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn-jumanji w-full py-3 text-lg rounded shadow-lg mt-4">Begin Adventure</button>
                 </form>
-                
-                <!-- Emergency Login -->
-                <div class="border-t border-[#5D4037] pt-4 mt-2">
-                    <button id="emergencyBtn" class="text-xs text-[#8B0000] underline font-bold hover:text-red-500">
-                        ⚠ ISSUES? CLICK FOR EMERGENCY ENTRY
-                    </button>
-                </div>
 
                 <p id="loginError" class="text-red-700 font-bold text-sm hidden"></p>
             </div>
@@ -211,11 +213,26 @@
             </div>
 
             <!-- ADMIN HUD (Side/Bottom Panel) -->
-            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-64 bg-[#f4e4bc] z-10 border-l-4 border-[#5D4037] shadow-2xl transform transition-transform duration-300 translate-x-full md:translate-x-0 overflow-hidden flex flex-col">
-                <div class="bg-[#5D4037] text-[#D4AF37] p-3 font-bold text-center">
-                    <i class="fas fa-users-cog"></i> HUNTER TRACKER
+            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-80 bg-[#f4e4bc] z-10 border-l-4 border-[#5D4037] shadow-2xl transform transition-transform duration-300 translate-x-full md:translate-x-0 overflow-hidden flex flex-col">
+                <div class="bg-[#5D4037] text-[#D4AF37] p-3 font-bold text-center flex-shrink-0">
+                    <i class="fas fa-users-cog"></i> MASTER CONTROL
                 </div>
-                <div class="p-2 bg-[#d7c49e] text-xs flex justify-between items-center">
+
+                <!-- Create Team Section -->
+                <div class="p-4 border-b-4 border-[#5D4037] bg-[#eaddcf] flex-shrink-0">
+                    <h3 class="text-sm font-bold text-[#5D4037] uppercase mb-2"><i class="fas fa-plus-circle"></i> Create New Team</h3>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="newTeamName" placeholder="Team Name" class="flex-1 p-2 text-sm border border-[#5D4037] rounded bg-white">
+                        <button onclick="generateTeam()" class="bg-[#2E4C2D] text-white px-3 py-1 rounded border border-[#5D4037] text-sm font-bold">GENERATE</button>
+                    </div>
+                    <div id="generatedCodeDisplay" class="hidden p-2 bg-[#F4E4BC] border border-[#5D4037] rounded text-center">
+                        <p class="text-[10px] uppercase text-gray-600">Give this code to the team:</p>
+                        <p id="codeOutput" class="text-2xl font-mono font-bold text-[#8B0000] tracking-widest">---</p>
+                        <div id="badgePreview" class="mt-2 text-sm"></div>
+                    </div>
+                </div>
+
+                <div class="p-2 bg-[#d7c49e] text-xs flex justify-between items-center flex-shrink-0">
                     <span>Teams Active: <span id="teamCount">0</span></span>
                     <button id="refreshMap" class="text-[#5D4037] hover:text-black"><i class="fas fa-sync"></i></button>
                 </div>
@@ -262,58 +279,33 @@
         };
 
         // GNDU Boundary (Detailed "Curvy" Polygon)
-        // Highly granular coordinates to create a smooth, non-boxy boundary around GNDU
         const GNDU_BOUNDS = [
-            // South Boundary (Following GT Road curve)
-            [31.6295, 74.8225], // Start Main Gate
-            [31.6297, 74.8240],
-            [31.6300, 74.8260],
-            [31.6305, 74.8285],
-            [31.6315, 74.8300],
-            
-            // South-East Corner (Curving up)
-            [31.6325, 74.8308],
-            [31.6340, 74.8315],
-            
-            // East Boundary (Residential Area)
-            [31.6360, 74.8320],
-            [31.6375, 74.8322],
-            [31.6390, 74.8320],
-            
-            // North-East Curve (Hostels)
-            [31.6410, 74.8310],
-            [31.6420, 74.8300],
-            [31.6430, 74.8285],
-            [31.6435, 74.8270],
-            
-            // North Boundary (Back of Campus)
-            [31.6440, 74.8250],
-            [31.6445, 74.8225],
-            [31.6445, 74.8200],
-            [31.6440, 74.8180],
-            
-            // North-West Curve (Stadium Area)
-            [31.6430, 74.8160],
-            [31.6415, 74.8150],
-            [31.6400, 74.8145],
-            
-            // West Boundary (Sports/Dept Area)
-            [31.6380, 74.8145],
-            [31.6360, 74.8148],
-            [31.6345, 74.8155],
-            
-            // South-West Curve (Back to Start)
-            [31.6330, 74.8170],
-            [31.6315, 74.8190],
-            [31.6305, 74.8210]  // Closing loop near start
+            [31.6295, 74.8225], [31.6297, 74.8240], [31.6300, 74.8260], [31.6305, 74.8285], [31.6315, 74.8300],
+            [31.6325, 74.8308], [31.6340, 74.8315], [31.6360, 74.8320], [31.6375, 74.8322], [31.6390, 74.8320],
+            [31.6410, 74.8310], [31.6420, 74.8300], [31.6430, 74.8285], [31.6435, 74.8270], [31.6440, 74.8250],
+            [31.6445, 74.8225], [31.6445, 74.8200], [31.6440, 74.8180], [31.6430, 74.8160], [31.6415, 74.8150],
+            [31.6400, 74.8145], [31.6380, 74.8145], [31.6360, 74.8148], [31.6345, 74.8155], [31.6330, 74.8170],
+            [31.6315, 74.8190], [31.6305, 74.8210]
         ];
         
-        // Strict Path for Preview Environment
         const APP_ID = 'gndu-hunt-v1';
         const COLLECTION_TEAMS = `artifacts/${APP_ID}/public/data/gndu_teams`;
+        const MASTER_PASSWORD = "qwertyjohn";
+
+        // --- BADGES ---
+        const BADGES = [
+            { icon: 'fa-dragon', color: '#8B0000', name: 'Red Dragon' },
+            { icon: 'fa-gem', color: '#2E4C2D', name: 'Green Gem' },
+            { icon: 'fa-skull-crossbones', color: '#000000', name: 'Black Skull' },
+            { icon: 'fa-crown', color: '#D4AF37', name: 'Gold Crown' },
+            { icon: 'fa-hat-wizard', color: '#4B0082', name: 'Wizard Hat' },
+            { icon: 'fa-anchor', color: '#000080', name: 'Navy Anchor' },
+            { icon: 'fa-feather-alt', color: '#A52A2A', name: 'Eagle Feather' },
+            { icon: 'fa-paw', color: '#FF4500', name: 'Tiger Paw' }
+        ];
 
         // --- STATE ---
-        let currentUser = null;
+        let currentUserId = null; // Used for Teams (Doc ID)
         let currentRole = 'team'; // 'team' or 'admin'
         let map = null;
         let userMarker = null;
@@ -328,19 +320,28 @@
             auth = firebase.auth();
             db = firebase.firestore();
 
-            // Auth State Listener
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    // Check local storage for role persistence (simple mechanism for demo)
-                    const savedRole = localStorage.getItem('gndu_role');
-                    if(savedRole) currentRole = savedRole;
-                    
+            // We log everyone in anonymously to ensure DB access rights
+            auth.signInAnonymously().catch(e => console.error("Connection Error:", e));
+
+            // Check Session Persistence (Local)
+            const savedRole = localStorage.getItem('gndu_role');
+            if (savedRole) {
+                currentRole = savedRole;
+                if (currentRole === 'team') {
+                    const savedId = localStorage.getItem('gndu_team_id');
+                    const savedName = localStorage.getItem('gndu_team_name');
+                    if (savedId && savedName) {
+                        currentUserId = savedId;
+                        showMainView();
+                    } else {
+                        showLoginView();
+                    }
+                } else if (currentRole === 'admin') {
                     showMainView();
-                } else {
-                    showLoginView();
                 }
-            });
+            } else {
+                showLoginView();
+            }
 
             // Mobile Admin Toggle
             document.getElementById('adminToggle').addEventListener('click', () => {
@@ -350,17 +351,9 @@
 
             // Logout
             document.getElementById('logoutBtn').addEventListener('click', () => {
-                auth.signOut().then(() => {
-                    if(watchId) navigator.geolocation.clearWatch(watchId);
-                    localStorage.removeItem('gndu_role');
-                    window.location.reload();
-                });
-            });
-
-            // Emergency Button
-            document.getElementById('emergencyBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                performEmergencyLogin();
+                if(watchId) navigator.geolocation.clearWatch(watchId);
+                localStorage.clear();
+                window.location.reload();
             });
         }
 
@@ -369,6 +362,7 @@
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('mainView').classList.add('hidden');
             document.getElementById('logoutBtn').classList.add('hidden');
+            setRole('team'); // Default view
         }
 
         function showMainView() {
@@ -377,15 +371,10 @@
             document.getElementById('mainView').classList.add('flex');
             document.getElementById('logoutBtn').classList.remove('hidden');
 
-            // Init Map (delay slightly to ensure container has size)
             setTimeout(() => {
                 if(!map) initMap();
-                
-                if (currentRole === 'team') {
-                    setupTeamMode();
-                } else {
-                    setupAdminMode();
-                }
+                if (currentRole === 'team') setupTeamMode();
+                else setupAdminMode();
             }, 500);
         }
 
@@ -399,100 +388,102 @@
             const activeBtn = document.getElementById(role === 'team' ? 'roleTeam' : 'roleAdmin');
             activeBtn.classList.add('bg-[#5D4037]', 'text-[#D4AF37]');
             
-            const teamInput = document.getElementById('teamNameGroup');
-            if(role === 'admin') teamInput.classList.add('hidden');
-            else teamInput.classList.remove('hidden');
+            if(role === 'admin') {
+                document.getElementById('adminFields').classList.remove('hidden');
+                document.getElementById('hunterFields').classList.add('hidden');
+            } else {
+                document.getElementById('adminFields').classList.add('hidden');
+                document.getElementById('hunterFields').classList.remove('hidden');
+            }
         }
 
-        // --- ROBUST AUTH HANDLER ---
-        async function performEmergencyLogin() {
-            const errorEl = document.getElementById('loginError');
-            errorEl.innerText = "Attempting Emergency Access...";
-            errorEl.classList.remove('hidden');
+        // --- TEAM GENERATION (ADMIN ONLY) ---
+        async function generateTeam() {
+            const name = document.getElementById('newTeamName').value;
+            if(!name) { showAlert("Input Error", "Please enter a team name."); return; }
 
-            // Generate Random Credentials
-            const rand = Math.floor(Math.random() * 100000);
-            const tempEmail = `guest${rand}@gndu.hunt`;
-            const tempPass = `guestpass${rand}`;
-            const teamName = document.getElementById('teamName').value || `Guest Hunter ${rand}`;
+            const btn = document.querySelector('button[onclick="generateTeam()"]');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            // Generate 5-char code
+            const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+            
+            // Assign Random Badge
+            const badgeId = Math.floor(Math.random() * BADGES.length);
 
             try {
-                // Try creating a fresh user
-                const cred = await auth.createUserWithEmailAndPassword(tempEmail, tempPass);
-                
-                // Save context
-                localStorage.setItem('gndu_role', currentRole);
-                if(currentRole === 'team') {
-                    localStorage.setItem('gndu_team_name', teamName);
-                    await db.doc(`${COLLECTION_TEAMS}/${cred.user.uid}`).set({
-                        name: teamName,
-                        status: 'offline',
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                
-                // If successful, onAuthStateChanged will handle the redirect
-            } catch (e) {
-                // Last Resort: Anonymous Auth
-                try {
-                    await auth.signInAnonymously();
-                     localStorage.setItem('gndu_role', currentRole);
-                    if(currentRole === 'team') localStorage.setItem('gndu_team_name', teamName);
-                } catch (anonErr) {
-                    errorEl.innerText = "CRITICAL FAIL: " + anonErr.message;
-                }
+                // Simply add to Firestore collection
+                await db.collection(COLLECTION_TEAMS).add({
+                    name: name,
+                    code: code,
+                    badgeId: badgeId,
+                    status: 'registered',
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // UI Feedback
+                document.getElementById('generatedCodeDisplay').classList.remove('hidden');
+                document.getElementById('codeOutput').innerText = code;
+                const badge = BADGES[badgeId];
+                document.getElementById('badgePreview').innerHTML = `Assigned Badge: <i class="fas ${badge.icon}" style="color:${badge.color}"></i> ${badge.name}`;
+                document.getElementById('newTeamName').value = ''; // clear
+            } catch (error) {
+                showAlert("Creation Failed", error.message);
+            } finally {
+                btn.innerText = "GENERATE";
+                btn.disabled = false;
             }
         }
 
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const teamName = document.getElementById('teamName').value;
             const errorEl = document.getElementById('loginError');
+            errorEl.classList.add('hidden');
 
-            if (currentRole === 'team' && !teamName) {
-                errorEl.innerText = "Team name is required for Hunters.";
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            try {
-                // Try Normal Login
-                await auth.signInWithEmailAndPassword(email, password);
-                localStorage.setItem('gndu_role', currentRole);
-                if(currentRole === 'team') localStorage.setItem('gndu_team_name', teamName);
-            } catch (error) {
+            if (currentRole === 'team') {
+                // TEAM LOGIN
+                const code = document.getElementById('accessCode').value.toUpperCase().trim();
+                if (code.length < 5) {
+                    errorEl.innerText = "Invalid Code Format";
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
                 
-                // Handle ALL auth failures by trying to register or falling back to temp user
-                if (['auth/user-not-found', 'auth/invalid-credential', 'auth/wrong-password'].includes(error.code)) {
-                    
-                    try {
-                        // 1. Try to Register with these credentials (maybe they don't exist yet?)
-                        const cred = await auth.createUserWithEmailAndPassword(email, password);
-                        localStorage.setItem('gndu_role', currentRole);
-                        if(currentRole === 'team') {
-                             localStorage.setItem('gndu_team_name', teamName);
-                             await db.doc(`${COLLECTION_TEAMS}/${cred.user.uid}`).set({
-                                name: teamName,
-                                status: 'offline',
-                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                        }
-                    } catch (regError) {
-                        // 2. If Registration fails (Email in use), the password is DEFINITELY wrong and we can't fix it.
-                        // Force Emergency Login logic
-                        if (regError.code === 'auth/email-already-in-use') {
-                           // Auto-trigger emergency login
-                           console.log("Credential conflict. Switching to temporary user.");
-                           await performEmergencyLogin();
-                        } else {
-                            errorEl.innerText = regError.message;
-                            errorEl.classList.remove('hidden');
-                        }
+                try {
+                    // Query Firestore for this code
+                    const snapshot = await db.collection(COLLECTION_TEAMS)
+                                            .where('code', '==', code)
+                                            .limit(1)
+                                            .get();
+
+                    if (snapshot.empty) {
+                        errorEl.innerText = "Invalid Access Code.";
+                        errorEl.classList.remove('hidden');
+                    } else {
+                        // Success
+                        const doc = snapshot.docs[0];
+                        currentUserId = doc.id;
+                        localStorage.setItem('gndu_role', 'team');
+                        localStorage.setItem('gndu_team_id', doc.id);
+                        localStorage.setItem('gndu_team_name', doc.data().name);
+                        localStorage.setItem('gndu_team_badge', doc.data().badgeId); // Cache badge
+                        showMainView();
                     }
+                } catch(error) {
+                    console.error(error);
+                    errorEl.innerText = "Connection Error. Try again.";
+                    errorEl.classList.remove('hidden');
+                }
+
+            } else {
+                // ADMIN LOGIN (Simple Password Check)
+                const password = document.getElementById('password').value;
+                if (password === MASTER_PASSWORD) {
+                    localStorage.setItem('gndu_role', 'admin');
+                    showMainView();
                 } else {
-                    errorEl.innerText = error.message;
+                    errorEl.innerText = "Incorrect Master Password.";
                     errorEl.classList.remove('hidden');
                 }
             }
@@ -500,72 +491,59 @@
 
         // --- MAP LOGIC ---
         function initMap() {
-            // Center on GNDU (Updated Center - Shifted West)
             map = L.map('map', {
                 zoomControl: true,
                 attributionControl: false
             }).setView([31.6370, 74.8220], 15);
 
-            // Vintage Tiles (OpenStreetMap with styling)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
             }).addTo(map);
 
-            // --- VISUAL ZONES ---
-            
-            // 1. "Danger Zone" Mask (Red overlay outside campus)
-            // Define the whole world as the outer ring
-            const worldCoords = [
-                [90, -180],
-                [90, 180],
-                [-90, 180],
-                [-90, -180]
-            ];
-            
-            // Draw a polygon that covers the world BUT has a hole where GNDU is
+            // Zones
+            const worldCoords = [[90, -180], [90, 180], [-90, 180], [-90, -180]];
             L.polygon([worldCoords, GNDU_BOUNDS], {
-                color: '#8B0000',     // Red Stroke (appears at border of hole)
-                weight: 2,
-                fillColor: '#8B0000', // Red Fill
-                fillOpacity: 0.4,     // Dim the outside world
-                stroke: false         // We'll draw the border separately for better control
+                color: '#8B0000', weight: 2, fillColor: '#8B0000', fillOpacity: 0.4, stroke: false
             }).addTo(map);
 
-            // 2. "Safe Zone" Border (The Campus Boundary)
             const campusPolygon = L.polygon(GNDU_BOUNDS, {
-                color: '#2E4C2D',     // Jumanji Green
-                weight: 4,
-                fillColor: '#00FF00', // Slight green tint inside
-                fillOpacity: 0.05,    // Mostly transparent
-                dashArray: '10, 10',  // Vintage map feel
-                className: 'safe-zone-border'
+                color: '#2E4C2D', weight: 4, fillColor: '#00FF00', fillOpacity: 0.05,
+                dashArray: '10, 10', className: 'safe-zone-border'
             }).addTo(map);
 
-            // Fit map to boundary
+            // Fit map to boundary initially
             map.fitBounds(campusPolygon.getBounds());
             
-            // Restrict panning (approximate buffer)
-            const bounds = campusPolygon.getBounds();
-            const buffer = 0.005; // small buffer
-            const maxBounds = [
-                [bounds.getSouthWest().lat - buffer, bounds.getSouthWest().lng - buffer],
-                [bounds.getNorthEast().lat + buffer, bounds.getNorthEast().lng + buffer]
-            ];
-            map.setMaxBounds(maxBounds);
+            // REMOVED setMaxBounds to allow tracking users even if they go far out of bounds
         }
 
-        // --- GEOFENCING LOGIC (Point in Polygon) ---
-        // Ray-Casting algorithm for arbitrary polygon inclusion
+        // --- HELPER: CREATE ICON ---
+        function createBadgeIcon(badgeId) {
+            const badge = BADGES[badgeId] || BADGES[0]; // Fallback to dragon
+            return L.divIcon({
+                className: 'custom-badge-icon',
+                html: `<div style="
+                    background-color: ${badge.color};
+                    width: 30px; height: 30px;
+                    border-radius: 50%;
+                    border: 2px solid #fff;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+                    display: flex; align-items: center; justify-content: center;
+                    color: white; font-size: 14px;">
+                    <i class="fas ${badge.icon}"></i>
+                </div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
+
+        // --- GEOFENCING LOGIC ---
         function isInsideGNDU(lat, lng) {
             let inside = false;
             for (let i = 0, j = GNDU_BOUNDS.length - 1; i < GNDU_BOUNDS.length; j = i++) {
                 const xi = GNDU_BOUNDS[i][0], yi = GNDU_BOUNDS[i][1];
                 const xj = GNDU_BOUNDS[j][0], yj = GNDU_BOUNDS[j][1];
-                
-                // Check if ray intersects the polygon edge
-                const intersect = ((yi > lng) != (yj > lng)) &&
-                    (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
-                
+                const intersect = ((yi > lng) != (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
                 if (intersect) inside = !inside;
             }
             return inside;
@@ -574,16 +552,12 @@
         // --- TEAM MODE LOGIC ---
         function setupTeamMode() {
             document.getElementById('teamHud').classList.remove('hidden');
-            const teamName = localStorage.getItem('gndu_team_name') || "Unknown Hunter";
+            const teamName = localStorage.getItem('gndu_team_name') || "Authenticated Team";
+            const badgeId = localStorage.getItem('gndu_team_badge');
+            
             document.getElementById('displayTeamName').innerText = teamName;
 
-            // Custom Icon
-            const hunterIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div style="background-color:#2E4C2D; width:20px; height:20px; border-radius:50%; border:2px solid #D4AF37; box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>`,
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
+            const hunterIcon = createBadgeIcon(badgeId);
 
             if (!navigator.geolocation) {
                 showAlert("GPS Error", "Geolocation is not supported by your browser.");
@@ -593,35 +567,22 @@
             watchId = navigator.geolocation.watchPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
-                    
-                    // Update HUD
                     document.getElementById('latDisplay').innerText = latitude.toFixed(4);
                     document.getElementById('lngDisplay').innerText = longitude.toFixed(4);
 
-                    // Update Map
-                    if (userMarker) {
-                        userMarker.setLatLng([latitude, longitude]);
-                    } else {
-                        userMarker = L.marker([latitude, longitude], { icon: hunterIcon }).addTo(map);
-                    }
+                    if (userMarker) userMarker.setLatLng([latitude, longitude]);
+                    else userMarker = L.marker([latitude, longitude], { icon: hunterIcon }).addTo(map);
+                    
                     map.panTo([latitude, longitude]);
 
-                    // Geofence Check
                     const isSafe = isInsideGNDU(latitude, longitude);
                     updateTeamStatusUI(isSafe);
-
-                    // Firestore Update (Throttled could be added, doing direct for MVP smoothness)
                     updateLocationInFirestore(latitude, longitude, isSafe ? 'active' : 'out_of_bounds');
                 },
                 (error) => {
-                    showAlert("GPS Error", "Unable to retrieve location. Please enable GPS.");
                     console.error(error);
                 },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 10000,
-                    timeout: 10000
-                }
+                { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
             );
         }
 
@@ -640,18 +601,14 @@
                 indicator.className = "px-3 py-1 bg-red-700 text-white text-xs rounded-full shadow font-sans font-bold tracking-wider";
                 alertBox.classList.remove('hidden');
                 hud.classList.add('status-pulse');
-                
-                // Optional: Vibrate if supported
                 if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
             }
         }
 
         async function updateLocationInFirestore(lat, lng, status) {
-            if (!currentUser) return;
+            if (!currentUserId) return; 
             try {
-                const teamName = localStorage.getItem('gndu_team_name');
-                await db.doc(`${COLLECTION_TEAMS}/${currentUser.uid}`).set({
-                    name: teamName,
+                await db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).set({
                     lat: lat,
                     lng: lng,
                     status: status,
@@ -667,21 +624,30 @@
             document.getElementById('adminHud').classList.remove('hidden');
             document.getElementById('adminToggle').classList.remove('hidden');
 
-            // Listen to all teams
             db.collection(COLLECTION_TEAMS).onSnapshot((snapshot) => {
                 const listEl = document.getElementById('teamsList');
-                listEl.innerHTML = ''; // Clear list
+                listEl.innerHTML = ''; 
                 let activeCount = 0;
+
+                // Track removed docs to clean up map markers
+                const currentDocIds = [];
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const teamId = doc.id;
+                    currentDocIds.push(teamId);
                     
-                    // Filter out stale data (older than 5 mins) if needed, but showing all for now
                     activeCount++;
-
                     updateAdminMarker(teamId, data);
                     addTeamToList(teamId, data, listEl);
+                });
+
+                // Cleanup markers for deleted teams
+                Object.keys(allTeamMarkers).forEach(id => {
+                    if (!currentDocIds.includes(id)) {
+                        map.removeLayer(allTeamMarkers[id]);
+                        delete allTeamMarkers[id];
+                    }
                 });
                 
                 document.getElementById('teamCount').innerText = activeCount;
@@ -690,34 +656,16 @@
 
         function updateAdminMarker(id, data) {
             if (!data.lat || !data.lng) return;
-
-            const isDanger = data.status === 'out_of_bounds';
-            const color = isDanger ? '#8B0000' : '#2E4C2D'; // Red or Green
-
-            const iconHtml = `<div style="
-                background-color:${color}; 
-                width:24px; height:24px; 
-                border-radius:50%; 
-                border:2px solid #D4AF37; 
-                display:flex; justify-content:center; align-items:center;
-                color:white; font-size:10px; font-weight:bold;
-                box-shadow: 0 0 5px black;">
-                ${data.name.charAt(0).toUpperCase()}
-            </div>`;
-
-            const icon = L.divIcon({
-                className: `marker-${id}`,
-                html: iconHtml,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
-            });
+            
+            // Use badge icon instead of plain color
+            const icon = createBadgeIcon(data.badgeId);
 
             if (allTeamMarkers[id]) {
                 allTeamMarkers[id].setLatLng([data.lat, data.lng]);
                 allTeamMarkers[id].setIcon(icon);
             } else {
                 const marker = L.marker([data.lat, data.lng], { icon: icon }).addTo(map);
-                marker.bindPopup(`<b>${data.name}</b><br>Status: ${data.status}`);
+                marker.bindPopup(`<b>${data.name}</b><br>Status: ${data.status}<br>Code: ${data.code}`);
                 allTeamMarkers[id] = marker;
             }
         }
@@ -727,41 +675,46 @@
             const item = document.createElement('div');
             item.className = `p-2 border-b border-[#5D4037] text-sm flex justify-between items-center ${isDanger ? 'bg-red-100' : ''}`;
             
-            // Calc time ago
-            let timeStr = "Just now";
-            if (data.lastUpdate) {
-                const seconds = Math.floor((Date.now() - data.lastUpdate.toDate()) / 1000);
-                if (seconds > 60) timeStr = `${Math.floor(seconds/60)}m ago`;
-                else timeStr = `${seconds}s ago`;
-                
-                // Highlight if stale (> 30s)
-                if (seconds > 30 && !isDanger) item.style.opacity = "0.6";
-            }
+            const badge = BADGES[data.badgeId] || BADGES[0];
 
             item.innerHTML = `
-                <div>
-                    <div class="font-bold text-[#5D4037]">${data.name}</div>
-                    <div class="text-xs text-gray-600">${timeStr}</div>
+                <div class="flex items-center gap-2 cursor-pointer flex-1" onclick="panToTeam('${id}', ${data.lat}, ${data.lng})">
+                     <i class="fas ${badge.icon}" style="color:${badge.color}"></i>
+                    <div>
+                        <div class="font-bold text-[#5D4037] leading-tight">${data.name}</div>
+                        <div class="text-[10px] text-gray-600 font-mono">CODE: ${data.code || 'N/A'}</div>
+                    </div>
                 </div>
-                <div class="${isDanger ? 'text-red-700 font-bold' : 'text-green-700'} text-xs uppercase">
-                    ${isDanger ? 'OUT!' : 'SAFE'}
+                <div class="flex items-center gap-2">
+                    <div class="${isDanger ? 'text-red-700 font-bold' : 'text-green-700'} text-xs uppercase mr-2">
+                        ${isDanger ? 'OUT!' : 'SAFE'}
+                    </div>
+                    <button onclick="deleteTeam('${id}', '${data.name}')" class="text-red-600 hover:text-red-800 p-1" title="Delete Team">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             `;
-            
-            // Pan to team on click
-            item.onclick = () => {
-                if(data.lat && data.lng) {
-                    map.setView([data.lat, data.lng], 18);
-                    if(window.innerWidth < 768) {
-                        document.getElementById('adminHud').classList.add('translate-x-full'); // close sidebar on mobile
-                    }
-                }
-            };
-
             listEl.appendChild(item);
         }
 
-        // --- UTILS ---
+        // --- GLOBAL ADMIN ACTIONS ---
+        window.panToTeam = function(id, lat, lng) {
+             if(lat && lng) {
+                map.setView([lat, lng], 18);
+                if(window.innerWidth < 768) document.getElementById('adminHud').classList.add('translate-x-full'); 
+            }
+        };
+
+        window.deleteTeam = async function(id, name) {
+            if(confirm(`Are you sure you want to PERMANENTLY delete team "${name}"?`)) {
+                try {
+                    await db.collection(COLLECTION_TEAMS).doc(id).delete();
+                } catch(e) {
+                    showAlert("Error", "Could not delete team.");
+                }
+            }
+        };
+
         function showAlert(title, message) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalMessage').innerText = message;
@@ -772,7 +725,6 @@
             document.getElementById('customModal').classList.add('hidden');
         }
 
-        // --- START ---
         window.onload = initApp;
 
     </script>
