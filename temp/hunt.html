@@ -77,13 +77,13 @@
         
         <div class="hud-glass p-8 rounded-lg w-full max-w-sm space-y-4">
             <input id="user-name" type="text" placeholder="Enter Team Name" class="w-full bg-black border border-red-900 p-3 text-red-500 focus:outline-none focus:border-red-500">
-            <button onclick="login('TEAM')" class="w-full bg-red-900 hover:bg-red-700 text-white font-bold py-3 transition">ENTER THE VOID</button>
+            <button id="team-login-btn" onclick="login('TEAM')" class="w-full bg-red-900 hover:bg-red-700 text-white font-bold py-3 transition">ENTER THE VOID</button>
             <div class="flex items-center gap-2 py-2">
                 <div class="h-[1px] flex-1 bg-red-900/30"></div>
                 <span class="text-xs text-red-900">ADMIN ONLY</span>
                 <div class="h-[1px] flex-1 bg-red-900/30"></div>
             </div>
-            <button onclick="login('ADMIN')" class="w-full border border-red-900 text-red-700 py-2 text-sm hover:bg-red-950 transition">COORDINATOR LOGIN</button>
+            <button id="admin-login-btn" onclick="login('ADMIN')" class="w-full border border-red-900 text-red-700 py-2 text-sm hover:bg-red-950 transition">COORDINATOR LOGIN</button>
         </div>
     </div>
 
@@ -145,7 +145,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, updateDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- CONFIG & CONSTANTS ---
@@ -174,12 +174,28 @@
 
     window.login = async (selectedRole) => {
         const nameInput = document.getElementById('user-name').value.trim();
-        if (!nameInput && selectedRole === 'TEAM') return alert("Enter team name");
+        const activeBtn = selectedRole === 'TEAM' ? document.getElementById('team-login-btn') : document.getElementById('admin-login-btn');
+        const originalText = activeBtn.innerText;
+
+        if (!nameInput && selectedRole === 'TEAM') {
+            activeBtn.innerText = "ENTER TEAM NAME";
+            setTimeout(() => activeBtn.innerText = originalText, 2000);
+            return;
+        }
         
+        activeBtn.innerText = "AUTHORIZING...";
         role = selectedRole;
+
         try {
-            await signInAnonymously(auth);
+            // Priority Auth Strategy
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+
             const user = auth.currentUser;
+            if (!user) throw new Error("Auth Failed");
             currentUser = user;
 
             // Initialize User Doc
@@ -202,7 +218,9 @@
             
             initGame();
         } catch (err) {
-            console.error(err);
+            console.error("Login sequence failed:", err);
+            activeBtn.innerText = "LOGIN FAILED";
+            setTimeout(() => activeBtn.innerText = originalText, 3000);
         }
     };
 
@@ -250,8 +268,8 @@
     }
 
     async function updateLocation(lat, lng, heading) {
-        if (!currentUser) return;
-        const teamRef = doc(db, 'artifacts', appId, 'public', 'data', 'teams', currentUser.uid);
+        if (!auth.currentUser) return;
+        const teamRef = doc(db, 'artifacts', appId, 'public', 'data', 'teams', auth.currentUser.uid);
         await updateDoc(teamRef, { lat, lng, lastSeen: Date.now() });
         
         // Center map on user
@@ -262,6 +280,7 @@
     }
 
     function syncTeams() {
+        if (!auth.currentUser) return;
         const teamsCol = collection(db, 'artifacts', appId, 'public', 'data', 'teams');
         onSnapshot(teamsCol, (snapshot) => {
             const teamListEl = document.getElementById('team-list');
@@ -269,7 +288,7 @@
 
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.uid === currentUser.uid) {
+                if (data.uid === auth.currentUser.uid) {
                     userTeamData = data;
                     updateUI(data);
                 }
@@ -279,7 +298,7 @@
                     updateTeamMarker(data);
                 }
             });
-        }, (err) => console.error("Snapshot error", err));
+        }, (err) => console.error("Snapshot synchronization error", err));
     }
 
     const markers = {};
@@ -308,14 +327,13 @@
                     class="flex-1 bg-red-900/50 text-[10px] py-1 border border-red-800">
                     SHIFT REALITY
                 </button>
-                <button onclick="setCheckpoint('${data.uid}')" 
-                    class="bg-gray-800 text-[10px] px-2 py-1">SET OBJ</button>
             </div>
         `;
         container.appendChild(card);
     }
 
     window.updateTeamLogic = async (uid, newState) => {
+        if (!auth.currentUser) return;
         const ref = doc(db, 'artifacts', appId, 'public', 'data', 'teams', uid);
         await updateDoc(ref, { logicState: newState });
     };
@@ -327,13 +345,12 @@
         const dist = calculateDistance(lat, lng, target.coords[1], target.coords[0]);
         
         // Core Deception Mechanic
-        // If TRAPPED: Invert the Bearing. If REALIZED: Show Correct Bearing.
         let trueBearing = calculateBearing(lat, lng, target.coords[1], target.coords[0]);
         let displayBearing = userTeamData.logicState === 'trapped' ? (trueBearing + 180) % 360 : trueBearing;
         
         // Map Orientation Deception
         if (userTeamData.logicState === 'trapped') {
-            map.setBearing(180); // Rotate map to further disorient
+            map.setBearing(180); 
         } else {
             map.setBearing(0);
         }
@@ -341,7 +358,6 @@
         document.getElementById('compass-needle').style.transform = `rotate(${displayBearing}deg)`;
         document.getElementById('distance-val').innerText = `${Math.round(dist)}m`;
         
-        // Identify nearest landmark for HUD
         let nearest = "THE VOID";
         for (let k in LANDMARKS) {
             const d = calculateDistance(lat, lng, LANDMARKS[k].coords[1], LANDMARKS[k].coords[0]);
@@ -367,9 +383,8 @@
         }
     }
 
-    // --- MATH UTILS ---
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // meters
+        const R = 6371e3;
         const φ1 = lat1 * Math.PI/180;
         const φ2 = lat2 * Math.PI/180;
         const Δφ = (lat2-lat1) * Math.PI/180;
@@ -389,12 +404,11 @@
     }
 
     window.togglePortal = () => {
-        // Global game state update logic could go here
+        console.log("Portal trigger sent to Upside Down...");
     };
 
     window.broadcastMessage = () => {
-        const msg = prompt("Message for the victims?");
-        if (msg) alert("Transmitting to the Upside Down...");
+        console.log("Cryptic message transmission prepared.");
     };
 
 </script>
