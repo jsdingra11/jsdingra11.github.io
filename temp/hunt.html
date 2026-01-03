@@ -6,41 +6,26 @@
     <title>GNDU: The Upside Down</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
     <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        :root {
-            --stranger-red: #8B0000;
-            --upside-down-blue: #0a192f;
-        }
+        :root { --stranger-red: #8B0000; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; }
 
-        body {
-            font-family: 'Special Elite', cursive;
-            background-color: #000;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            height: 100vh;
-        }
-
-        /* FIX: Ensure map has explicit height and width */
+        /* The Map must be absolute and fill the background */
         #map {
-            height: 100%;
-            width: 100%;
             position: absolute;
             top: 0;
-            bottom: 0;
-            background: #000;
-            transition: transform 3s cubic-bezier(0.4, 0, 0.2, 1), filter 2s;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* Lowest layer */
+            transition: transform 3s ease-in-out, filter 2s;
         }
 
-        /* Core Dual-Reality Logic */
+        /* Logic for Scrambling */
         .dimension-wrong {
             transform: rotate(180deg) scaleX(-1);
             filter: invert(100%) hue-rotate(180deg) brightness(0.6) contrast(1.5);
@@ -51,99 +36,67 @@
             filter: sepia(0.5) contrast(1.1);
         }
 
+        /* Overlay UI must be on top of the map */
+        header, #loginView, #teamHud, #adminHud { z-index: 50; position: relative; }
+        
         .vintage-card {
-            background: rgba(10, 10, 10, 0.95);
+            background: rgba(10, 10, 10, 0.9);
             border: 2px solid var(--stranger-red);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
-        }
-
-        .btn-stranger {
-            background: var(--stranger-red);
+            backdrop-filter: blur(8px);
             color: white;
-            font-family: 'Rye', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s;
         }
 
-        .btn-stranger:hover {
-            background: #b30000;
-            box-shadow: 0 0 15px var(--stranger-red);
-        }
-
-        #app { height: 100%; position: relative; }
+        .btn-stranger { background: var(--stranger-red); color: white; font-family: 'Rye', serif; }
     </style>
 </head>
-<body class="flex flex-col">
+<body>
 
-    <header class="bg-black text-red-600 p-3 text-center border-b-2 border-red-900 z-50 flex justify-between items-center shrink-0">
+    <header class="bg-black text-red-600 p-3 text-center border-b-2 border-red-900 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <i class="fas fa-radiation-alt animate-pulse"></i>
-            <div>
-                <h1 class="text-lg tracking-tighter font-bold uppercase">Hawkins Lab: GNDU</h1>
-                <p id="dimensionLabel" class="text-[9px] text-red-500 font-sans tracking-[0.2em]">ANALYZING RIFT...</p>
-            </div>
+            <i class="fas fa-biohazard animate-pulse"></i>
+            <h1 class="text-lg font-bold uppercase tracking-tighter">Hawkins Lab: GNDU</h1>
         </div>
         <button id="logoutBtn" class="hidden text-[10px] border border-red-600 px-2 py-1 rounded">ABANDON</button>
     </header>
 
-    <main id="app" class="flex-grow flex flex-col">
-        
-        <div id="loginView" class="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black">
+    <main id="app" class="relative h-full w-full">
+        <div id="loginView" class="absolute inset-0 flex items-center justify-center p-4 bg-black">
             <div class="vintage-card w-full max-w-md p-8 text-center space-y-6">
-                <h2 class="text-3xl font-bold text-red-600 font-serif">SYSTEM ACCESS</h2>
-                
-                <div class="flex justify-center gap-4">
+                <h2 class="text-2xl font-bold text-red-600">UNAUTHORIZED ACCESS</h2>
+                <div class="flex gap-4">
                     <button onclick="setRole('team')" id="roleTeam" class="flex-1 py-2 border-2 border-red-600 bg-red-600 text-white font-bold rounded">SUBJECT</button>
                     <button onclick="setRole('admin')" id="roleAdmin" class="flex-1 py-2 border-2 border-red-600 text-red-600 font-bold rounded">OBSERVER</button>
                 </div>
-
                 <form id="authForm" class="space-y-4">
-                    <div id="adminFields" class="hidden">
-                        <input type="password" id="password" value="qwertyjohn" class="w-full bg-gray-900 border-b-2 border-red-600 p-2 outline-none text-center text-white">
-                    </div>
-                    <div id="hunterFields">
-                        <input type="text" id="accessCode" placeholder="SYNC CODE" maxlength="5" class="w-full text-center text-3xl uppercase bg-transparent border-2 border-red-600 p-2 rounded text-red-500 font-mono">
-                    </div>
-                    <button type="submit" class="btn-stranger w-full py-3 rounded">AUTHORIZE</button>
+                    <div id="adminFields" class="hidden"><input type="password" id="password" value="qwertyjohn" class="w-full bg-gray-900 border-b-2 border-red-600 p-2 text-center text-white"></div>
+                    <div id="hunterFields"><input type="text" id="accessCode" placeholder="RIFT CODE" class="w-full text-center text-2xl bg-transparent border-2 border-red-600 p-2 text-red-500 font-mono"></div>
+                    <button type="submit" class="btn-stranger w-full py-3 rounded uppercase font-bold">Initiate Sync</button>
                 </form>
-                <p id="loginError" class="text-red-500 font-bold text-sm hidden"></p>
             </div>
         </div>
 
-        <div id="mainView" class="hidden flex-grow relative overflow-hidden">
+        <div id="mainView" class="hidden h-full w-full">
             <div id="map"></div>
 
-            <div id="teamHud" class="hidden absolute bottom-6 left-0 right-0 z-40 p-4 pointer-events-none">
-                <div class="vintage-card p-4 flex flex-col gap-2 pointer-events-auto max-w-lg mx-auto w-full">
-                    <div class="flex justify-between items-center border-b border-red-900 pb-2">
+            <div id="teamHud" class="hidden absolute bottom-10 left-0 right-0 p-4 pointer-events-none">
+                <div class="vintage-card p-4 max-w-md mx-auto pointer-events-auto">
+                    <div class="flex justify-between border-b border-red-900 pb-2 mb-2">
                         <span id="displayTeamName" class="font-bold text-red-500">Scanning...</span>
-                        <div id="statusIndicator" class="px-3 py-1 bg-red-900 text-[10px] rounded-full">ACTIVE RIFT</div>
+                        <span class="text-[10px] bg-red-900 px-2 py-1 rounded">RIFT ACTIVE</span>
                     </div>
-                    <div class="text-[10px] text-gray-400">CURRENT SECTOR: <span id="currentSectorName" class="text-white">UNKNOWN</span></div>
+                    <div class="text-[10px] text-gray-400">SECTOR: <span id="sectorName" class="text-white">UNKNOWN</span></div>
                 </div>
             </div>
 
-            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-72 bg-black/95 z-50 border-l-2 border-red-600 flex flex-col transition-transform translate-x-full md:translate-x-0">
-                <div class="bg-red-900 text-white p-3 font-bold text-center text-sm">RIFT MONITOR</div>
+            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-64 bg-black/95 border-l-2 border-red-600 flex flex-col translate-x-full md:translate-x-0 transition-transform">
                 <div class="p-4 border-b border-red-900">
-                    <input type="text" id="newTeamName" placeholder="Subject Name" class="w-full p-2 text-xs bg-gray-900 border border-red-900 rounded mb-2 text-white">
-                    <button onclick="generateTeam()" class="w-full bg-red-600 text-white p-2 text-xs font-bold rounded">INDUCT SUBJECT</button>
+                    <input type="text" id="newTeamName" placeholder="Subject Name" class="w-full p-2 text-xs bg-gray-900 border border-red-900 text-white mb-2">
+                    <button onclick="generateTeam()" class="w-full bg-red-600 text-white py-2 text-[10px] font-bold">INDUCT</button>
                 </div>
-                <div id="teamsList" class="flex-grow overflow-y-auto p-2 space-y-2"></div>
+                <div id="teamsList" class="flex-grow overflow-y-auto p-2"></div>
             </div>
         </div>
     </main>
-
-    <div id="customModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4">
-        <div class="vintage-card w-full max-w-sm p-6 text-center">
-            <h3 id="modalTitle" class="text-lg font-bold mb-2 text-red-600 uppercase">Alert</h3>
-            <p id="modalMessage" class="mb-6 text-sm text-gray-300"></p>
-            <button onclick="closeModal()" class="btn-stranger px-6 py-2 rounded text-xs">DISMISS</button>
-        </div>
-    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -160,14 +113,6 @@
             appId: "1:692699808449:web:120c8941a940d071f24a40"
         };
 
-        const STORY_LOCS = {
-            "GJCEI": { name: "Hawkins Lab", coords: [31.6355, 74.8235], logic: "wrong" },
-            "CHEMISTRY": { name: "Experiment Wing", coords: [31.6382, 74.8251], logic: "wrong" },
-            "PHYSICS": { name: "Gate / Portal", coords: [31.6395, 74.8240], logic: "correct" },
-            "LIFE_SCIENCE": { name: "Creel House", coords: [31.6405, 74.8210], logic: "correct" },
-            "UIT": { name: "Exit Gate", coords: [31.6432, 74.8215], logic: "correct" }
-        };
-
         const COLLECTION_TEAMS = "artifacts/gndu-hunt-v1/public/data/gndu_teams";
         let db, currentUserId, currentRole = 'team', map, userMarker;
 
@@ -175,7 +120,6 @@
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             firebase.auth().signInAnonymously();
-
             if (localStorage.getItem('gndu_team_id')) {
                 currentUserId = localStorage.getItem('gndu_team_id');
                 showMainView();
@@ -184,114 +128,70 @@
 
         function showMainView() {
             document.getElementById('loginView').classList.add('hidden');
-            const mainView = document.getElementById('mainView');
-            mainView.classList.remove('hidden');
-            mainView.classList.add('flex');
+            document.getElementById('mainView').classList.remove('hidden');
             document.getElementById('logoutBtn').classList.remove('hidden');
-            
-            // FIX: Delay map init to ensure container has size
-            setTimeout(() => {
-                initMap();
-            }, 500);
+            setTimeout(initMap, 500);
         }
 
         function initMap() {
             if (map) return;
+            // attributionControl: false removes the scrambled letters
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([31.6370, 74.8220], 16);
             
-            map = L.map('map', { zoomControl: false }).setView([31.6370, 74.8220], 16);
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: 'CartoDB'
-            }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
             if (currentRole === 'team') {
                 setupTeamTracking();
-                listenToRealityShift();
+                listenToReality();
             } else {
-                setupAdminDashboard();
+                setupAdmin();
             }
-
-            // FIX: Force render
-            setTimeout(() => { map.invalidateSize(); }, 200);
+            setTimeout(() => map.invalidateSize(), 200);
         }
 
-        function listenToRealityShift() {
+        function listenToReality() {
             db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).onSnapshot(doc => {
                 const data = doc.data();
                 if (!data) return;
-                
                 const mapEl = document.getElementById('map');
-                const label = document.getElementById('dimensionLabel');
-
-                if (data.logicState === 'realized') {
-                    mapEl.className = "dimension-realized";
-                    label.innerText = "DIMENSION STABILIZED";
-                    label.classList.replace('text-red-500', 'text-green-500');
-                } else {
-                    mapEl.className = "dimension-wrong";
-                    label.innerText = "UPSIDE DOWN SIGNAL";
-                }
-
-                if (data.adminMessage) {
-                    showAlert("INCOMING TRANSMISSION", data.adminMessage);
-                    db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).update({ adminMessage: "" });
-                }
+                mapEl.className = data.logicState === 'realized' ? 'dimension-realized' : 'dimension-wrong';
             });
         }
 
         function setupTeamTracking() {
             document.getElementById('teamHud').classList.remove('hidden');
             document.getElementById('displayTeamName').innerText = localStorage.getItem('gndu_team_name');
-
             navigator.geolocation.watchPosition(pos => {
                 const { latitude, longitude } = pos.coords;
                 if (userMarker) userMarker.setLatLng([latitude, longitude]);
-                else userMarker = L.circleMarker([latitude, longitude], { color: '#8B0000', radius: 8, fillOpacity: 0.8 }).addTo(map);
-                
+                else userMarker = L.circleMarker([latitude, longitude], { color: 'red', radius: 8 }).addTo(map);
                 map.panTo([latitude, longitude]);
-
-                // Story Mapping Check
-                Object.entries(STORY_LOCS).forEach(([key, loc]) => {
-                    if (map.distance([latitude, longitude], loc.coords) < 50) {
-                        document.getElementById('currentSectorName').innerText = loc.name;
-                    }
-                });
-
-                db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).update({
-                    lat: latitude, lng: longitude,
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).update({ lat: latitude, lng: longitude });
             }, null, { enableHighAccuracy: true });
         }
 
-        function setupAdminDashboard() {
+        function setupAdmin() {
             document.getElementById('adminHud').classList.remove('hidden');
             db.collection(COLLECTION_TEAMS).onSnapshot(snap => {
                 const list = document.getElementById('teamsList');
                 list.innerHTML = '';
                 snap.forEach(doc => {
-                    const data = doc.data();
-                    const div = document.createElement('div');
-                    div.className = "p-3 border-b border-red-900 bg-gray-900/50 rounded";
-                    div.innerHTML = `
-                        <div class="text-[10px] font-bold text-red-500 uppercase">${data.name}</div>
-                        <div class="text-[9px] text-gray-400 mb-2">STATE: ${data.logicState || 'wrong'}</div>
-                        <div class="flex gap-1">
-                            <button onclick="updateLogic('${doc.id}', 'wrong')" class="bg-red-900 px-2 py-1 rounded text-[8px]">CORRUPT</button>
-                            <button onclick="updateLogic('${doc.id}', 'realized')" class="bg-green-900 px-2 py-1 rounded text-[8px]">REVEAL</button>
-                            <button onclick="sendMsg('${doc.id}')" class="bg-blue-900 px-2 py-1 rounded text-[8px]">MSG</button>
+                    const d = doc.data();
+                    const item = document.createElement('div');
+                    item.className = "p-2 border-b border-red-900 text-[10px]";
+                    item.innerHTML = `
+                        <div class="font-bold text-red-500">${d.name}</div>
+                        <div class="flex gap-2 mt-1">
+                            <button onclick="updateLogic('${doc.id}', 'wrong')" class="bg-red-900 px-1">CORRUPT</button>
+                            <button onclick="updateLogic('${doc.id}', 'realized')" class="bg-green-900 px-1">REVEAL</button>
                         </div>
                     `;
-                    list.appendChild(div);
+                    list.appendChild(item);
                 });
             });
         }
 
-        window.updateLogic = (id, state) => db.doc(`${COLLECTION_TEAMS}/${id}`).update({ logicState: state });
-        window.sendMsg = (id) => {
-            const m = prompt("Transmission text:");
-            if(m) db.doc(`${COLLECTION_TEAMS}/${id}`).update({ adminMessage: m });
-        };
+        window.updateLogic = (id, s) => db.doc(`${COLLECTION_TEAMS}/${id}`).update({ logicState: s });
 
         window.setRole = (r) => {
             currentRole = r;
@@ -304,15 +204,12 @@
             if (currentRole === 'team') {
                 const code = document.getElementById('accessCode').value.toUpperCase();
                 const snap = await db.collection(COLLECTION_TEAMS).where('code', '==', code).get();
-                if(!snap.empty) {
+                if (!snap.empty) {
                     const d = snap.docs[0];
                     localStorage.setItem('gndu_team_id', d.id);
                     localStorage.setItem('gndu_team_name', d.data().name);
                     currentUserId = d.id;
                     showMainView();
-                } else {
-                    document.getElementById('loginError').innerText = "RIFT SYNC FAILED";
-                    document.getElementById('loginError').classList.remove('hidden');
                 }
             } else if (document.getElementById('password').value === 'qwertyjohn') {
                 showMainView();
@@ -321,26 +218,10 @@
 
         async function generateTeam() {
             const name = document.getElementById('newTeamName').value;
-            if(!name) return;
             const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-            await db.collection(COLLECTION_TEAMS).add({
-                name, code, logicState: 'wrong', status: 'active',
-                lat: 0, lng: 0
-            });
-            alert(`Subject induction complete. Access Code: ${code}`);
+            await db.collection(COLLECTION_TEAMS).add({ name, code, logicState: 'wrong' });
+            alert("Code: " + code);
         }
-
-        function showAlert(t, m) {
-            document.getElementById('modalTitle').innerText = t;
-            document.getElementById('modalMessage').innerText = m;
-            document.getElementById('customModal').classList.remove('hidden');
-        }
-        function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
-
-        document.getElementById('logoutBtn').onclick = () => {
-            localStorage.clear();
-            window.location.reload();
-        };
 
         window.onload = initApp;
     </script>
