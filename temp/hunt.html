@@ -3,618 +3,711 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Upside Down Hunt</title>
+    <title>GNDU: The Upside Down</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Tailwind CSS (CDN for portability) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- MapLibre GL JS -->
-    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
-    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Configuration ---
-        const firebaseConfig = JSON.parse(new URLSearchParams(window.location.search).get('firebase_config') || '{}');
-        // Fallback for demo environment if config is missing (will rely on injected vars in production)
-        const injectedConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const finalConfig = injectedConfig || firebaseConfig;
-
-        const app = initializeApp(finalConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'stranger-things-demo';
-
-        // --- Game Constants & State ---
-        let currentUser = null;
-        let role = null; // 'ADMIN' or 'TEAM'
-        let teamId = null;
-        let map = null;
-        let userMarker = null;
-        let watchId = null;
-        let locations = {}; // Will be calculated relative to center
-        let gameActive = false;
-        
-        // Game Logic State
-        let isTrapped = true; // True = Upside Down logic (inverted map), False = Real world
-        const CENTER_OFFSET_METERS = {
-            'PHYSICS': { n: 0, e: 0, label: 'Portal / Physics Dept', type: 'portal' },
-            'LAB': { n: 300, e: 200, label: 'Hawkins Lab / GJCEI', type: 'danger' },
-            'CHEM': { n: 100, e: -100, label: 'Exp Wing / Chemistry', type: 'clue' },
-            'CREEL': { n: -200, e: 150, label: 'Creel House / Life Sci', type: 'danger' },
-            'HIGH': { n: 50, e: -300, label: 'Hawkins High / Library', type: 'clue' },
-            'BRENNER': { n: 400, e: 50, label: 'Brenner Office / Dean', type: 'boss' },
-            'MALL': { n: -100, e: -200, label: 'Starcourt / Lecture Complex', type: 'hub' },
-            'NATURE': { n: -500, e: 0, label: 'The Upside Down / Bot Garden', type: 'danger' },
-            'HAVEN': { n: 0, e: 400, label: 'Safe Haven / Gurudwara', type: 'save' },
-            'HIDEOUT': { n: -100, e: -400, label: 'Hideout / Kids Park', type: 'clue' },
-            'EXIT': { n: 600, e: 0, label: 'Exit Gate / UIT', type: 'exit' }
-        };
-
-        // DOM Elements
-        const loginScreen = document.getElementById('login-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const adminPanel = document.getElementById('admin-panel');
-        const statusMsg = document.getElementById('status-msg');
-        const compassNeedle = document.getElementById('compass-needle');
-        const overlay = document.getElementById('upside-down-overlay');
-
-        // --- Utils ---
-        function getOffsetCoord(lat, lng, northMeters, eastMeters) {
-            // Approx: 1 deg lat = 111111m, 1 deg lng = 111111 * cos(lat)
-            const r_earth = 6378137;
-            const dLat = (northMeters / r_earth) * (180 / Math.PI);
-            const dLng = (eastMeters / r_earth) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
-            return { lat: lat + dLat, lng: lng + dLng };
-        }
-
-        // --- Auth & Init ---
-        async function init() {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInAnonymously(auth); // Prefer anon for this simple game, token logic complex
-            } else {
-                await signInAnonymously(auth);
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    // Check if already registered
-                    // In a real app we'd check DB, here we rely on localStorage or session for role
-                }
-            });
-        }
-
-        window.handleLogin = async (selectedRole) => {
-            const code = document.getElementById('access-code').value.toUpperCase();
-            
-            if (selectedRole === 'ADMIN') {
-                if (code !== 'HOPPER') {
-                    alert('ACCESS DENIED. WRONG CODE.');
-                    return;
-                }
-                role = 'ADMIN';
-                teamId = 'admin';
-            } else {
-                if (!code) {
-                    alert('ENTER A TEAM NAME');
-                    return;
-                }
-                role = 'TEAM';
-                teamId = code; // Use code as team name
-            }
-
-            // Save session
-            localStorage.setItem('stranger_role', role);
-            localStorage.setItem('stranger_team', teamId);
-
-            loginScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            
-            if (role === 'ADMIN') {
-                adminPanel.classList.remove('hidden');
-                overlay.style.display = 'none'; // Admin sees reality
-            } else {
-                // Team starts in Upside Down
-                document.body.classList.add('upside-down-mode');
-            }
-
-            startGame();
-        };
-
-        // --- Core Game Functions ---
-        async function startGame() {
-            // 1. Get Game Config (Center Point)
-            const globalRef = doc(db, 'artifacts', appId, 'public', 'data', 'game_state', 'global');
-            
-            // Listen to Global State
-            onSnapshot(globalRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.data();
-                    if (data.center) {
-                        initializeLocations(data.center);
-                    }
-                    if (role === 'TEAM') {
-                        // Check if logic state changed for this specific team (stored in team doc, but global override possible)
-                        // For simplicity, let's look at a team specific doc
-                    }
-                } else if (role === 'ADMIN') {
-                    // If no center exists, Admin must set it
-                    navigator.geolocation.getCurrentPosition((pos) => {
-                        const center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                        setDoc(globalRef, { center: center, portal_open: false }, { merge: true });
-                    });
-                }
-            }, (error) => console.error("Snapshot error:", error));
-
-            // Listen to Team State (if Team)
-            if (role === 'TEAM') {
-                const teamRef = doc(db, 'artifacts', appId, 'public', 'data', 'teams', teamId);
-                onSnapshot(teamRef, (snap) => {
-                    if (snap.exists()) {
-                        const data = snap.data();
-                        isTrapped = (data.status === 'TRAPPED');
-                        updateRealityRender();
-                        if (data.message) {
-                            showFlashMessage(data.message);
-                        }
-                    } else {
-                        // Init team
-                        setDoc(teamRef, { 
-                            status: 'TRAPPED', 
-                            last_seen: serverTimestamp(),
-                            role: 'TEAM'
-                        });
-                    }
-                }, (e) => console.log(e));
-            }
-
-            // Listen to All Teams (if Admin)
-            if (role === 'ADMIN') {
-                const teamsRef = collection(db, 'artifacts', appId, 'public', 'data', 'teams');
-                onSnapshot(teamsRef, (snap) => {
-                    updateAdminMap(snap.docs.map(d => ({id: d.id, ...d.data()})));
-                }, (e) => console.log(e));
-            }
-
-            initMap();
-        }
-
-        function initializeLocations(center) {
-            locations = {};
-            Object.keys(CENTER_OFFSET_METERS).forEach(key => {
-                const off = CENTER_OFFSET_METERS[key];
-                locations[key] = {
-                    ...off,
-                    coords: getOffsetCoord(center.lat, center.lng, off.n, off.e)
-                };
-            });
-            
-            if (map) addLocationMarkers();
-        }
-
-        // --- Map Implementation ---
-        function initMap() {
-            const startPos = { lat: 30.3564, lng: 76.3647 }; // Fallback (Thapar) if no GPS yet
-
-            map = new maplibregl.Map({
-                container: 'map',
-                style: role === 'ADMIN' 
-                    ? 'https://demotiles.maplibre.org/style.json' // Standard for Admin
-                    : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', // Dark for Team
-                center: [startPos.lng, startPos.lat],
-                zoom: 17,
-                pitch: 60, // 3D Tilt
-                bearing: 0,
-                attributionControl: false
-            });
-
-            // Add 3D Buildings
-            map.on('load', () => {
-                map.addLayer({
-                    'id': '3d-buildings',
-                    'source': 'composite',
-                    'source-layer': 'building',
-                    'filter': ['==', 'extrude', 'true'],
-                    'type': 'fill-extrusion',
-                    'minzoom': 15,
-                    'paint': {
-                        'fill-extrusion-color': role === 'ADMIN' ? '#aaa' : '#5a0000', // Red buildings for Team
-                        'fill-extrusion-height': ['get', 'height'],
-                        'fill-extrusion-base': ['get', 'min_height'],
-                        'fill-extrusion-opacity': 0.8
-                    }
-                });
-                
-                startTracking();
-            });
-        }
-
-        function startTracking() {
-            if (!navigator.geolocation) return;
-
-            watchId = navigator.geolocation.watchPosition((pos) => {
-                const { latitude, longitude, heading } = pos.coords;
-                
-                // Update Firebase
-                if (currentUser && teamId) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'teams', teamId);
-                    updateDoc(docRef, {
-                        location: { lat: latitude, lng: longitude },
-                        heading: heading || 0,
-                        last_seen: serverTimestamp()
-                    }).catch(e => {
-                        // Silent fail or retry? If doc doesn't exist, created in snapshot listener
-                        setDoc(docRef, {
-                            location: { lat: latitude, lng: longitude },
-                            heading: heading || 0,
-                            last_seen: serverTimestamp(),
-                            status: 'TRAPPED'
-                        }, { merge: true });
-                    });
-                }
-
-                // Update Map View
-                updateUserPosition(latitude, longitude, heading);
-
-            }, (err) => console.error(err), {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 5000
-            });
-        }
-
-        let markers = {};
-
-        function updateAdminMap(teams) {
-            if (!map) return;
-            
-            teams.forEach(team => {
-                if (!team.location) return;
-                
-                if (!markers[team.id]) {
-                    const el = document.createElement('div');
-                    el.className = 'w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg pulse';
-                    el.innerHTML = `<span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs bg-black text-white px-1 rounded whitespace-nowrap">${team.id}</span>`;
-                    markers[team.id] = new maplibregl.Marker({ element: el })
-                        .setLngLat([team.location.lng, team.location.lat])
-                        .addTo(map);
-                } else {
-                    markers[team.id].setLngLat([team.location.lng, team.location.lat]);
-                }
-            });
-        }
-
-        function updateUserPosition(lat, lng, heading) {
-            if (!map) return;
-
-            // 1. Center Map
-            map.easeTo({
-                center: [lng, lat],
-                duration: 1000
-            });
-
-            // 2. Handle Rotation (The Mechanic)
-            if (role === 'TEAM') {
-                if (isTrapped) {
-                    // INVERTED REALITY: Map Bearing is South-Up (180).
-                    // User heading (device) needs to be reflected visually.
-                    map.rotateTo(180, { duration: 1000 });
-                    
-                    // Update Fake Compass UI
-                    // If map is South Up (180), and phone points North (0), MapLibre renders "North" at bottom.
-                    // We want user to think "Up" on screen is North.
-                    // So we force compass to point Up.
-                    compassNeedle.style.transform = `rotate(0deg)`; // Lie to the user
-                } else {
-                    // REALITY: Map Bearing follows phone heading or North Up
-                    // Let's do Standard GPS mode: Bearing follows Heading
-                    map.rotateTo(heading || 0, { duration: 1000 });
-                    compassNeedle.style.transform = `rotate(-${heading || 0}deg)`; // Real compass
-                }
-            } else {
-                // Admin
-                if (!userMarker) {
-                    const el = document.createElement('div');
-                    el.className = 'w-4 h-4 bg-green-500 rounded-full border-white border-2';
-                    userMarker = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map);
-                } else {
-                    userMarker.setLngLat([lng, lat]);
-                }
-            }
-
-            // Check distances for cues
-            checkProximity(lat, lng);
-        }
-
-        function checkProximity(lat, lng) {
-            // Simple distance check to locations
-            let nearest = null;
-            let minDist = Infinity;
-
-            Object.values(locations).forEach(loc => {
-                if (!loc.coords) return;
-                const d = getDistanceFromLatLonInKm(lat, lng, loc.coords.lat, loc.coords.lng) * 1000;
-                if (d < minDist) {
-                    minDist = d;
-                    nearest = loc;
-                }
-            });
-
-            if (nearest && minDist < 30) {
-                statusMsg.innerHTML = `<span class="text-red-500 animate-pulse">NEAR: ${nearest.label}</span>`;
-            } else {
-                statusMsg.innerText = role === 'TEAM' ? (isTrapped ? "SEARCHING SIGNAL..." : "CONNECTED TO DIMENSION X") : "MONITORING...";
-            }
-        }
-
-        function addLocationMarkers() {
-            // Remove old markers if any (simple implementation assumes static list)
-            Object.values(locations).forEach(loc => {
-                const el = document.createElement('div');
-                // Icon selection
-                let icon = '📍';
-                if (loc.type === 'portal') icon = '🌀';
-                if (loc.type === 'danger') icon = '🦇';
-                if (loc.type === 'exit') icon = '🚪';
-
-                el.innerHTML = `<div class="text-2xl drop-shadow-md filter grayscale hover:grayscale-0 transition-all cursor-pointer" onclick="alert('${loc.label}')">${icon}</div>`;
-                
-                new maplibregl.Marker({ element: el })
-                    .setLngLat([loc.coords.lng, loc.coords.lat])
-                    .addTo(map);
-            });
-        }
-
-        // --- View Updates ---
-        function updateRealityRender() {
-            if (role !== 'TEAM') return;
-
-            if (isTrapped) {
-                document.body.classList.add('upside-down-mode');
-                overlay.style.display = 'block';
-                map.setStyle('https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'); // Refresh dark
-                map.setPaintProperty('3d-buildings', 'fill-extrusion-color', '#5a0000');
-            } else {
-                document.body.classList.remove('upside-down-mode');
-                overlay.style.display = 'none';
-                // Switch to a lighter map or just normal colors
-                map.setPaintProperty('3d-buildings', 'fill-extrusion-color', '#444444');
-            }
-        }
-
-        function showFlashMessage(text) {
-            const el = document.createElement('div');
-            el.className = 'fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 pointer-events-none fade-in-out';
-            el.innerHTML = `<h1 class="text-4xl text-red-600 font-serif font-bold text-center tracking-widest uppercase glow-text">${text}</h1>`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 4000);
-        }
-
-        // --- Admin Actions ---
-        window.toggleTeamState = async () => {
-            const targetTeam = prompt("Enter Team Name to Toggle Reality:");
-            if (!targetTeam) return;
-            
-            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'teams', targetTeam);
-            const snap = await getDoc(ref);
-            if (snap.exists()) {
-                const currentStatus = snap.data().status;
-                await updateDoc(ref, { 
-                    status: currentStatus === 'TRAPPED' ? 'REALIZED' : 'TRAPPED',
-                    message: currentStatus === 'TRAPPED' ? 'THE MIND FLAYER RETREATS...' : 'WELCOME TO THE UPSIDE DOWN'
-                });
-            }
-        };
-
-        window.sendMessage = async () => {
-            const targetTeam = prompt("Enter Team Name (or 'ALL'):");
-            const msg = prompt("Enter cryptic message:");
-            if (!targetTeam || !msg) return;
-
-            if (targetTeam === 'ALL') {
-                // Not efficient for thousands, but fine for campus game
-                // skipping for brevity in this file
-            } else {
-                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'teams', targetTeam);
-                await updateDoc(ref, { message: msg });
-            }
-        };
-
-        // --- Math Utils ---
-        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-            var R = 6371; // Radius of the earth in km
-            var dLat = deg2rad(lat2-lat1);  
-            var dLon = deg2rad(lon2-lon1); 
-            var a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-            var d = R * c; 
-            return d;
-        }
-
-        function deg2rad(deg) {
-            return deg * (Math.PI/180)
-        }
-
-        // Initialize
-        init();
-
-    </script>
+    <!-- Firebase SDKs (Updated to stable v10) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Benguiat+ITC&family=Roboto+Mono:wght@400;700&display=swap');
-
+        /* Custom "Stranger Things" Aesthetics */
         :root {
-            --upside-down-red: #ff1100;
+            --stranger-red: #E71D36;
+            --upside-down-blue: #0A1128;
+            --neon-glow: 0 0 10px #E71D36, 0 0 20px #E71D36;
         }
 
         body {
-            font-family: 'Roboto Mono', monospace;
             background-color: #000;
-            color: #ccc;
-            overflow: hidden; /* Prevent pull-to-refresh */
+            font-family: 'Roboto Mono', monospace;
+            overflow: hidden; /* Prevent pull-to-refresh on mobile */
         }
 
-        .font-stranger {
-            font-family: 'Benguiat ITC', serif;
-        }
+        .font-creepster { font-family: 'Creepster', display; }
 
-        /* The Upside Down Effect */
-        .upside-down-mode #map {
-            filter: grayscale(100%) sepia(100%) hue-rotate(320deg) saturate(300%) contrast(1.2);
-        }
-
-        .ash-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Snow_falling_at_night.gif/800px-Snow_falling_at_night.gif'); 
-            /* Fallback or cheap particle effect */
-            background-size: cover;
-            opacity: 0.15;
-            pointer-events: none;
-            mix-blend-mode: screen;
-            z-index: 20;
-            display: none;
-        }
-        
-        .vignette {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
-            pointer-events: none;
-            z-index: 19;
-        }
-
-        .glow-text {
-            text-shadow: 0 0 10px var(--upside-down-red), 0 0 20px var(--upside-down-red);
-        }
-
-        /* Custom Map Markers */
-        .marker-team {
-            background-color: var(--upside-down-red);
-            width: 15px; height: 15px;
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--upside-down-red);
-        }
-
-        .pulse {
-            animation: pulse-animation 2s infinite;
-        }
-        @keyframes pulse-animation {
-            0% { box-shadow: 0 0 0 0px rgba(255, 17, 0, 0.7); }
-            100% { box-shadow: 0 0 0 10px rgba(255, 17, 0, 0); }
-        }
-
-        .compass-container {
+        /* Map Glitch Effect Overlay */
+        .glitch-overlay {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: rgba(0,0,0,0.7);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 400; /* Above map tiles, below controls */
+        }
+
+        /* Particles */
+        .ash-particle {
+            position: absolute;
+            background: rgba(200, 200, 200, 0.3);
             border-radius: 50%;
-            border: 2px solid #555;
-            z-index: 30;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 401;
+            animation: float 10s linear infinite;
         }
-        .compass-needle {
-            width: 4px;
-            height: 40px;
-            background: linear-gradient(to top, white 50%, red 50%);
-            transition: transform 0.5s ease-out;
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
         }
-        
-        .fade-in-out {
-            animation: fadeInOut 4s forwards;
+
+        /* Leaflet Customizations */
+        .leaflet-container { background: #1a1a1a; }
+        .custom-marker-icon {
+            filter: drop-shadow(0 0 5px rgba(231, 29, 54, 0.8));
         }
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { opacity: 0; }
+
+        /* Admin / Realization Toggle Transition */
+        .reality-shift {
+            transition: filter 2s ease;
+        }
+        .reality-normal { filter: invert(0); }
+        .reality-upsidedown { filter: sepia(1) hue-rotate(180deg) saturate(2); }
+
+        /* CRT Scanline effect for UI */
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 9999;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
         }
     </style>
 </head>
-<body>
+<body class="text-gray-200 h-screen w-screen relative">
 
-    <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
-        <h1 class="text-5xl font-stranger text-red-600 mb-8 glow-text text-center px-4">HAWKINS LAB<br>NETWORK</h1>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="absolute inset-0 bg-black z-[1000] flex flex-col items-center justify-center p-6 text-center">
+        <h1 class="text-5xl text-red-600 font-creepster mb-2" style="text-shadow: var(--neon-glow);">STRANGER<br>CAMPUS</h1>
+        <p class="text-xs text-gray-500 mb-8 tracking-widest uppercase">GNDU // Hawkins Lab Branch</p>
         
-        <div class="w-full max-w-xs space-y-4 px-4">
-            <input id="access-code" type="text" placeholder="ENTER ACCESS CODE" 
-                   class="w-full bg-gray-900 border-2 border-red-800 text-white p-3 text-center uppercase tracking-widest focus:outline-none focus:border-red-500 rounded">
+        <div class="w-full max-w-sm space-y-4">
+            <input type="text" id="team-name-input" placeholder="ENTER TEAM CODE" 
+                class="w-full bg-gray-900 border-2 border-red-900 text-red-500 text-center p-3 rounded font-bold uppercase focus:outline-none focus:border-red-500 transition">
+            <button id="start-btn" class="w-full bg-red-900 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition uppercase tracking-widest">
+                Enter The Void
+            </button>
+        </div>
+        <p class="mt-8 text-[10px] text-gray-600">WARNING: GEOLOCATION REQUIRED.<br>THE MAP IS NOT WHAT IT SEEMS.</p>
+    </div>
+
+    <!-- MAIN GAME UI -->
+    <div id="game-ui" class="hidden h-full w-full flex flex-col">
+        <!-- Header / HUD -->
+        <div class="bg-black/90 p-2 flex justify-between items-center border-b border-red-900 z-50">
+            <div>
+                <h2 class="text-red-600 font-creepster text-xl">UPSIDE DOWN</h2>
+                <div id="connection-status" class="text-[10px] text-green-500 animate-pulse">● SIGNAL: STABLE</div>
+            </div>
+            <div class="text-right">
+                <div id="team-display" class="font-bold text-sm text-gray-300">TEAM</div>
+                <div id="score-display" class="text-xs text-red-400">GATES: 0/7</div>
+            </div>
+        </div>
+
+        <!-- The Map -->
+        <div id="map" class="flex-grow z-0 reality-upsidedown relative"></div>
+        <div class="glitch-overlay"></div>
+        <div class="scanline"></div>
+
+        <!-- Notification / Message Area -->
+        <div id="message-area" class="absolute top-20 left-4 right-4 z-[500] pointer-events-none">
+            <!-- Messages injected here -->
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="bg-black/90 p-3 border-t border-red-900 z-50">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] uppercase text-gray-500">Proximity Sensor</span>
+                <span id="nearest-target-dist" class="text-lg font-bold font-mono text-red-500">-- M</span>
+            </div>
+            <div class="h-2 w-full bg-gray-900 rounded overflow-hidden">
+                <div id="signal-strength" class="h-full bg-red-600 w-0 transition-all duration-500"></div>
+            </div>
             
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="handleLogin('TEAM')" 
-                        class="bg-red-900 hover:bg-red-700 text-white py-3 rounded font-bold tracking-wider transition">
-                    JOIN HUNT
-                </button>
-                <button onclick="handleLogin('ADMIN')" 
-                        class="bg-gray-800 hover:bg-gray-700 text-gray-400 py-3 rounded font-bold tracking-wider transition border border-gray-600">
-                    ADMIN
-                </button>
+            <!-- Dev / Simulation Controls (Hidden by default, toggle with corner tap) -->
+            <div id="sim-controls" class="hidden mt-2 pt-2 border-t border-gray-800 grid grid-cols-3 gap-2">
+                <button onclick="simMove('N')" class="bg-gray-800 p-1 text-xs">▲ N</button>
+                <button onclick="toggleAdmin()" class="bg-blue-900 p-1 text-xs">ADMIN</button>
+                <button onclick="simMove('S')" class="bg-gray-800 p-1 text-xs">▼ S</button>
+                <button onclick="simMove('W')" class="bg-gray-800 p-1 text-xs">◀ W</button>
+                <button onclick="forceUpdate()" class="bg-green-900 p-1 text-xs">SYNC</button>
+                <button onclick="simMove('E')" class="bg-gray-800 p-1 text-xs">▶ E</button>
             </div>
+            <div onclick="tapAdmin()" class="h-4 w-4 absolute bottom-0 right-0 opacity-0"></div>
         </div>
-        <p class="mt-8 text-xs text-gray-600 font-mono">WARNING: UNAUTHORIZED ACCESS IS PROHIBITED</p>
     </div>
 
-    <!-- Game Screen -->
-    <div id="game-screen" class="fixed inset-0 hidden">
+    <!-- ADMIN DASHBOARD (Overlay) -->
+    <div id="admin-panel" class="hidden fixed inset-0 bg-gray-900 z-[2000] overflow-y-auto p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-blue-400">DIMENSION X (ADMIN)</h2>
+            <button onclick="toggleAdmin()" class="text-red-500 border border-red-500 px-3 py-1 rounded">CLOSE</button>
+        </div>
         
-        <!-- Map Container -->
-        <div id="map" class="w-full h-full bg-black"></div>
-
-        <!-- Atmospheric Overlays -->
-        <div id="upside-down-overlay" class="ash-overlay"></div>
-        <div class="vignette"></div>
-
-        <!-- UI HUD -->
-        <div class="absolute top-0 left-0 w-full p-4 z-30 pointer-events-none flex justify-between items-start">
-            <div class="bg-black bg-opacity-70 p-2 rounded border-l-2 border-red-600">
-                <h2 class="text-xs text-gray-400 uppercase tracking-widest">Signal Status</h2>
-                <div id="status-msg" class="text-sm font-bold text-red-500 font-mono mt-1">CONNECTING...</div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-black p-3 rounded border border-blue-900">
+                <h3 class="text-xs text-gray-500 uppercase">View Mode</h3>
+                <div class="flex gap-2 mt-2">
+                    <button onclick="setAdminMode('real')" class="flex-1 bg-blue-700 text-xs py-2 rounded">REALITY</button>
+                    <button onclick="setAdminMode('scrambled')" class="flex-1 bg-red-900 text-xs py-2 rounded">UPSIDE DOWN</button>
+                </div>
+            </div>
+            <div class="bg-black p-3 rounded border border-blue-900">
+                <h3 class="text-xs text-gray-500 uppercase">Global Actions</h3>
+                <button onclick="resetAllTeams()" class="w-full mt-2 bg-gray-800 text-xs py-2 rounded border border-red-900 text-red-500">RESET ALL</button>
             </div>
         </div>
 
-        <!-- Deceptive Compass -->
-        <div class="compass-container">
-            <div id="compass-needle" class="compass-needle"></div>
-            <div class="absolute -top-1 text-xs font-bold text-gray-400">N</div>
+        <h3 class="text-sm font-bold text-gray-300 mb-2">ACTIVE TEAMS</h3>
+        <div id="admin-team-list" class="space-y-2">
+            <!-- Team items populated here -->
         </div>
-
-        <!-- Footer Objectives -->
-        <div class="absolute bottom-6 left-4 right-4 z-30 pointer-events-auto">
-            <div class="bg-black bg-opacity-80 p-4 border-t-4 border-red-800 rounded-b shadow-2xl backdrop-blur-sm">
-                <h3 class="text-red-600 font-stranger text-lg mb-1">Current Objective</h3>
-                <p class="text-gray-300 text-xs leading-relaxed">
-                    Readings are erratic. The compass cannot be trusted in the Rift. 
-                    <span class="text-white font-bold">Find the Portal (Physics Dept).</span> 
-                    Watch your bearings—up is not always North.
-                </p>
-            </div>
-        </div>
-
-        <!-- Admin Controls (Only visible to Admin) -->
-        <div id="admin-panel" class="absolute bottom-32 right-4 z-40 hidden flex flex-col space-y-2 pointer-events-auto">
-            <button onclick="toggleTeamState()" class="bg-blue-900 text-white p-3 rounded-full shadow-lg border border-blue-400 hover:bg-blue-700">
-                🧠 Toggle Logic
-            </button>
-            <button onclick="sendMessage()" class="bg-green-900 text-white p-3 rounded-full shadow-lg border border-green-400 hover:bg-green-700">
-                💬 Message
-            </button>
-        </div>
-
     </div>
 
+    <!-- AUDIO ELEMENTS -->
+    <!-- Simple synth drone generated via Web Audio API in JS, no external files -->
+
+    <script>
+        /*******************************************************
+         * CONFIGURATION & CONSTANTS
+         *******************************************************/
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+            authDomain: "iist-fd6e8.firebaseapp.com",
+            projectId: "iist-fd6e8",
+            storageBucket: "iist-fd6e8.firebasestorage.app",
+            messagingSenderId: "692699808449",
+            appId: "1:692699808449:web:120c8941a940d071f24a40"
+        };
+
+        // GNDU Boundary Coords provided
+        const GNDU_BOUNDS = [
+            [31.6295, 74.8225], [31.6315, 74.8300], [31.6390, 74.8320], 
+            [31.6445, 74.8225], [31.6440, 74.8180], [31.6315, 74.8190]
+        ];
+
+        // Calculated Center of GNDU for pivoting the world
+        // Approx center based on bounds
+        const CAMPUS_CENTER = { lat: 31.6370, lng: 74.8250 }; 
+
+        // STORY MAPPING
+        // These are the REAL coordinates. The app will scramble them for display.
+        // Narrative: "The Map is Lying". 
+        // Player sees "Hawkins Lab" at North. It is actually at South.
+        const LOCATIONS = [
+            { id: 'start', name: 'Start Point', lat: 31.6350, lng: 74.8200, radius: 30, zone: 'neutral' }, // Generic start
+            { id: 'lab', name: 'Hawkins Lab', story: 'GJCEI', lat: 31.6340, lng: 74.8230, radius: 40, zone: 'science' }, 
+            { id: 'portal', name: 'The Gate', story: 'Physics Dept', lat: 31.6360, lng: 74.8260, radius: 30, zone: 'science' },
+            { id: 'creel', name: 'Creel House', story: 'Life Science', lat: 31.6380, lng: 74.8280, radius: 30, zone: 'bio' },
+            { id: 'high', name: 'Hawkins High', story: 'Library', lat: 31.6370, lng: 74.8250, radius: 50, zone: 'central' }, // Center
+            { id: 'brenner', name: 'Dr. Brenner Office', story: 'Dean Office', lat: 31.6330, lng: 74.8220, radius: 25, zone: 'admin' },
+            { id: 'mall', name: 'Starcourt Mall', story: 'Lecture Theatre', lat: 31.6400, lng: 74.8240, radius: 40, zone: 'fun' },
+            { id: 'garden', name: 'The Upside Down', story: 'Botanical Garden', lat: 31.6420, lng: 74.8290, radius: 60, zone: 'nature' },
+            { id: 'haven', name: 'Safe Haven', story: 'Gurudwara', lat: 31.6310, lng: 74.8290, radius: 40, zone: 'sacred' },
+            { id: 'park', name: 'Kids Hideout', story: 'Children Park', lat: 31.6320, lng: 74.8210, radius: 30, zone: 'fun' },
+            { id: 'exit', name: 'Exit Gate', story: 'UIT', lat: 31.6440, lng: 74.8200, radius: 50, zone: 'exit' }
+        ];
+
+        /*******************************************************
+         * INITIALIZATION
+         *******************************************************/
+        // Ensure firebase exists before init
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(FIREBASE_CONFIG);
+        } else {
+            console.error("Firebase SDK not loaded.");
+        }
+        
+        const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+        const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
+
+        let map, playerMarker;
+        let locationLayer = L.layerGroup(); // Holds the target markers
+        let userLayer = L.layerGroup(); // Admin only: holds other users
+        let currentUser = null;
+        let watchId = null;
+        let gameState = {
+            logicState: 'wrong', // 'wrong' (Upside Down) or 'realized' (Dimension X)
+            foundIds: [],
+            currentPos: null
+        };
+
+        // DOM Elements
+        const ui = {
+            login: document.getElementById('login-screen'),
+            game: document.getElementById('game-ui'),
+            input: document.getElementById('team-name-input'),
+            btn: document.getElementById('start-btn'),
+            dist: document.getElementById('nearest-target-dist'),
+            signal: document.getElementById('signal-strength'),
+            teamName: document.getElementById('team-display'),
+            score: document.getElementById('score-display'),
+            msgs: document.getElementById('message-area'),
+            sim: document.getElementById('sim-controls'),
+            admin: document.getElementById('admin-panel'),
+            adminList: document.getElementById('admin-team-list'),
+            mapContainer: document.getElementById('map')
+        };
+
+        /*******************************************************
+         * MATH & SCRAMBLING LOGIC (CORE MECHANIC)
+         *******************************************************/
+
+        // Standard Haversine Distance
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // metres
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // The "Upside Down" Transform
+        // Rotates a coordinate 180 degrees around CAMPUS_CENTER
+        function scrambleCoordinate(lat, lng) {
+            // NewLat = Center + (Center - Old)
+            const newLat = CAMPUS_CENTER.lat + (CAMPUS_CENTER.lat - lat);
+            const newLng = CAMPUS_CENTER.lng + (CAMPUS_CENTER.lng - lng);
+            return { lat: newLat, lng: newLng };
+        }
+
+        /*******************************************************
+         * GAME LOGIC
+         *******************************************************/
+
+        // Setup Map
+        function initMap() {
+            // Dark map style
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([CAMPUS_CENTER.lat, CAMPUS_CENTER.lng], 16);
+
+            // Using CartoDB Dark Matter for that spooky vibe
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd'
+            }).addTo(map);
+
+            locationLayer.addTo(map);
+            userLayer.addTo(map);
+
+            // Draw Bounds (Admin/Debug mostly, helps visualize the play area)
+            const polygon = L.polygon(GNDU_BOUNDS, {
+                color: '#333',
+                weight: 1,
+                fill: false,
+                dashArray: '5, 10'
+            }).addTo(map);
+        }
+
+        // Render Targets based on Logic State
+        function renderTargets() {
+            locationLayer.clearLayers();
+
+            LOCATIONS.forEach(loc => {
+                if (gameState.foundIds.includes(loc.id)) return; // Don't show found ones? Or show as inactive.
+
+                let displayLat, displayLng;
+
+                // PSYCHOLOGICAL TRICK: 
+                // If logicState is 'wrong', we show the SCRAMBLED location.
+                // The player walks to this location on the map.
+                // But the checkCheckpoint() function checks the REAL location.
+                if (gameState.logicState === 'wrong') {
+                    const scrambled = scrambleCoordinate(loc.lat, loc.lng);
+                    displayLat = scrambled.lat;
+                    displayLng = scrambled.lng;
+                } else {
+                    // Once realized, they see the truth
+                    displayLat = loc.lat;
+                    displayLng = loc.lng;
+                }
+
+                // Marker Styles
+                const isExit = loc.id === 'exit';
+                const color = isExit ? '#fff' : '#E71D36';
+                
+                const markerHtml = `
+                    <div style="
+                        background-color: ${color};
+                        width: 12px; height: 12px;
+                        border-radius: 50%;
+                        box-shadow: 0 0 10px ${color}, 0 0 20px ${color};
+                        animation: pulse 2s infinite;
+                    "></div>
+                `;
+
+                const icon = L.divIcon({
+                    className: 'custom-pin',
+                    html: markerHtml,
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                });
+
+                L.marker([displayLat, displayLng], { icon: icon })
+                    .bindPopup(`<b class="font-creepster text-lg text-black">${loc.name}</b><br><span class="text-xs text-gray-800">${loc.story}</span>`)
+                    .addTo(locationLayer);
+            });
+        }
+
+        // Check if player is near a REAL location
+        function checkCheckpoints(lat, lng) {
+            let nearestDist = 99999;
+            let nearestName = "";
+
+            LOCATIONS.forEach(loc => {
+                if (gameState.foundIds.includes(loc.id)) return;
+
+                // We ALWAYS check against REAL location, regardless of visual state
+                const dist = getDistance(lat, lng, loc.lat, loc.lng);
+                
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestName = loc.name;
+                }
+
+                // Hit logic
+                if (dist <= loc.radius) {
+                    handleCheckpointHit(loc);
+                }
+            });
+
+            // UI Updates based on distance
+            updateProximityUI(nearestDist);
+        }
+
+        function handleCheckpointHit(loc) {
+            // Vibrate phone
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+            // If player is in "Wrong" state, hitting a checkpoint is confusing because
+            // on their map, the checkpoint is on the other side of campus.
+            // This is the "Ghost" mechanic.
+            
+            showToast(`ENTERED: ${loc.name}`, 'success');
+            
+            // Add to found list
+            gameState.foundIds.push(loc.id);
+            ui.score.innerText = `GATES: ${gameState.foundIds.length}/${LOCATIONS.length}`;
+
+            // Save to DB
+            if (currentUser) {
+                db.collection('teams').doc(currentUser.uid).update({
+                    foundIds: gameState.foundIds,
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            renderTargets(); // Remove the found one
+        }
+
+        function updateProximityUI(dist) {
+            ui.dist.innerText = Math.round(dist) + " M";
+            
+            // Signal strength bar (closer = wider)
+            // Max signal at 10m, zero at 200m
+            let percent = Math.max(0, Math.min(100, (200 - dist) / 2));
+            ui.signal.style.width = percent + "%";
+            
+            // visual styling based on distance
+            if (dist < 50) {
+                ui.signal.className = "h-full bg-green-500 w-0 transition-all duration-200";
+            } else {
+                ui.signal.className = "h-full bg-red-600 w-0 transition-all duration-500";
+            }
+        }
+
+        // Show on-screen notifications
+        function showToast(text, type = 'normal') {
+            const div = document.createElement('div');
+            div.className = `mb-2 p-3 rounded shadow-lg text-sm font-bold backdrop-blur-sm animate-bounce
+                ${type === 'success' ? 'bg-green-900/80 text-green-300 border-l-4 border-green-500' : 'bg-red-900/80 text-white border-l-4 border-red-500'}`;
+            div.innerText = text;
+            ui.msgs.appendChild(div);
+            
+            setTimeout(() => {
+                div.remove();
+            }, 4000);
+        }
+
+        /*******************************************************
+         * PLAYER LOCATION HANDLING
+         *******************************************************/
+
+        function updatePlayerPosition(lat, lng) {
+            gameState.currentPos = { lat, lng };
+
+            // Update Map Marker
+            if (!playerMarker) {
+                const playerHtml = `<div style="width:16px; height:16px; background:#4488ff; border:2px solid white; border-radius:50%; box-shadow:0 0 10px cyan;"></div>`;
+                const icon = L.divIcon({ className: '', html: playerHtml, iconSize:[16,16], iconAnchor:[8,8] });
+                playerMarker = L.marker([lat, lng], { icon: icon, zIndexOffset: 1000 }).addTo(map);
+                map.panTo([lat, lng]);
+            } else {
+                playerMarker.setLatLng([lat, lng]);
+            }
+
+            // Core Logic
+            checkCheckpoints(lat, lng);
+
+            // Sync to Firestore
+            if (currentUser) {
+                db.collection('teams').doc(currentUser.uid).update({
+                    lat: lat,
+                    lng: lng,
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        function startGeolocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation not supported");
+                return;
+            }
+
+            watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    updatePlayerPosition(pos.coords.latitude, pos.coords.longitude);
+                },
+                (err) => {
+                    console.error("Geolocation Error:", err.code, err.message);
+                    showToast("GPS SIGNAL LOST: " + err.message, "error");
+                },
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+            );
+        }
+
+        /*******************************************************
+         * SIMULATION / DEBUG (Because we aren't at GNDU)
+         *******************************************************/
+        // Allows testing the logic by "walking" a virtual joystick
+        let simLat = CAMPUS_CENTER.lat;
+        let simLng = CAMPUS_CENTER.lng;
+        
+        // Tap count to unlock admin
+        let tapCount = 0;
+        function tapAdmin() {
+            tapCount++;
+            if (tapCount === 5) {
+                ui.sim.classList.remove('hidden');
+                showToast("DEV TOOLS UNLOCKED");
+            }
+        }
+
+        function simMove(dir) {
+            const step = 0.0005; // approx 50 meters
+            if (dir === 'N') simLat += step;
+            if (dir === 'S') simLat -= step;
+            if (dir === 'E') simLng += step;
+            if (dir === 'W') simLng -= step;
+            
+            // Stop real GPS if simulating
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            
+            updatePlayerPosition(simLat, simLng);
+        }
+
+        function forceUpdate() {
+            renderTargets();
+        }
+
+        /*******************************************************
+         * AUTH & STARTUP
+         *******************************************************/
+
+        ui.btn.addEventListener('click', async () => {
+            const name = ui.input.value.trim();
+            if (!name) return;
+
+            ui.btn.innerText = "OPENING PORTAL...";
+            ui.btn.disabled = true;
+
+            try {
+                if (!auth) throw new Error("Firebase Auth not initialized");
+
+                // Anonymous Auth
+                const cred = await auth.signInAnonymously();
+                currentUser = cred.user;
+
+                // Create/Update Team Doc
+                await db.collection('teams').doc(currentUser.uid).set({
+                    name: name,
+                    lat: CAMPUS_CENTER.lat,
+                    lng: CAMPUS_CENTER.lng,
+                    status: 'active',
+                    logicState: 'wrong', // Start in the Upside Down
+                    foundIds: [],
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                // Start Game
+                ui.login.classList.add('hidden');
+                ui.game.classList.remove('hidden');
+                ui.teamName.innerText = name;
+                
+                // Initialize Map
+                initMap();
+                renderTargets(); // Will render Scrambled initially
+                startGeolocation();
+                createParticles();
+                
+                // Listen to my own state changes (Admin might flip my logicState)
+                db.collection('teams').doc(currentUser.uid).onSnapshot(snap => {
+                    const data = snap.data();
+                    if (data && data.logicState !== gameState.logicState) {
+                        gameState.logicState = data.logicState;
+                        handleRealityShift(data.logicState);
+                    }
+                });
+
+            } catch (e) {
+                console.error("Auth/Startup Error:", e);
+                alert("Connection Failed: " + (e.message || JSON.stringify(e)));
+                ui.btn.innerText = "TRY AGAIN";
+                ui.btn.disabled = false;
+            }
+        });
+
+        function handleRealityShift(newState) {
+            if (newState === 'realized') {
+                showToast("REALITY RESTORED", 'success');
+                ui.mapContainer.classList.remove('reality-upsidedown');
+                ui.mapContainer.classList.add('reality-normal');
+            } else {
+                showToast("ENTERING UPSIDE DOWN", 'error');
+                ui.mapContainer.classList.add('reality-upsidedown');
+                ui.mapContainer.classList.remove('reality-normal');
+            }
+            renderTargets();
+        }
+
+        function createParticles() {
+            for(let i=0; i<20; i++) {
+                let p = document.createElement('div');
+                p.className = 'ash-particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                p.style.width = (Math.random() * 5 + 2) + 'px';
+                p.style.height = p.style.width;
+                p.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                document.body.appendChild(p);
+            }
+        }
+
+        /*******************************************************
+         * ADMIN DASHBOARD
+         *******************************************************/
+        
+        function toggleAdmin() {
+            const current = ui.admin.classList.contains('hidden');
+            if (current) {
+                const pass = prompt("ADMIN PASSCODE:");
+                if (pass === "11") {
+                    ui.admin.classList.remove('hidden');
+                    startAdminWatch();
+                }
+            } else {
+                ui.admin.classList.add('hidden');
+                // stop watching to save data? optional.
+            }
+        }
+
+        let adminUnsub;
+        function startAdminWatch() {
+            if (adminUnsub) return; // already watching
+            
+            // Listen to ALL teams
+            adminUnsub = db.collection('teams').onSnapshot(snapshot => {
+                ui.adminList.innerHTML = '';
+                userLayer.clearLayers(); // Map view of users
+
+                snapshot.forEach(doc => {
+                    const t = doc.data();
+                    const id = doc.id;
+                    const isMe = currentUser && currentUser.uid === id;
+                    
+                    // Add to Admin List
+                    const row = document.createElement('div');
+                    row.className = `p-2 bg-gray-800 rounded border border-gray-700 flex justify-between items-center`;
+                    row.innerHTML = `
+                        <div>
+                            <div class="font-bold text-sm ${t.logicState === 'wrong' ? 'text-red-400' : 'text-blue-400'}">${t.name}</div>
+                            <div class="text-[10px] text-gray-400">${t.foundIds ? t.foundIds.length : 0} GATES | ${t.logicState.toUpperCase()}</div>
+                        </div>
+                        <button onclick="toggleTeamState('${id}', '${t.logicState}')" class="text-xs bg-gray-700 px-2 py-1 rounded">FLIP</button>
+                    `;
+                    ui.adminList.appendChild(row);
+
+                    // Add to Admin Map Layer (Real positions only)
+                    if (!isMe && t.lat) {
+                        L.circleMarker([t.lat, t.lng], {
+                            radius: 6,
+                            color: t.logicState === 'wrong' ? 'red' : 'blue',
+                            fillOpacity: 0.8
+                        }).addTo(userLayer).bindPopup(t.name);
+                    }
+                });
+            });
+        }
+
+        // Global function for onclick in admin panel
+        window.toggleTeamState = (id, current) => {
+            const next = current === 'wrong' ? 'realized' : 'wrong';
+            db.collection('teams').doc(id).update({ logicState: next });
+        };
+        
+        window.setAdminMode = (mode) => {
+            if (mode === 'real') {
+                ui.mapContainer.classList.remove('reality-upsidedown');
+            } else {
+                ui.mapContainer.classList.add('reality-upsidedown');
+            }
+        }
+
+        window.resetAllTeams = () => {
+            if(confirm("RESET ALL TEAMS?")) {
+                db.collection('teams').get().then(snap => {
+                    snap.forEach(doc => {
+                        doc.ref.update({ logicState: 'wrong', foundIds: [] });
+                    });
+                });
+            }
+        }
+
+    </script>
 </body>
 </html>
