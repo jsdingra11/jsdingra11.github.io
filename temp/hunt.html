@@ -6,32 +6,41 @@
     <title>GNDU: The Upside Down</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
             --stranger-red: #8B0000;
             --upside-down-blue: #0a192f;
-            --jumanji-wood: #5D4037;
-            --parchment: #F4E4BC;
         }
 
         body {
             font-family: 'Special Elite', cursive;
-            background-color: var(--upside-down-blue);
+            background-color: #000;
             color: #fff;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
-            transition: background-color 2s ease;
+            height: 100vh;
         }
 
-        /* The Core Trick: Map Scrambling */
+        /* FIX: Ensure map has explicit height and width */
         #map {
-            transition: transform 3s cubic-bezier(0.4, 0, 0.2, 1), filter 2s;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            bottom: 0;
             background: #000;
+            transition: transform 3s cubic-bezier(0.4, 0, 0.2, 1), filter 2s;
         }
 
+        /* Core Dual-Reality Logic */
         .dimension-wrong {
             transform: rotate(180deg) scaleX(-1);
             filter: invert(100%) hue-rotate(180deg) brightness(0.6) contrast(1.5);
@@ -42,100 +51,97 @@
             filter: sepia(0.5) contrast(1.1);
         }
 
-        /* UI Styling */
         .vintage-card {
-            background: rgba(20, 20, 20, 0.9);
+            background: rgba(10, 10, 10, 0.95);
             border: 2px solid var(--stranger-red);
-            color: white;
             border-radius: 8px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
         }
 
-        .btn-jumanji {
+        .btn-stranger {
             background: var(--stranger-red);
             color: white;
             font-family: 'Rye', serif;
-            box-shadow: 0 4px 0 #4a0000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
         }
 
-        /* GPS Dot - Must always be upright regardless of map rotation */
-        .custom-badge-icon {
-            transition: transform 0.5s;
+        .btn-stranger:hover {
+            background: #b30000;
+            box-shadow: 0 0 15px var(--stranger-red);
         }
 
-        @keyframes flicker {
-            0% { opacity: 1; } 5% { opacity: 0.2; } 10% { opacity: 1; }
-            15% { opacity: 0.8; } 20% { opacity: 1; } 100% { opacity: 1; }
-        }
-        .flicker-effect { animation: flicker 0.5s infinite; }
+        #app { height: 100%; position: relative; }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="flex flex-col">
 
-    <header class="bg-black text-[#8B0000] p-3 text-center border-b-2 border-red-900 shadow-lg z-20 flex justify-between items-center shrink-0">
+    <header class="bg-black text-red-600 p-3 text-center border-b-2 border-red-900 z-50 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2">
-            <i class="fas fa-biohazard text-2xl"></i>
+            <i class="fas fa-radiation-alt animate-pulse"></i>
             <div>
-                <h1 class="text-xl tracking-tighter text-left leading-tight font-bold">HAWKINS LAB: GNDU</h1>
-                <p id="dimensionLabel" class="text-[10px] text-red-500 font-sans tracking-[0.3em]">UPSIDE DOWN SIGNAL</p>
+                <h1 class="text-lg tracking-tighter font-bold uppercase">Hawkins Lab: GNDU</h1>
+                <p id="dimensionLabel" class="text-[9px] text-red-500 font-sans tracking-[0.2em]">ANALYZING RIFT...</p>
             </div>
         </div>
-        <button id="logoutBtn" class="hidden text-xs border border-red-500 px-2 py-1 rounded">ABANDON</button>
+        <button id="logoutBtn" class="hidden text-[10px] border border-red-600 px-2 py-1 rounded">ABANDON</button>
     </header>
 
-    <main id="app" class="flex-grow relative overflow-hidden flex flex-col">
+    <main id="app" class="flex-grow flex flex-col">
         
-        <div id="loginView" class="absolute inset-0 z-30 flex items-center justify-center p-4 bg-black">
-            <div class="vintage-card w-full max-w-md p-8 text-center space-y-6 border-red-600">
-                <h2 class="text-3xl font-bold text-red-600 uppercase font-serif">Enter Dimension</h2>
-                <div class="flex justify-center gap-4 my-4">
+        <div id="loginView" class="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black">
+            <div class="vintage-card w-full max-w-md p-8 text-center space-y-6">
+                <h2 class="text-3xl font-bold text-red-600 font-serif">SYSTEM ACCESS</h2>
+                
+                <div class="flex justify-center gap-4">
                     <button onclick="setRole('team')" id="roleTeam" class="flex-1 py-2 border-2 border-red-600 bg-red-600 text-white font-bold rounded">SUBJECT</button>
                     <button onclick="setRole('admin')" id="roleAdmin" class="flex-1 py-2 border-2 border-red-600 text-red-600 font-bold rounded">OBSERVER</button>
                 </div>
 
                 <form id="authForm" class="space-y-4">
                     <div id="adminFields" class="hidden">
-                        <input type="password" id="password" value="qwertyjohn" class="w-full bg-transparent border-b-2 border-red-600 p-2 outline-none text-center">
+                        <input type="password" id="password" value="qwertyjohn" class="w-full bg-gray-900 border-b-2 border-red-600 p-2 outline-none text-center text-white">
                     </div>
                     <div id="hunterFields">
-                        <input type="text" id="accessCode" placeholder="CODE" maxlength="5" class="w-full text-center text-4xl uppercase bg-transparent border-2 border-red-600 p-2 rounded text-red-500 font-mono">
+                        <input type="text" id="accessCode" placeholder="SYNC CODE" maxlength="5" class="w-full text-center text-3xl uppercase bg-transparent border-2 border-red-600 p-2 rounded text-red-500 font-mono">
                     </div>
-                    <button type="submit" class="btn-jumanji w-full py-3 text-lg rounded mt-4">SYNC FREQUENCY</button>
+                    <button type="submit" class="btn-stranger w-full py-3 rounded">AUTHORIZE</button>
                 </form>
                 <p id="loginError" class="text-red-500 font-bold text-sm hidden"></p>
             </div>
         </div>
 
-        <div id="mainView" class="hidden flex-col h-full relative">
-            <div id="map" class="flex-grow w-full z-0 dimension-wrong"></div>
+        <div id="mainView" class="hidden flex-grow relative overflow-hidden">
+            <div id="map"></div>
 
-            <div id="teamHud" class="hidden absolute bottom-0 left-0 right-0 z-10 p-4 pointer-events-none">
-                <div class="vintage-card p-4 flex flex-col gap-2 pointer-events-auto max-w-lg mx-auto w-full border-red-900">
+            <div id="teamHud" class="hidden absolute bottom-6 left-0 right-0 z-40 p-4 pointer-events-none">
+                <div class="vintage-card p-4 flex flex-col gap-2 pointer-events-auto max-w-lg mx-auto w-full">
                     <div class="flex justify-between items-center border-b border-red-900 pb-2">
                         <span id="displayTeamName" class="font-bold text-red-500">Scanning...</span>
-                        <div id="statusIndicator" class="px-3 py-1 bg-red-900 text-white text-xs rounded-full">DANGER</div>
+                        <div id="statusIndicator" class="px-3 py-1 bg-red-900 text-[10px] rounded-full">ACTIVE RIFT</div>
                     </div>
-                    <div id="locationLabel" class="text-[10px] text-gray-400 uppercase">Current Sector: <span id="currentSectorName" class="text-white">Unknown</span></div>
-                    <div id="outOfBoundsAlert" class="hidden bg-red-600 text-white p-2 text-center text-xs font-bold animate-pulse">VOID DETECTED: RETURN TO CAMPUS</div>
+                    <div class="text-[10px] text-gray-400">CURRENT SECTOR: <span id="currentSectorName" class="text-white">UNKNOWN</span></div>
                 </div>
             </div>
 
-            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-80 bg-black z-10 border-l-2 border-red-600 shadow-2xl flex flex-col transition-transform translate-x-full md:translate-x-0">
-                <div class="bg-red-900 text-white p-3 font-bold text-center">SIGNAL MONITOR</div>
+            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-72 bg-black/95 z-50 border-l-2 border-red-600 flex flex-col transition-transform translate-x-full md:translate-x-0">
+                <div class="bg-red-900 text-white p-3 font-bold text-center text-sm">RIFT MONITOR</div>
                 <div class="p-4 border-b border-red-900">
-                    <input type="text" id="newTeamName" placeholder="New Team Name" class="w-full p-2 text-sm bg-gray-900 border border-red-900 rounded mb-2">
-                    <button onclick="generateTeam()" class="w-full bg-red-600 text-white p-2 text-xs font-bold rounded">INITIATE SUBJECT</button>
+                    <input type="text" id="newTeamName" placeholder="Subject Name" class="w-full p-2 text-xs bg-gray-900 border border-red-900 rounded mb-2 text-white">
+                    <button onclick="generateTeam()" class="w-full bg-red-600 text-white p-2 text-xs font-bold rounded">INDUCT SUBJECT</button>
                 </div>
                 <div id="teamsList" class="flex-grow overflow-y-auto p-2 space-y-2"></div>
             </div>
         </div>
     </main>
 
-    <div id="customModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-        <div class="vintage-card w-full max-w-sm p-6 text-center border-red-600">
-            <h3 id="modalTitle" class="text-xl font-bold mb-2 text-red-600">ALERT</h3>
-            <p id="modalMessage" class="mb-6 text-sm">Communication Breakdown</p>
-            <button onclick="closeModal()" class="btn-jumanji px-6 py-2 rounded">ACKNOWLEDGE</button>
+    <div id="customModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4">
+        <div class="vintage-card w-full max-w-sm p-6 text-center">
+            <h3 id="modalTitle" class="text-lg font-bold mb-2 text-red-600 uppercase">Alert</h3>
+            <p id="modalMessage" class="mb-6 text-sm text-gray-300"></p>
+            <button onclick="closeModal()" class="btn-stranger px-6 py-2 rounded text-xs">DISMISS</button>
         </div>
     </div>
 
@@ -154,18 +160,16 @@
             appId: "1:692699808449:web:120c8941a940d071f24a40"
         };
 
-        const GNDU_BOUNDS = [[31.6295, 74.8225], [31.6315, 74.8300], [31.6390, 74.8320], [31.6445, 74.8225], [31.6440, 74.8180], [31.6315, 74.8190]];
-        
-        // Stranger Things Story Mapping
         const STORY_LOCS = {
             "GJCEI": { name: "Hawkins Lab", coords: [31.6355, 74.8235], logic: "wrong" },
             "CHEMISTRY": { name: "Experiment Wing", coords: [31.6382, 74.8251], logic: "wrong" },
-            "PHYSICS": { name: "The Portal", coords: [31.6395, 74.8240], logic: "correct" },
-            "UIT": { name: "Final Exit", coords: [31.6432, 74.8215], logic: "correct" }
+            "PHYSICS": { name: "Gate / Portal", coords: [31.6395, 74.8240], logic: "correct" },
+            "LIFE_SCIENCE": { name: "Creel House", coords: [31.6405, 74.8210], logic: "correct" },
+            "UIT": { name: "Exit Gate", coords: [31.6432, 74.8215], logic: "correct" }
         };
 
         const COLLECTION_TEAMS = "artifacts/gndu-hunt-v1/public/data/gndu_teams";
-        let db, currentUserId, currentRole = 'team', map, userMarker, watchId;
+        let db, currentUserId, currentRole = 'team', map, userMarker;
 
         function initApp() {
             firebase.initializeApp(firebaseConfig);
@@ -175,28 +179,30 @@
             if (localStorage.getItem('gndu_team_id')) {
                 currentUserId = localStorage.getItem('gndu_team_id');
                 showMainView();
-            } else {
-                showLoginView();
             }
-        }
-
-        function showLoginView() {
-            document.getElementById('loginView').classList.remove('hidden');
-            document.getElementById('mainView').classList.add('hidden');
         }
 
         function showMainView() {
             document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('mainView').classList.remove('hidden');
+            const mainView = document.getElementById('mainView');
+            mainView.classList.remove('hidden');
+            mainView.classList.add('flex');
             document.getElementById('logoutBtn').classList.remove('hidden');
-            setTimeout(initMap, 500);
+            
+            // FIX: Delay map init to ensure container has size
+            setTimeout(() => {
+                initMap();
+            }, 500);
         }
 
         function initMap() {
+            if (map) return;
+            
             map = L.map('map', { zoomControl: false }).setView([31.6370, 74.8220], 16);
             
-            // Dark "Upside Down" style tiles
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: 'CartoDB'
+            }).addTo(map);
 
             if (currentRole === 'team') {
                 setupTeamTracking();
@@ -204,22 +210,25 @@
             } else {
                 setupAdminDashboard();
             }
+
+            // FIX: Force render
+            setTimeout(() => { map.invalidateSize(); }, 200);
         }
 
-        // SCRAMBLING ENGINE
         function listenToRealityShift() {
             db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).onSnapshot(doc => {
                 const data = doc.data();
+                if (!data) return;
+                
                 const mapEl = document.getElementById('map');
                 const label = document.getElementById('dimensionLabel');
 
                 if (data.logicState === 'realized') {
-                    mapEl.className = "flex-grow w-full z-0 dimension-realized";
+                    mapEl.className = "dimension-realized";
                     label.innerText = "DIMENSION STABILIZED";
-                    label.classList.remove('text-red-500');
-                    label.classList.add('text-green-500');
+                    label.classList.replace('text-red-500', 'text-green-500');
                 } else {
-                    mapEl.className = "flex-grow w-full z-0 dimension-wrong";
+                    mapEl.className = "dimension-wrong";
                     label.innerText = "UPSIDE DOWN SIGNAL";
                 }
 
@@ -234,22 +243,20 @@
             document.getElementById('teamHud').classList.remove('hidden');
             document.getElementById('displayTeamName').innerText = localStorage.getItem('gndu_team_name');
 
-            watchId = navigator.geolocation.watchPosition(pos => {
+            navigator.geolocation.watchPosition(pos => {
                 const { latitude, longitude } = pos.coords;
-                
-                // Update Local Marker
                 if (userMarker) userMarker.setLatLng([latitude, longitude]);
-                else userMarker = L.circleMarker([latitude, longitude], { color: 'red', radius: 10 }).addTo(map);
+                else userMarker = L.circleMarker([latitude, longitude], { color: '#8B0000', radius: 8, fillOpacity: 0.8 }).addTo(map);
                 
                 map.panTo([latitude, longitude]);
 
-                // Check Checkpoints
+                // Story Mapping Check
                 Object.entries(STORY_LOCS).forEach(([key, loc]) => {
-                    const dist = map.distance([latitude, longitude], loc.coords);
-                    if (dist < 40) document.getElementById('currentSectorName').innerText = loc.name;
+                    if (map.distance([latitude, longitude], loc.coords) < 50) {
+                        document.getElementById('currentSectorName').innerText = loc.name;
+                    }
                 });
 
-                // Sync to Firebase
                 db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).update({
                     lat: latitude, lng: longitude,
                     lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
@@ -257,7 +264,6 @@
             }, null, { enableHighAccuracy: true });
         }
 
-        // ADMIN CONTROLS
         function setupAdminDashboard() {
             document.getElementById('adminHud').classList.remove('hidden');
             db.collection(COLLECTION_TEAMS).onSnapshot(snap => {
@@ -266,13 +272,14 @@
                 snap.forEach(doc => {
                     const data = doc.data();
                     const div = document.createElement('div');
-                    div.className = "p-2 border-b border-red-900 text-xs";
+                    div.className = "p-3 border-b border-red-900 bg-gray-900/50 rounded";
                     div.innerHTML = `
-                        <div class="font-bold text-red-500">${data.name} [${data.logicState || 'wrong'}]</div>
-                        <div class="flex gap-2 mt-2">
-                            <button onclick="updateLogic('${doc.id}', 'wrong')" class="bg-red-900 p-1 rounded">CORRUPT</button>
-                            <button onclick="updateLogic('${doc.id}', 'realized')" class="bg-green-900 p-1 rounded">REVEAL</button>
-                            <button onclick="sendMsg('${doc.id}')" class="bg-blue-900 p-1 rounded">MSG</button>
+                        <div class="text-[10px] font-bold text-red-500 uppercase">${data.name}</div>
+                        <div class="text-[9px] text-gray-400 mb-2">STATE: ${data.logicState || 'wrong'}</div>
+                        <div class="flex gap-1">
+                            <button onclick="updateLogic('${doc.id}', 'wrong')" class="bg-red-900 px-2 py-1 rounded text-[8px]">CORRUPT</button>
+                            <button onclick="updateLogic('${doc.id}', 'realized')" class="bg-green-900 px-2 py-1 rounded text-[8px]">REVEAL</button>
+                            <button onclick="sendMsg('${doc.id}')" class="bg-blue-900 px-2 py-1 rounded text-[8px]">MSG</button>
                         </div>
                     `;
                     list.appendChild(div);
@@ -282,7 +289,7 @@
 
         window.updateLogic = (id, state) => db.doc(`${COLLECTION_TEAMS}/${id}`).update({ logicState: state });
         window.sendMsg = (id) => {
-            const m = prompt("Enter cryptic message:");
+            const m = prompt("Transmission text:");
             if(m) db.doc(`${COLLECTION_TEAMS}/${id}`).update({ adminMessage: m });
         };
 
@@ -303,6 +310,9 @@
                     localStorage.setItem('gndu_team_name', d.data().name);
                     currentUserId = d.id;
                     showMainView();
+                } else {
+                    document.getElementById('loginError').innerText = "RIFT SYNC FAILED";
+                    document.getElementById('loginError').classList.remove('hidden');
                 }
             } else if (document.getElementById('password').value === 'qwertyjohn') {
                 showMainView();
@@ -311,11 +321,13 @@
 
         async function generateTeam() {
             const name = document.getElementById('newTeamName').value;
+            if(!name) return;
             const code = Math.random().toString(36).substring(2, 7).toUpperCase();
             await db.collection(COLLECTION_TEAMS).add({
-                name, code, logicState: 'wrong', status: 'active'
+                name, code, logicState: 'wrong', status: 'active',
+                lat: 0, lng: 0
             });
-            alert(`Subject Initialized. Code: ${code}`);
+            alert(`Subject induction complete. Access Code: ${code}`);
         }
 
         function showAlert(t, m) {
@@ -324,6 +336,11 @@
             document.getElementById('customModal').classList.remove('hidden');
         }
         function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
+
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.clear();
+            window.location.reload();
+        };
 
         window.onload = initApp;
     </script>
