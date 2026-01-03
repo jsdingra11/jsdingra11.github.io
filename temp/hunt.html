@@ -2,228 +2,394 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GNDU: The Upside Down</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stranger Campus: The Upside Down</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
+    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --stranger-red: #8B0000; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; }
-
-        /* The Map must be absolute and fill the background */
-        #map {
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;700&display=swap');
+        
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; }
+        .stranger-title { font-family: 'Creepster', cursive; text-shadow: 0 0 10px #ff0000; }
+        
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        
+        .upside-down-overlay {
+            pointer-events: none;
             position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1; /* Lowest layer */
-            transition: transform 3s ease-in-out, filter 2s;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 20%, rgba(30, 0, 0, 0.4) 100%);
+            box-shadow: inset 0 0 100px rgba(255, 0, 0, 0.2);
+            z-index: 10;
         }
 
-        /* Logic for Scrambling */
-        .dimension-wrong {
-            transform: rotate(180deg) scaleX(-1);
-            filter: invert(100%) hue-rotate(180deg) brightness(0.6) contrast(1.5);
+        .ash-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 11;
+            background: url('https://www.transparenttextures.com/patterns/dust.png');
+            opacity: 0.3;
+            animation: drift 20s linear infinite;
         }
 
-        .dimension-realized {
-            transform: rotate(0deg) scaleX(1);
-            filter: sepia(0.5) contrast(1.1);
+        @keyframes drift {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100px); }
         }
 
-        /* Overlay UI must be on top of the map */
-        header, #loginView, #teamHud, #adminHud { z-index: 50; position: relative; }
-        
-        .vintage-card {
-            background: rgba(10, 10, 10, 0.9);
-            border: 2px solid var(--stranger-red);
-            backdrop-filter: blur(8px);
-            color: white;
+        .glass-panel {
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 0, 0, 0.3);
         }
 
-        .btn-stranger { background: var(--stranger-red); color: white; font-family: 'Rye', serif; }
+        .status-trapped { color: #ef4444; text-shadow: 0 0 5px #ff0000; }
+        .status-realized { color: #10b981; text-shadow: 0 0 5px #00ff00; }
+
+        .custom-marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255,0,0,0.8);
+        }
     </style>
 </head>
-<body>
+<body class="bg-black text-gray-100">
 
-    <header class="bg-black text-red-600 p-3 text-center border-b-2 border-red-900 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-biohazard animate-pulse"></i>
-            <h1 class="text-lg font-bold uppercase tracking-tighter">Hawkins Lab: GNDU</h1>
-        </div>
-        <button id="logoutBtn" class="hidden text-[10px] border border-red-600 px-2 py-1 rounded">ABANDON</button>
-    </header>
-
-    <main id="app" class="relative h-full w-full">
-        <div id="loginView" class="absolute inset-0 flex items-center justify-center p-4 bg-black">
-            <div class="vintage-card w-full max-w-md p-8 text-center space-y-6">
-                <h2 class="text-2xl font-bold text-red-600">UNAUTHORIZED ACCESS</h2>
-                <div class="flex gap-4">
-                    <button onclick="setRole('team')" id="roleTeam" class="flex-1 py-2 border-2 border-red-600 bg-red-600 text-white font-bold rounded">SUBJECT</button>
-                    <button onclick="setRole('admin')" id="roleAdmin" class="flex-1 py-2 border-2 border-red-600 text-red-600 font-bold rounded">OBSERVER</button>
-                </div>
-                <form id="authForm" class="space-y-4">
-                    <div id="adminFields" class="hidden"><input type="password" id="password" value="qwertyjohn" class="w-full bg-gray-900 border-b-2 border-red-600 p-2 text-center text-white"></div>
-                    <div id="hunterFields"><input type="text" id="accessCode" placeholder="RIFT CODE" class="w-full text-center text-2xl bg-transparent border-2 border-red-600 p-2 text-red-500 font-mono"></div>
-                    <button type="submit" class="btn-stranger w-full py-3 rounded uppercase font-bold">Initiate Sync</button>
-                </form>
+    <!-- Auth / Role Selection -->
+    <div id="auth-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black p-6">
+        <h1 class="stranger-title text-6xl text-red-600 mb-8 text-center uppercase tracking-widest">Stranger Campus</h1>
+        <div class="glass-panel p-8 rounded-xl w-full max-w-md space-y-4">
+            <input id="team-name" type="text" placeholder="Enter Team Name..." class="w-full bg-zinc-900 border border-zinc-700 p-3 rounded focus:outline-none focus:border-red-600">
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="login('team')" class="bg-red-800 hover:bg-red-700 text-white font-bold py-3 rounded transition shadow-[0_0_15px_rgba(153,27,27,0.5)]">TEAM</button>
+                <button onclick="login('admin')" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded transition">ADMIN</button>
             </div>
+            <p id="auth-msg" class="text-xs text-center text-zinc-500 italic">Enter the portal at your own risk.</p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="hidden h-full flex flex-col relative">
+        <!-- UI Overlays -->
+        <div id="upside-down-effects" class="hidden">
+            <div class="upside-down-overlay"></div>
+            <div class="ash-particles"></div>
         </div>
 
-        <div id="mainView" class="hidden h-full w-full">
-            <div id="map"></div>
-
-            <div id="teamHud" class="hidden absolute bottom-10 left-0 right-0 p-4 pointer-events-none">
-                <div class="vintage-card p-4 max-w-md mx-auto pointer-events-auto">
-                    <div class="flex justify-between border-b border-red-900 pb-2 mb-2">
-                        <span id="displayTeamName" class="font-bold text-red-500">Scanning...</span>
-                        <span class="text-[10px] bg-red-900 px-2 py-1 rounded">RIFT ACTIVE</span>
+        <!-- Top Status Bar -->
+        <header class="absolute top-4 left-4 right-4 z-50 flex justify-between items-start pointer-events-none">
+            <div class="glass-panel p-3 rounded-lg pointer-events-auto">
+                <h2 id="reality-label" class="stranger-title text-xl text-red-500">UPSIDE DOWN</h2>
+                <p id="location-hint" class="text-xs uppercase tracking-tighter opacity-70">Detecting Spores...</p>
+            </div>
+            <div id="admin-controls" class="hidden pointer-events-auto flex flex-col gap-2">
+                <div class="glass-panel p-3 rounded-lg">
+                    <h3 class="text-xs font-bold mb-2 text-red-400">ADMIN PANEL</h3>
+                    <div class="space-y-2 text-[10px]" id="team-list">
+                        <!-- Admin sees team list here -->
                     </div>
-                    <div class="text-[10px] text-gray-400">SECTOR: <span id="sectorName" class="text-white">UNKNOWN</span></div>
+                    <button onclick="togglePortals()" class="mt-3 w-full bg-red-900 text-[10px] py-1 rounded">TOGGLE EXIT GATE</button>
                 </div>
             </div>
+        </header>
 
-            <div id="adminHud" class="hidden absolute top-0 right-0 bottom-0 w-64 bg-black/95 border-l-2 border-red-600 flex flex-col translate-x-full md:translate-x-0 transition-transform">
-                <div class="p-4 border-b border-red-900">
-                    <input type="text" id="newTeamName" placeholder="Subject Name" class="w-full p-2 text-xs bg-gray-900 border border-red-900 text-white mb-2">
-                    <button onclick="generateTeam()" class="w-full bg-red-600 text-white py-2 text-[10px] font-bold">INDUCT</button>
+        <!-- Bottom Feedback Panel -->
+        <footer class="absolute bottom-8 left-4 right-4 z-50 pointer-events-none">
+            <div class="glass-panel p-4 rounded-xl pointer-events-auto max-w-lg mx-auto">
+                <div class="flex items-center gap-3">
+                    <div id="status-icon" class="w-3 h-3 rounded-full bg-red-600 animate-pulse"></div>
+                    <p id="game-feedback" class="text-sm font-medium italic">"The clock is ticking, Henderson."</p>
                 </div>
-                <div id="teamsList" class="flex-grow overflow-y-auto p-2"></div>
+                <div id="team-stats" class="mt-2 text-xs grid grid-cols-2 gap-2 opacity-80">
+                    <span id="stat-checkpoint">Objective: Unknown</span>
+                    <span id="stat-state" class="text-right text-red-500">TRAPPED</span>
+                </div>
             </div>
-        </div>
-    </main>
+        </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <!-- The Map -->
+        <div id="map"></div>
+    </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
-            authDomain: "iist-fd6e8.firebaseapp.com",
-            projectId: "iist-fd6e8",
-            storageBucket: "iist-fd6e8.firebasestorage.app",
-            messagingSenderId: "692699808449",
-            appId: "1:692699808449:web:120c8941a940d071f24a40"
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, updateDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global State
+        let map, user, role, currentTeamName;
+        let markers = {};
+        const CAMPUS_CENTER = [75.9220, 22.7520]; // Default center (Indore UIT area example)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'st-campus-hunt';
+        const firebaseConfig = JSON.parse(__firebase_config);
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Thematic Mappings
+        const THEME_MAP = {
+            "GJCEI": "Hawkins Lab",
+            "Chemistry Dept": "Experiment Wing",
+            "Physics Dept": "Gate/Portal",
+            "Life Science Dept": "Creel House",
+            "Library": "Hawkins High",
+            "Dean Office": "Dr. Brenner’s Office",
+            "Lecture Theatre Complex": "Starcourt Mall",
+            "Botanical Garden": "Upside Down (Nature)",
+            "Gurudwara": "Safe Haven",
+            "Children’s Park": "Kids’ Hideout",
+            "UIT": "Exit Gate"
         };
 
-        const COLLECTION_TEAMS = "artifacts/gndu-hunt-v1/public/data/gndu_teams";
-        let db, currentUserId, currentRole = 'team', map, userMarker;
+        // UI Setup
+        window.login = async (selectedRole) => {
+            const name = document.getElementById('team-name').value.trim();
+            if (!name) return alert("Please enter a name");
+            
+            role = selectedRole;
+            currentTeamName = name;
+            
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error(err);
+                alert("Login failed.");
+            }
+        };
+
+        onAuthStateChanged(auth, async (u) => {
+            if (u) {
+                user = u;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                
+                // Initialize user in DB
+                if (role === 'team') {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teams', user.uid), {
+                        name: currentTeamName,
+                        role: 'team',
+                        state: 'trapped',
+                        checkpoint: 0,
+                        location: { lat: CAMPUS_CENTER[1], lng: CAMPUS_CENTER[0] },
+                        lastActive: Date.now()
+                    }, { merge: true });
+                }
+                
+                initApp();
+            }
+        });
 
         function initApp() {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            firebase.auth().signInAnonymously();
-            if (localStorage.getItem('gndu_team_id')) {
-                currentUserId = localStorage.getItem('gndu_team_id');
-                showMainView();
+            lucide.createIcons();
+            initMap();
+            setupTracking();
+            setupSync();
+            
+            if (role === 'admin') {
+                document.getElementById('admin-controls').classList.remove('hidden');
+                document.getElementById('reality-label').innerText = "DIMENSION X";
+                document.getElementById('reality-label').classList.replace('text-red-500', 'text-blue-500');
+            } else {
+                document.getElementById('upside-down-effects').classList.remove('hidden');
             }
-        }
-
-        function showMainView() {
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('mainView').classList.remove('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-            setTimeout(initMap, 500);
         }
 
         function initMap() {
-            if (map) return;
-            // attributionControl: false removes the scrambled letters
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([31.6370, 74.8220], 16);
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
-            if (currentRole === 'team') {
-                setupTeamTracking();
-                listenToReality();
-            } else {
-                setupAdmin();
-            }
-            setTimeout(() => map.invalidateSize(), 200);
-        }
-
-        function listenToReality() {
-            db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).onSnapshot(doc => {
-                const data = doc.data();
-                if (!data) return;
-                const mapEl = document.getElementById('map');
-                mapEl.className = data.logicState === 'realized' ? 'dimension-realized' : 'dimension-wrong';
+            // Stranger Things Style: Custom colors via paint properties
+            map = new maplibregl.Map({
+                container: 'map',
+                style: {
+                    version: 8,
+                    sources: {
+                        'osm': {
+                            type: 'raster',
+                            tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+                            tileSize: 256,
+                            attribution: '&copy; OpenStreetMap'
+                        },
+                        'buildings': {
+                            type: 'geojson',
+                            data: getMockCampusBuildings()
+                        }
+                    },
+                    layers: [
+                        { id: 'osm-layer', type: 'raster', source: 'osm' },
+                        {
+                            id: 'buildings-3d',
+                            type: 'fill-extrusion',
+                            source: 'buildings',
+                            paint: {
+                                'fill-extrusion-color': role === 'team' ? '#4a0000' : '#1e293b',
+                                'fill-extrusion-height': ['get', 'height'],
+                                'fill-extrusion-base': 0,
+                                'fill-extrusion-opacity': 0.8
+                            }
+                        }
+                    ]
+                },
+                center: CAMPUS_CENTER,
+                zoom: 17,
+                pitch: 60,
+                bearing: role === 'team' ? 180 : 0
             });
-        }
 
-        function setupTeamTracking() {
-            document.getElementById('teamHud').classList.remove('hidden');
-            document.getElementById('displayTeamName').innerText = localStorage.getItem('gndu_team_name');
-            navigator.geolocation.watchPosition(pos => {
-                const { latitude, longitude } = pos.coords;
-                if (userMarker) userMarker.setLatLng([latitude, longitude]);
-                else userMarker = L.circleMarker([latitude, longitude], { color: 'red', radius: 8 }).addTo(map);
-                map.panTo([latitude, longitude]);
-                db.doc(`${COLLECTION_TEAMS}/${currentUserId}`).update({ lat: latitude, lng: longitude });
-            }, null, { enableHighAccuracy: true });
-        }
-
-        function setupAdmin() {
-            document.getElementById('adminHud').classList.remove('hidden');
-            db.collection(COLLECTION_TEAMS).onSnapshot(snap => {
-                const list = document.getElementById('teamsList');
-                list.innerHTML = '';
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const item = document.createElement('div');
-                    item.className = "p-2 border-b border-red-900 text-[10px]";
-                    item.innerHTML = `
-                        <div class="font-bold text-red-500">${d.name}</div>
-                        <div class="flex gap-2 mt-1">
-                            <button onclick="updateLogic('${doc.id}', 'wrong')" class="bg-red-900 px-1">CORRUPT</button>
-                            <button onclick="updateLogic('${doc.id}', 'realized')" class="bg-green-900 px-1">REVEAL</button>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
-            });
-        }
-
-        window.updateLogic = (id, s) => db.doc(`${COLLECTION_TEAMS}/${id}`).update({ logicState: s });
-
-        window.setRole = (r) => {
-            currentRole = r;
-            document.getElementById('adminFields').classList.toggle('hidden', r === 'team');
-            document.getElementById('hunterFields').classList.toggle('hidden', r === 'admin');
-        };
-
-        document.getElementById('authForm').onsubmit = async (e) => {
-            e.preventDefault();
-            if (currentRole === 'team') {
-                const code = document.getElementById('accessCode').value.toUpperCase();
-                const snap = await db.collection(COLLECTION_TEAMS).where('code', '==', code).get();
-                if (!snap.empty) {
-                    const d = snap.docs[0];
-                    localStorage.setItem('gndu_team_id', d.id);
-                    localStorage.setItem('gndu_team_name', d.data().name);
-                    currentUserId = d.id;
-                    showMainView();
+            map.on('load', () => {
+                // Add Red/Dark Atmosphere if Team
+                if (role === 'team') {
+                    map.setPaintProperty('buildings-3d', 'fill-extrusion-color', '#3d0000');
                 }
-            } else if (document.getElementById('password').value === 'qwertyjohn') {
-                showMainView();
-            }
-        };
-
-        async function generateTeam() {
-            const name = document.getElementById('newTeamName').value;
-            const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-            await db.collection(COLLECTION_TEAMS).add({ name, code, logicState: 'wrong' });
-            alert("Code: " + code);
+            });
         }
 
-        window.onload = initApp;
+        // Coordinate Scrambler: Flips location around the center for the Upside Down
+        function transformCoords(lat, lng) {
+            if (role === 'admin') return [lng, lat];
+            
+            // Mirror logic around campus center
+            const centerLat = CAMPUS_CENTER[1];
+            const centerLng = CAMPUS_CENTER[0];
+            
+            const newLat = centerLat + (centerLat - lat);
+            const newLng = centerLng + (centerLng - lng);
+            
+            return [newLng, newLat];
+        }
+
+        function setupTracking() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(async (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    
+                    if (role === 'team') {
+                        // Real location update to Firebase
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teams', user.uid), {
+                            location: { lat: latitude, lng: longitude },
+                            lastActive: Date.now()
+                        });
+
+                        // Update local hint based on distance to nearest theme location
+                        updateThematicHint(latitude, longitude);
+                    }
+                }, (err) => console.error("GPS Error", err), {
+                    enableHighAccuracy: true,
+                    maximumAge: 0
+                });
+            }
+        }
+
+        function setupSync() {
+            // Listen to all teams
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'teams');
+            onSnapshot(q, (snapshot) => {
+                const teamsHtml = [];
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const teamId = docSnap.id;
+                    
+                    // Transformation logic
+                    const mapCoords = transformCoords(data.location.lat, data.location.lng);
+                    
+                    // Update Markers
+                    if (!markers[teamId]) {
+                        const el = document.createElement('div');
+                        el.className = 'custom-marker';
+                        el.style.backgroundColor = (teamId === user.uid) ? '#ef4444' : '#71717a';
+                        markers[teamId] = new maplibregl.Marker(el).setLngLat(mapCoords).addTo(map);
+                    } else {
+                        markers[teamId].setLngLat(mapCoords);
+                    }
+
+                    // Admin UI List
+                    if (role === 'admin') {
+                        teamsHtml.push(`
+                            <div class="flex justify-between items-center border-b border-zinc-800 pb-1">
+                                <span class="${data.state === 'trapped' ? 'text-red-400' : 'text-green-400'}">${data.name}</span>
+                                <button onclick="toggleTeamState('${teamId}', '${data.state}')" class="bg-zinc-700 px-2 rounded">TOGGLE</button>
+                            </div>
+                        `);
+                    }
+
+                    // Local Team UI Update
+                    if (teamId === user.uid) {
+                        document.getElementById('stat-state').innerText = data.state.toUpperCase();
+                        document.getElementById('stat-state').className = `text-right ${data.state === 'trapped' ? 'text-red-500' : 'text-green-500'}`;
+                        document.getElementById('game-feedback').innerText = data.state === 'trapped' 
+                            ? "You are trapped in the Upside Down. Orient yourself." 
+                            : "Reality is stabilizing... find the portal!";
+                    }
+                });
+
+                if (role === 'admin') {
+                    document.getElementById('team-list').innerHTML = teamsHtml.join('') || "No teams active";
+                }
+            });
+
+            // Global settings listener (portals etc)
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'game', 'global'), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.exitActive) {
+                        document.getElementById('game-feedback').innerText = "THE EXIT PORTAL IS OPEN AT UIT!";
+                    }
+                }
+            });
+        }
+
+        // Admin Actions
+        window.toggleTeamState = async (tid, currentState) => {
+            const newState = currentState === 'trapped' ? 'realized' : 'trapped';
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'teams', tid), { state: newState });
+        };
+
+        window.togglePortals = async () => {
+            const gRef = doc(db, 'artifacts', appId, 'public', 'data', 'game', 'global');
+            const gSnap = await getDoc(gRef);
+            const active = gSnap.exists() ? gSnap.data().exitActive : false;
+            await setDoc(gRef, { exitActive: !active }, { merge: true });
+        };
+
+        function updateThematicHint(lat, lng) {
+            // Simple proximity check for demo
+            document.getElementById('location-hint').innerText = "Spores are dense in this sector...";
+        }
+
+        // Generate Mock Buildings for the 2.5D visual
+        function getMockCampusBuildings() {
+            // Simplified building footprints for UIT Campus area
+            return {
+                type: 'FeatureCollection',
+                features: [
+                    {
+                        type: 'Feature',
+                        properties: { height: 20, name: 'GJCEI' },
+                        geometry: { type: 'Polygon', coordinates: [[[75.9215, 22.7525], [75.9220, 22.7525], [75.9220, 22.7520], [75.9215, 22.7520], [75.9215, 22.7525]]] }
+                    },
+                    {
+                        type: 'Feature',
+                        properties: { height: 35, name: 'Library' },
+                        geometry: { type: 'Polygon', coordinates: [[[75.9225, 22.7535], [75.9230, 22.7535], [75.9230, 22.7530], [75.9225, 22.7530], [75.9225, 22.7535]]] }
+                    },
+                    {
+                        type: 'Feature',
+                        properties: { height: 25, name: 'UIT Main' },
+                        geometry: { type: 'Polygon', coordinates: [[[75.9205, 22.7510], [75.9215, 22.7510], [75.9215, 22.7505], [75.9205, 22.7505], [75.9205, 22.7510]]] }
+                    }
+                ]
+            };
+        }
+
     </script>
 </body>
 </html>
