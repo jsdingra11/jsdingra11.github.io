@@ -3,711 +3,527 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GNDU: The Upside Down</title>
+    <title>GNDU Tactical Tracker</title>
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-    <!-- Tailwind CSS (CDN for portability) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- Firebase SDKs (Updated to stable v10) -->
-    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-
     <style>
-        /* Custom "Stranger Things" Aesthetics */
         :root {
-            --stranger-red: #E71D36;
-            --upside-down-blue: #0A1128;
-            --neon-glow: 0 0 10px #E71D36, 0 0 20px #E71D36;
+            --primary: #00ff9d;
+            --bg: #050505;
+            --panel: rgba(10, 20, 15, 0.95);
+            --danger: #ff3333;
         }
 
-        body {
-            background-color: #000;
-            font-family: 'Roboto Mono', monospace;
-            overflow: hidden; /* Prevent pull-to-refresh on mobile */
+        body { 
+            margin: 0; 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Courier New', Courier, monospace; 
+            overflow: hidden; 
+            touch-action: none;
+            display: flex;
+            align-items: center; /* Center the grid vertically */
+            justify-content: center; /* Center the grid horizontally */
+            height: 100vh;
+            width: 100vw;
         }
 
-        .font-creepster { font-family: 'Creepster', display; }
+        /* --- THE SCRAMBLED GRID --- */
+        #grid-container {
+            /* Width/Height will be set by JS to match Map Aspect Ratio */
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            grid-template-rows: repeat(5, 1fr);
+            gap: 2px;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+        }
 
-        /* Map Glitch Effect Overlay */
-        .glitch-overlay {
+        .map-tile {
+            position: relative;
+            background: #111;
+            overflow: hidden;
+            border: 1px solid #333; 
+        }
+
+        /* High Contrast Map Tiles for readability */
+        .leaflet-layer {
+            filter: contrast(1.1) saturate(1.1) brightness(0.9);
+        }
+
+        .leaflet-control-container .leaflet-top, 
+        .leaflet-control-container .leaflet-bottom { display: none !important; }
+
+        /* --- HUD (Fixed on Screen) --- */
+        #hud {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 400; /* Above map tiles, below controls */
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: var(--panel);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            padding: 15px;
+            z-index: 5000;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+            backdrop-filter: blur(5px);
+            transition: border-color 0.3s;
         }
 
-        /* Particles */
-        .ash-particle {
-            position: absolute;
-            background: rgba(200, 200, 200, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 401;
-            animation: float 10s linear infinite;
-        }
+        .hud-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .label { font-size: 10px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+        .value { font-size: 16px; font-weight: bold; color: white; }
+        .highlight { color: var(--primary); font-size: 18px; text-shadow: 0 0 5px var(--primary); }
+        
+        /* Danger State for Out of Zone */
+        .out-of-zone { border-color: var(--danger) !important; box-shadow: 0 0 20px rgba(255, 50, 50, 0.3) !important; }
+        .out-of-zone .highlight { color: var(--danger) !important; text-shadow: 0 0 5px var(--danger) !important; }
 
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            50% { opacity: 0.8; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-        }
+        #progress-bar { width: 100%; height: 4px; background: #333; margin-top: 10px; border-radius: 2px; }
+        #progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s ease; box-shadow: 0 0 10px var(--primary); }
 
-        /* Leaflet Customizations */
-        .leaflet-container { background: #1a1a1a; }
-        .custom-marker-icon {
-            filter: drop-shadow(0 0 5px rgba(231, 29, 54, 0.8));
+        /* --- MODALS --- */
+        #modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; box-sizing: border-box;
         }
+        .modal-content { border: 2px solid var(--primary); padding: 30px; background: black; max-width: 400px; }
+        h1 { color: var(--primary); margin: 0 0 10px 0; font-size: 24px; text-transform: uppercase; }
+        p { color: #ccc; line-height: 1.5; font-family: sans-serif; }
+        button { background: var(--primary); color: black; border: none; padding: 12px 24px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
 
-        /* Admin / Realization Toggle Transition */
-        .reality-shift {
-            transition: filter 2s ease;
-        }
-        .reality-normal { filter: invert(0); }
-        .reality-upsidedown { filter: sepia(1) hue-rotate(180deg) saturate(2); }
+        /* --- DEBUG --- */
+        #debug-toggle { position: absolute; top: 10px; right: 10px; font-size: 20px; color: #333; cursor: pointer; z-index: 6000; }
+        #debug-panel { display: none; position: absolute; top: 40px; right: 10px; background: rgba(0,0,0,0.9); border: 1px solid #555; padding: 10px; width: 200px; z-index: 6000; font-size: 10px; }
+        
+        /* --- MARKERS --- */
+        .user-marker { width: 14px; height: 14px; background: #00aaff; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px #00aaff; animation: pulse-blue 2s infinite; }
+        .target-marker { font-size: 24px; animation: bounce 1s infinite; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)); }
+        @keyframes pulse-blue { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* CRT Scanline effect for UI */
-        .scanline {
-            width: 100%;
-            height: 100px;
-            z-index: 9999;
-            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0,0,0,0) 100%);
-            opacity: 0.1;
-            position: absolute;
-            bottom: 100%;
-            animation: scanline 10s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes scanline {
-            0% { bottom: 100%; }
-            100% { bottom: -100px; }
-        }
     </style>
 </head>
-<body class="text-gray-200 h-screen w-screen relative">
+<body>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="absolute inset-0 bg-black z-[1000] flex flex-col items-center justify-center p-6 text-center">
-        <h1 class="text-5xl text-red-600 font-creepster mb-2" style="text-shadow: var(--neon-glow);">STRANGER<br>CAMPUS</h1>
-        <p class="text-xs text-gray-500 mb-8 tracking-widest uppercase">GNDU // Hawkins Lab Branch</p>
-        
-        <div class="w-full max-w-sm space-y-4">
-            <input type="text" id="team-name-input" placeholder="ENTER TEAM CODE" 
-                class="w-full bg-gray-900 border-2 border-red-900 text-red-500 text-center p-3 rounded font-bold uppercase focus:outline-none focus:border-red-500 transition">
-            <button id="start-btn" class="w-full bg-red-900 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition uppercase tracking-widest">
-                Enter The Void
-            </button>
-        </div>
-        <p class="mt-8 text-[10px] text-gray-600">WARNING: GEOLOCATION REQUIRED.<br>THE MAP IS NOT WHAT IT SEEMS.</p>
-    </div>
-
-    <!-- MAIN GAME UI -->
-    <div id="game-ui" class="hidden h-full w-full flex flex-col">
-        <!-- Header / HUD -->
-        <div class="bg-black/90 p-2 flex justify-between items-center border-b border-red-900 z-50">
+    <div id="grid-container"></div>
+    
+    <div id="hud">
+        <div class="hud-row">
             <div>
-                <h2 class="text-red-600 font-creepster text-xl">UPSIDE DOWN</h2>
-                <div id="connection-status" class="text-[10px] text-green-500 animate-pulse">● SIGNAL: STABLE</div>
+                <div class="label">CURRENT OBJECTIVE</div>
+                <div class="value highlight" id="target-name">INITIALIZING...</div>
             </div>
-            <div class="text-right">
-                <div id="team-display" class="font-bold text-sm text-gray-300">TEAM</div>
-                <div id="score-display" class="text-xs text-red-400">GATES: 0/7</div>
+            <div style="text-align: right;">
+                <div class="label">DISTANCE</div>
+                <div class="value" id="dist-display">--- m</div>
             </div>
         </div>
-
-        <!-- The Map -->
-        <div id="map" class="flex-grow z-0 reality-upsidedown relative"></div>
-        <div class="glitch-overlay"></div>
-        <div class="scanline"></div>
-
-        <!-- Notification / Message Area -->
-        <div id="message-area" class="absolute top-20 left-4 right-4 z-[500] pointer-events-none">
-            <!-- Messages injected here -->
+        <div class="hud-row">
+            <div>
+                <div class="label">GPS STATUS</div>
+                <div class="value" style="font-size: 12px;" id="gps-status">Waiting...</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="label">CHECKPOINT</div>
+                <div class="value" style="font-size: 12px;" id="checkpoint-count">0 / 0</div>
+            </div>
         </div>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+    </div>
 
-        <!-- Bottom Controls -->
-        <div class="bg-black/90 p-3 border-t border-red-900 z-50">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-[10px] uppercase text-gray-500">Proximity Sensor</span>
-                <span id="nearest-target-dist" class="text-lg font-bold font-mono text-red-500">-- M</span>
-            </div>
-            <div class="h-2 w-full bg-gray-900 rounded overflow-hidden">
-                <div id="signal-strength" class="h-full bg-red-600 w-0 transition-all duration-500"></div>
-            </div>
-            
-            <!-- Dev / Simulation Controls (Hidden by default, toggle with corner tap) -->
-            <div id="sim-controls" class="hidden mt-2 pt-2 border-t border-gray-800 grid grid-cols-3 gap-2">
-                <button onclick="simMove('N')" class="bg-gray-800 p-1 text-xs">▲ N</button>
-                <button onclick="toggleAdmin()" class="bg-blue-900 p-1 text-xs">ADMIN</button>
-                <button onclick="simMove('S')" class="bg-gray-800 p-1 text-xs">▼ S</button>
-                <button onclick="simMove('W')" class="bg-gray-800 p-1 text-xs">◀ W</button>
-                <button onclick="forceUpdate()" class="bg-green-900 p-1 text-xs">SYNC</button>
-                <button onclick="simMove('E')" class="bg-gray-800 p-1 text-xs">▶ E</button>
-            </div>
-            <div onclick="tapAdmin()" class="h-4 w-4 absolute bottom-0 right-0 opacity-0"></div>
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <h1 id="modal-title">MISSION UPDATE</h1>
+            <p id="modal-msg">Briefing...</p>
+            <button onclick="closeModal()">ACKNOWLEDGE</button>
         </div>
     </div>
 
-    <!-- ADMIN DASHBOARD (Overlay) -->
-    <div id="admin-panel" class="hidden fixed inset-0 bg-gray-900 z-[2000] overflow-y-auto p-4">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-blue-400">DIMENSION X (ADMIN)</h2>
-            <button onclick="toggleAdmin()" class="text-red-500 border border-red-500 px-3 py-1 rounded">CLOSE</button>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div class="bg-black p-3 rounded border border-blue-900">
-                <h3 class="text-xs text-gray-500 uppercase">View Mode</h3>
-                <div class="flex gap-2 mt-2">
-                    <button onclick="setAdminMode('real')" class="flex-1 bg-blue-700 text-xs py-2 rounded">REALITY</button>
-                    <button onclick="setAdminMode('scrambled')" class="flex-1 bg-red-900 text-xs py-2 rounded">UPSIDE DOWN</button>
-                </div>
-            </div>
-            <div class="bg-black p-3 rounded border border-blue-900">
-                <h3 class="text-xs text-gray-500 uppercase">Global Actions</h3>
-                <button onclick="resetAllTeams()" class="w-full mt-2 bg-gray-800 text-xs py-2 rounded border border-red-900 text-red-500">RESET ALL</button>
-            </div>
-        </div>
-
-        <h3 class="text-sm font-bold text-gray-300 mb-2">ACTIVE TEAMS</h3>
-        <div id="admin-team-list" class="space-y-2">
-            <!-- Team items populated here -->
-        </div>
+    <div id="debug-toggle" onclick="toggleDebug()">⚙️</div>
+    <div id="debug-panel">
+        <div style="color:white; margin-bottom:5px;">ADMIN TOOLS</div>
+        <button style="padding:5px; font-size:10px; width:100%;" onclick="copyCoords()">COPY MY COORDS</button>
+        <button style="padding:5px; font-size:10px; width:100%; margin-top:5px; background:#444; color:white;" onclick="skipLevel()">SKIP LEVEL</button>
+        <button style="padding:5px; font-size:10px; width:100%; margin-top:5px; background:#444; color:white;" onclick="toggleScramble()">TOGGLE SCRAMBLE</button>
+        <div id="debug-coords" style="margin-top:5px; color:#0f0; word-break: break-all;"></div>
     </div>
 
-    <!-- AUDIO ELEMENTS -->
-    <!-- Simple synth drone generated via Web Audio API in JS, no external files -->
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        /*******************************************************
-         * CONFIGURATION & CONSTANTS
-         *******************************************************/
-        const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
-            authDomain: "iist-fd6e8.firebaseapp.com",
-            projectId: "iist-fd6e8",
-            storageBucket: "iist-fd6e8.firebasestorage.app",
-            messagingSenderId: "692699808449",
-            appId: "1:692699808449:web:120c8941a940d071f24a40"
-        };
-
-        // GNDU Boundary Coords provided
-        const GNDU_BOUNDS = [
-            [31.6295, 74.8225], [31.6315, 74.8300], [31.6390, 74.8320], 
-            [31.6445, 74.8225], [31.6440, 74.8180], [31.6315, 74.8190]
+        // ==================================================================
+        // 1. EXACT GNDU POLYGON (Visual & Logic Border)
+        // ==================================================================
+        const GNDU_POLYGON = [ 
+            [31.631552692516745, 74.83082324628221], 
+            [31.641265976684306, 74.82907932842214], 
+            [31.64008934348646, 74.81981781333435], 
+            [31.630710083556302, 74.82104480288615]
         ];
 
-        // Calculated Center of GNDU for pivoting the world
-        // Approx center based on bounds
-        const CAMPUS_CENTER = { lat: 31.6370, lng: 74.8250 }; 
-
-        // STORY MAPPING
-        // These are the REAL coordinates. The app will scramble them for display.
-        // Narrative: "The Map is Lying". 
-        // Player sees "Hawkins Lab" at North. It is actually at South.
-        const LOCATIONS = [
-            { id: 'start', name: 'Start Point', lat: 31.6350, lng: 74.8200, radius: 30, zone: 'neutral' }, // Generic start
-            { id: 'lab', name: 'Hawkins Lab', story: 'GJCEI', lat: 31.6340, lng: 74.8230, radius: 40, zone: 'science' }, 
-            { id: 'portal', name: 'The Gate', story: 'Physics Dept', lat: 31.6360, lng: 74.8260, radius: 30, zone: 'science' },
-            { id: 'creel', name: 'Creel House', story: 'Life Science', lat: 31.6380, lng: 74.8280, radius: 30, zone: 'bio' },
-            { id: 'high', name: 'Hawkins High', story: 'Library', lat: 31.6370, lng: 74.8250, radius: 50, zone: 'central' }, // Center
-            { id: 'brenner', name: 'Dr. Brenner Office', story: 'Dean Office', lat: 31.6330, lng: 74.8220, radius: 25, zone: 'admin' },
-            { id: 'mall', name: 'Starcourt Mall', story: 'Lecture Theatre', lat: 31.6400, lng: 74.8240, radius: 40, zone: 'fun' },
-            { id: 'garden', name: 'The Upside Down', story: 'Botanical Garden', lat: 31.6420, lng: 74.8290, radius: 60, zone: 'nature' },
-            { id: 'haven', name: 'Safe Haven', story: 'Gurudwara', lat: 31.6310, lng: 74.8290, radius: 40, zone: 'sacred' },
-            { id: 'park', name: 'Kids Hideout', story: 'Children Park', lat: 31.6320, lng: 74.8210, radius: 30, zone: 'fun' },
-            { id: 'exit', name: 'Exit Gate', story: 'UIT', lat: 31.6440, lng: 74.8200, radius: 50, zone: 'exit' }
+        // 2. RESTRICTED ZONES (Excluded Areas inside the map)
+        // Add polygons here to block them out. Users entering these will fail.
+        const RESTRICTED_ZONES = [
+            // Example Format: 
+            // [ [31.6385, 74.8250], [31.6385, 74.8260], [31.6375, 74.8260], [31.6375, 74.8250] ],
         ];
 
-        /*******************************************************
-         * INITIALIZATION
-         *******************************************************/
-        // Ensure firebase exists before init
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(FIREBASE_CONFIG);
-        } else {
-            console.error("Firebase SDK not loaded.");
-        }
-        
-        const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
-        const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
+        // 3. CHECKPOINTS (Must be inside polygon)
+        const MISSIONS = [
+            { name: "Botanical Garden",     lat: 31.6295, lng: 74.8235 }, // Adjusted slightly to fit new bounds
+            { name: "Auditorium",           lat: 31.6370, lng: 74.8300 },
+            { name: "Gurdwara Sahib",       lat: 31.6355, lng: 74.8255 },
+            { name: "Dean Office",          lat: 31.6365, lng: 74.8250 },
+            { name: "Bhai Gurdas Library",  lat: 31.6360, lng: 74.8265 },
+            { name: "Chemistry Dept",       lat: 31.6350, lng: 74.8270 },
+            { name: "Life Sciences",        lat: 31.6375, lng: 74.8230 },
+            { name: "Physics Dept",         lat: 31.6340, lng: 74.8230 },
+            { name: "Lecture Theatre (LC)", lat: 31.6358, lng: 74.8245 },
+            { name: "Maths & CSE Dept",     lat: 31.6345, lng: 74.8220 },
+            { name: "GJCEI",                lat: 31.6385, lng: 74.8200 },
+            { name: "Law Department",       lat: 31.6380, lng: 74.8195 }, 
+            { name: "Economics Dept",       lat: 31.6390, lng: 74.8190 }, 
+            { name: "Children's Park",      lat: 31.6400, lng: 74.8210 },
+            { name: "UIT (Technology)",     lat: 31.6405, lng: 74.8195 }
+        ];
 
-        let map, playerMarker;
-        let locationLayer = L.layerGroup(); // Holds the target markers
-        let userLayer = L.layerGroup(); // Admin only: holds other users
-        let currentUser = null;
-        let watchId = null;
-        let gameState = {
-            logicState: 'wrong', // 'wrong' (Upside Down) or 'realized' (Dimension X)
-            foundIds: [],
-            currentPos: null
+        // 4. AUTO-CALCULATE BOUNDING BOX FROM POLYGON
+        const lats = GNDU_POLYGON.map(p => p[0]);
+        const lngs = GNDU_POLYGON.map(p => p[1]);
+        const MAP_BOUNDS = {
+            north: Math.max(...lats),
+            south: Math.min(...lats),
+            east:  Math.max(...lngs),
+            west:  Math.min(...lngs)
         };
 
-        // DOM Elements
-        const ui = {
-            login: document.getElementById('login-screen'),
-            game: document.getElementById('game-ui'),
-            input: document.getElementById('team-name-input'),
-            btn: document.getElementById('start-btn'),
-            dist: document.getElementById('nearest-target-dist'),
-            signal: document.getElementById('signal-strength'),
-            teamName: document.getElementById('team-display'),
-            score: document.getElementById('score-display'),
-            msgs: document.getElementById('message-area'),
-            sim: document.getElementById('sim-controls'),
-            admin: document.getElementById('admin-panel'),
-            adminList: document.getElementById('admin-team-list'),
-            mapContainer: document.getElementById('map')
-        };
+        const CHECKPOINT_RADIUS_METERS = 35; 
+        const GRID_ROWS = 5;
+        const GRID_COLS = 5; 
 
-        /*******************************************************
-         * MATH & SCRAMBLING LOGIC (CORE MECHANIC)
-         *******************************************************/
+        let currentLevel = 0;
+        let mapTiles = [];
+        let userPos = { lat: 0, lng: 0 };
+        let isGameComplete = false;
+        let isScrambled = true; // TOGGLE STATE
 
-        // Standard Haversine Distance
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // metres
-            const φ1 = lat1 * Math.PI/180;
-            const φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180;
-            const Δλ = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+        function init() {
+            // STEP 0: RESIZE GRID CONTAINER TO MATCH MAP ASPECT RATIO
+            // This prevents tiles from repeating content by ensuring the div shape matches the map shape.
+            optimizeGridDimensions();
+
+            renderGrid();
+            loadMission(0);
+            startTracking();
         }
 
-        // The "Upside Down" Transform
-        // Rotates a coordinate 180 degrees around CAMPUS_CENTER
-        function scrambleCoordinate(lat, lng) {
-            // NewLat = Center + (Center - Old)
-            const newLat = CAMPUS_CENTER.lat + (CAMPUS_CENTER.lat - lat);
-            const newLng = CAMPUS_CENTER.lng + (CAMPUS_CENTER.lng - lng);
-            return { lat: newLat, lng: newLng };
+        function optimizeGridDimensions() {
+            const container = document.getElementById('grid-container');
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+
+            // Calculate Map Real World Dimensions (approx meters)
+            const latDiff = MAP_BOUNDS.north - MAP_BOUNDS.south;
+            const lngDiff = MAP_BOUNDS.east - MAP_BOUNDS.west;
+            const avgLat = (MAP_BOUNDS.north + MAP_BOUNDS.south) / 2;
+            
+            // 1 degree lat ~ 111132m, 1 degree lng ~ 111132 * cos(lat)
+            const metersH = latDiff * 111132;
+            const metersW = lngDiff * 111132 * Math.cos(avgLat * Math.PI / 180);
+            
+            const mapRatio = metersW / metersH;
+            const screenRatio = screenW / screenH;
+
+            // Adjust container size
+            if (screenRatio > mapRatio) {
+                // Screen is wider than map -> constrain width by height
+                container.style.height = '100vh';
+                container.style.width = (screenH * mapRatio) + 'px';
+            } else {
+                // Screen is taller than map -> constrain height by width
+                container.style.width = '100vw';
+                container.style.height = (screenW / mapRatio) + 'px';
+            }
         }
 
-        /*******************************************************
-         * GAME LOGIC
-         *******************************************************/
-
-        // Setup Map
-        function initMap() {
-            // Dark map style
-            map = L.map('map', {
-                zoomControl: false,
-                attributionControl: false
-            }).setView([CAMPUS_CENTER.lat, CAMPUS_CENTER.lng], 16);
-
-            // Using CartoDB Dark Matter for that spooky vibe
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            }).addTo(map);
-
-            locationLayer.addTo(map);
-            userLayer.addTo(map);
-
-            // Draw Bounds (Admin/Debug mostly, helps visualize the play area)
-            const polygon = L.polygon(GNDU_BOUNDS, {
-                color: '#333',
-                weight: 1,
-                fill: false,
-                dashArray: '5, 10'
-            }).addTo(map);
+        function toggleScramble() {
+            isScrambled = !isScrambled;
+            // Clear existing grid
+            mapTiles.forEach(t => t.map.remove());
+            mapTiles = [];
+            document.getElementById('grid-container').innerHTML = '';
+            
+            renderGrid();
+            alert("Map Mode: " + (isScrambled ? "SCRAMBLED" : "ORDERED (NORMAL)"));
         }
 
-        // Render Targets based on Logic State
-        function renderTargets() {
-            locationLayer.clearLayers();
+        function renderGrid() {
+            const container = document.getElementById('grid-container');
+            const latSpan = MAP_BOUNDS.north - MAP_BOUNDS.south;
+            const lngSpan = MAP_BOUNDS.east - MAP_BOUNDS.west;
+            const cellH = latSpan / GRID_ROWS;
+            const cellW = lngSpan / GRID_COLS;
 
-            LOCATIONS.forEach(loc => {
-                if (gameState.foundIds.includes(loc.id)) return; // Don't show found ones? Or show as inactive.
+            let tiles = [];
 
-                let displayLat, displayLng;
+            const worldBox = [[90, -180], [90, 180], [-90, 180], [-90, -180]];
+            
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    const div = document.createElement('div');
+                    div.className = 'map-tile';
+                    div.id = `tile-${r}-${c}`;
+                    div.dataset.row = r;
+                    div.dataset.col = c;
+                    
+                    const bN = MAP_BOUNDS.north - (r * cellH);
+                    const bS = bN - cellH;
+                    const bW = MAP_BOUNDS.west + (c * cellW);
+                    const bE = bW + cellW;
 
-                // PSYCHOLOGICAL TRICK: 
-                // If logicState is 'wrong', we show the SCRAMBLED location.
-                // The player walks to this location on the map.
-                // But the checkCheckpoint() function checks the REAL location.
-                if (gameState.logicState === 'wrong') {
-                    const scrambled = scrambleCoordinate(loc.lat, loc.lng);
-                    displayLat = scrambled.lat;
-                    displayLng = scrambled.lng;
-                } else {
-                    // Once realized, they see the truth
-                    displayLat = loc.lat;
-                    displayLng = loc.lng;
+                    div.dataset.bounds = JSON.stringify([[bS, bW], [bN, bE]]);
+                    tiles.push(div);
                 }
+            }
 
-                // Marker Styles
-                const isExit = loc.id === 'exit';
-                const color = isExit ? '#fff' : '#E71D36';
-                
-                const markerHtml = `
-                    <div style="
-                        background-color: ${color};
-                        width: 12px; height: 12px;
-                        border-radius: 50%;
-                        box-shadow: 0 0 10px ${color}, 0 0 20px ${color};
-                        animation: pulse 2s infinite;
-                    "></div>
-                `;
+            // Shuffle ONLY if scrambled mode is ON
+            if (isScrambled) {
+                for (let i = tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+                }
+            }
 
-                const icon = L.divIcon({
-                    className: 'custom-pin',
-                    html: markerHtml,
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
+            tiles.forEach(tile => {
+                container.appendChild(tile);
+                const bounds = JSON.parse(tile.dataset.bounds);
+                const latLngBounds = L.latLngBounds(bounds);
+
+                const map = L.map(tile.id, {
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    boxZoom: false,
+                    touchZoom: false,
+                    zoomSnap: 0, // FIXED: Allows fractional zoom for perfect fit
+                    // STRICT BOUNDS to prevent seeing neighbor tiles
+                    maxBounds: latLngBounds,
+                    maxBoundsViscosity: 1.0
                 });
 
-                L.marker([displayLat, displayLng], { icon: icon })
-                    .bindPopup(`<b class="font-creepster text-lg text-black">${loc.name}</b><br><span class="text-xs text-gray-800">${loc.story}</span>`)
-                    .addTo(locationLayer);
+                // Force fit exactly
+                map.fitBounds(latLngBounds, { padding: [0, 0] });
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 22,
+                    maxNativeZoom: 19,
+                    detectRetina: true, // Crisp tiles on mobile
+                    opacity: 1
+                }).addTo(map);
+
+                // --- ADD THE MASK ---
+                L.polygon([worldBox, GNDU_POLYGON], {
+                    color: 'transparent',
+                    fillColor: '#000000',
+                    fillOpacity: 0.85
+                }).addTo(map);
+
+                // --- DRAW RESTRICTED ZONES ---
+                RESTRICTED_ZONES.forEach(zone => {
+                    L.polygon(zone, {
+                        color: '#ff3333',
+                        fillColor: '#ff3333',
+                        fillOpacity: 0.4,
+                        weight: 1,
+                        dashArray: '5, 5'
+                    }).addTo(map);
+                });
+
+                // Draw Border
+                L.polygon(GNDU_POLYGON, {
+                    color: '#00ff9d',
+                    weight: 2,
+                    fill: false,
+                    dashArray: '5, 10'
+                }).addTo(map);
+
+                mapTiles.push({
+                    id: tile.id,
+                    element: tile,
+                    map: map,
+                    bounds: latLngBounds,
+                    userMarker: null,
+                    targetMarker: null
+                });
             });
         }
 
-        // Check if player is near a REAL location
-        function checkCheckpoints(lat, lng) {
-            let nearestDist = 99999;
-            let nearestName = "";
-
-            LOCATIONS.forEach(loc => {
-                if (gameState.foundIds.includes(loc.id)) return;
-
-                // We ALWAYS check against REAL location, regardless of visual state
-                const dist = getDistance(lat, lng, loc.lat, loc.lng);
+        // Ray-casting algorithm
+        function isPointInPolygon(lat, lng, poly) {
+            let x = lat, y = lng;
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                let xi = poly[i][0], yi = poly[i][1];
+                let xj = poly[j][0], yj = poly[j][1];
                 
-                if (dist < nearestDist) {
-                    nearestDist = dist;
-                    nearestName = loc.name;
-                }
-
-                // Hit logic
-                if (dist <= loc.radius) {
-                    handleCheckpointHit(loc);
-                }
-            });
-
-            // UI Updates based on distance
-            updateProximityUI(nearestDist);
-        }
-
-        function handleCheckpointHit(loc) {
-            // Vibrate phone
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
-            // If player is in "Wrong" state, hitting a checkpoint is confusing because
-            // on their map, the checkpoint is on the other side of campus.
-            // This is the "Ghost" mechanic.
-            
-            showToast(`ENTERED: ${loc.name}`, 'success');
-            
-            // Add to found list
-            gameState.foundIds.push(loc.id);
-            ui.score.innerText = `GATES: ${gameState.foundIds.length}/${LOCATIONS.length}`;
-
-            // Save to DB
-            if (currentUser) {
-                db.collection('teams').doc(currentUser.uid).update({
-                    foundIds: gameState.foundIds,
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                let intersect = ((yi > y) != (yj > y)) &&
+                    (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
             }
-
-            renderTargets(); // Remove the found one
+            return inside;
         }
 
-        function updateProximityUI(dist) {
-            ui.dist.innerText = Math.round(dist) + " M";
-            
-            // Signal strength bar (closer = wider)
-            // Max signal at 10m, zero at 200m
-            let percent = Math.max(0, Math.min(100, (200 - dist) / 2));
-            ui.signal.style.width = percent + "%";
-            
-            // visual styling based on distance
-            if (dist < 50) {
-                ui.signal.className = "h-full bg-green-500 w-0 transition-all duration-200";
-            } else {
-                ui.signal.className = "h-full bg-red-600 w-0 transition-all duration-500";
-            }
-        }
-
-        // Show on-screen notifications
-        function showToast(text, type = 'normal') {
-            const div = document.createElement('div');
-            div.className = `mb-2 p-3 rounded shadow-lg text-sm font-bold backdrop-blur-sm animate-bounce
-                ${type === 'success' ? 'bg-green-900/80 text-green-300 border-l-4 border-green-500' : 'bg-red-900/80 text-white border-l-4 border-red-500'}`;
-            div.innerText = text;
-            ui.msgs.appendChild(div);
-            
-            setTimeout(() => {
-                div.remove();
-            }, 4000);
-        }
-
-        /*******************************************************
-         * PLAYER LOCATION HANDLING
-         *******************************************************/
-
-        function updatePlayerPosition(lat, lng) {
-            gameState.currentPos = { lat, lng };
-
-            // Update Map Marker
-            if (!playerMarker) {
-                const playerHtml = `<div style="width:16px; height:16px; background:#4488ff; border:2px solid white; border-radius:50%; box-shadow:0 0 10px cyan;"></div>`;
-                const icon = L.divIcon({ className: '', html: playerHtml, iconSize:[16,16], iconAnchor:[8,8] });
-                playerMarker = L.marker([lat, lng], { icon: icon, zIndexOffset: 1000 }).addTo(map);
-                map.panTo([lat, lng]);
-            } else {
-                playerMarker.setLatLng([lat, lng]);
-            }
-
-            // Core Logic
-            checkCheckpoints(lat, lng);
-
-            // Sync to Firestore
-            if (currentUser) {
-                db.collection('teams').doc(currentUser.uid).update({
-                    lat: lat,
-                    lng: lng,
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
-        }
-
-        function startGeolocation() {
+        function startTracking() {
             if (!navigator.geolocation) {
-                alert("Geolocation not supported");
+                showModal("ERROR", "GPS Not Supported");
                 return;
             }
 
-            watchId = navigator.geolocation.watchPosition(
+            navigator.geolocation.watchPosition(
                 (pos) => {
-                    updatePlayerPosition(pos.coords.latitude, pos.coords.longitude);
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = pos.coords.accuracy;
+                    userPos = { lat, lng };
+
+                    // 1. Check if Inside Main Zone
+                    let inZone = isPointInPolygon(lat, lng, GNDU_POLYGON);
+                    let inRestricted = false;
+
+                    // 2. Check if Inside Any Restricted Zone
+                    if (inZone) {
+                        for (let zone of RESTRICTED_ZONES) {
+                            if (isPointInPolygon(lat, lng, zone)) {
+                                inRestricted = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!inZone) {
+                        document.getElementById('hud').classList.add('out-of-zone');
+                        document.getElementById('gps-status').innerText = "OUT OF BOUNDS";
+                        document.getElementById('gps-status').style.color = "red";
+                        document.getElementById('target-name').innerText = "RETURN TO ZONE";
+                    } else if (inRestricted) {
+                        document.getElementById('hud').classList.add('out-of-zone');
+                        document.getElementById('gps-status').innerText = "RESTRICTED ZONE";
+                        document.getElementById('gps-status').style.color = "red";
+                        document.getElementById('target-name').innerText = "BACK AWAY";
+                    } else {
+                        document.getElementById('hud').classList.remove('out-of-zone');
+                        document.getElementById('gps-status').innerText = `Active (±${Math.round(acc)}m)`;
+                        document.getElementById('gps-status').style.color = "white";
+                        if(document.getElementById('target-name').innerText === "RETURN TO ZONE" || document.getElementById('target-name').innerText === "BACK AWAY") {
+                            document.getElementById('target-name').innerText = MISSIONS[currentLevel].name;
+                        }
+                    }
+
+                    // Treat Restricted as Out of Zone for game loop
+                    updateGameLoop(lat, lng, inZone && !inRestricted);
                 },
-                (err) => {
-                    console.error("Geolocation Error:", err.code, err.message);
-                    showToast("GPS SIGNAL LOST: " + err.message, "error");
-                },
+                (err) => { document.getElementById('gps-status').innerText = "NO SIGNAL"; },
                 { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
             );
         }
 
-        /*******************************************************
-         * SIMULATION / DEBUG (Because we aren't at GNDU)
-         *******************************************************/
-        // Allows testing the logic by "walking" a virtual joystick
-        let simLat = CAMPUS_CENTER.lat;
-        let simLng = CAMPUS_CENTER.lng;
-        
-        // Tap count to unlock admin
-        let tapCount = 0;
-        function tapAdmin() {
-            tapCount++;
-            if (tapCount === 5) {
-                ui.sim.classList.remove('hidden');
-                showToast("DEV TOOLS UNLOCKED");
+        function updateGameLoop(lat, lng, isSafe) {
+            if (isGameComplete) return;
+
+            const target = MISSIONS[currentLevel];
+            const userLatLng = L.latLng(lat, lng);
+            const targetLatLng = L.latLng(target.lat, target.lng);
+
+            // 1. Distance
+            const dist = userLatLng.distanceTo(targetLatLng);
+            document.getElementById('dist-display').innerText = `${Math.round(dist)} m`;
+
+            // 2. Win Check (Must be safe)
+            if (isSafe && dist <= CHECKPOINT_RADIUS_METERS) {
+                levelComplete();
             }
-        }
 
-        function simMove(dir) {
-            const step = 0.0005; // approx 50 meters
-            if (dir === 'N') simLat += step;
-            if (dir === 'S') simLat -= step;
-            if (dir === 'E') simLng += step;
-            if (dir === 'W') simLng -= step;
-            
-            // Stop real GPS if simulating
-            if (watchId) navigator.geolocation.clearWatch(watchId);
-            
-            updatePlayerPosition(simLat, simLng);
-        }
+            // 3. Update Markers
+            mapTiles.forEach((tile, index) => {
+                if (tile.userMarker) { tile.map.removeLayer(tile.userMarker); tile.userMarker = null; }
+                if (tile.targetMarker) { tile.map.removeLayer(tile.targetMarker); tile.targetMarker = null; }
 
-        function forceUpdate() {
-            renderTargets();
-        }
-
-        /*******************************************************
-         * AUTH & STARTUP
-         *******************************************************/
-
-        ui.btn.addEventListener('click', async () => {
-            const name = ui.input.value.trim();
-            if (!name) return;
-
-            ui.btn.innerText = "OPENING PORTAL...";
-            ui.btn.disabled = true;
-
-            try {
-                if (!auth) throw new Error("Firebase Auth not initialized");
-
-                // Anonymous Auth
-                const cred = await auth.signInAnonymously();
-                currentUser = cred.user;
-
-                // Create/Update Team Doc
-                await db.collection('teams').doc(currentUser.uid).set({
-                    name: name,
-                    lat: CAMPUS_CENTER.lat,
-                    lng: CAMPUS_CENTER.lng,
-                    status: 'active',
-                    logicState: 'wrong', // Start in the Upside Down
-                    foundIds: [],
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-
-                // Start Game
-                ui.login.classList.add('hidden');
-                ui.game.classList.remove('hidden');
-                ui.teamName.innerText = name;
-                
-                // Initialize Map
-                initMap();
-                renderTargets(); // Will render Scrambled initially
-                startGeolocation();
-                createParticles();
-                
-                // Listen to my own state changes (Admin might flip my logicState)
-                db.collection('teams').doc(currentUser.uid).onSnapshot(snap => {
-                    const data = snap.data();
-                    if (data && data.logicState !== gameState.logicState) {
-                        gameState.logicState = data.logicState;
-                        handleRealityShift(data.logicState);
-                    }
-                });
-
-            } catch (e) {
-                console.error("Auth/Startup Error:", e);
-                alert("Connection Failed: " + (e.message || JSON.stringify(e)));
-                ui.btn.innerText = "TRY AGAIN";
-                ui.btn.disabled = false;
-            }
-        });
-
-        function handleRealityShift(newState) {
-            if (newState === 'realized') {
-                showToast("REALITY RESTORED", 'success');
-                ui.mapContainer.classList.remove('reality-upsidedown');
-                ui.mapContainer.classList.add('reality-normal');
-            } else {
-                showToast("ENTERING UPSIDE DOWN", 'error');
-                ui.mapContainer.classList.add('reality-upsidedown');
-                ui.mapContainer.classList.remove('reality-normal');
-            }
-            renderTargets();
-        }
-
-        function createParticles() {
-            for(let i=0; i<20; i++) {
-                let p = document.createElement('div');
-                p.className = 'ash-particle';
-                p.style.left = Math.random() * 100 + 'vw';
-                p.style.top = Math.random() * 100 + 'vh';
-                p.style.width = (Math.random() * 5 + 2) + 'px';
-                p.style.height = p.style.width;
-                p.style.animationDuration = (Math.random() * 5 + 5) + 's';
-                document.body.appendChild(p);
-            }
-        }
-
-        /*******************************************************
-         * ADMIN DASHBOARD
-         *******************************************************/
-        
-        function toggleAdmin() {
-            const current = ui.admin.classList.contains('hidden');
-            if (current) {
-                const pass = prompt("ADMIN PASSCODE:");
-                if (pass === "11") {
-                    ui.admin.classList.remove('hidden');
-                    startAdminWatch();
+                if (tile.bounds.contains(userLatLng)) {
+                    const icon = L.divIcon({ className: 'user-marker', iconSize: [20, 20] });
+                    tile.userMarker = L.marker([lat, lng], {icon: icon}).addTo(tile.map);
                 }
-            } else {
-                ui.admin.classList.add('hidden');
-                // stop watching to save data? optional.
-            }
-        }
 
-        let adminUnsub;
-        function startAdminWatch() {
-            if (adminUnsub) return; // already watching
-            
-            // Listen to ALL teams
-            adminUnsub = db.collection('teams').onSnapshot(snapshot => {
-                ui.adminList.innerHTML = '';
-                userLayer.clearLayers(); // Map view of users
-
-                snapshot.forEach(doc => {
-                    const t = doc.data();
-                    const id = doc.id;
-                    const isMe = currentUser && currentUser.uid === id;
-                    
-                    // Add to Admin List
-                    const row = document.createElement('div');
-                    row.className = `p-2 bg-gray-800 rounded border border-gray-700 flex justify-between items-center`;
-                    row.innerHTML = `
-                        <div>
-                            <div class="font-bold text-sm ${t.logicState === 'wrong' ? 'text-red-400' : 'text-blue-400'}">${t.name}</div>
-                            <div class="text-[10px] text-gray-400">${t.foundIds ? t.foundIds.length : 0} GATES | ${t.logicState.toUpperCase()}</div>
-                        </div>
-                        <button onclick="toggleTeamState('${id}', '${t.logicState}')" class="text-xs bg-gray-700 px-2 py-1 rounded">FLIP</button>
-                    `;
-                    ui.adminList.appendChild(row);
-
-                    // Add to Admin Map Layer (Real positions only)
-                    if (!isMe && t.lat) {
-                        L.circleMarker([t.lat, t.lng], {
-                            radius: 6,
-                            color: t.logicState === 'wrong' ? 'red' : 'blue',
-                            fillOpacity: 0.8
-                        }).addTo(userLayer).bindPopup(t.name);
-                    }
-                });
+                if (tile.bounds.contains(targetLatLng)) {
+                    const emoji = currentLevel === MISSIONS.length - 1 ? '🏁' : '⭐';
+                    const icon = L.divIcon({ 
+                        className: 'target-marker', 
+                        html: emoji, 
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32]
+                    });
+                    tile.targetMarker = L.marker([target.lat, target.lng], {icon: icon}).addTo(tile.map);
+                }
             });
         }
 
-        // Global function for onclick in admin panel
-        window.toggleTeamState = (id, current) => {
-            const next = current === 'wrong' ? 'realized' : 'wrong';
-            db.collection('teams').doc(id).update({ logicState: next });
-        };
-        
-        window.setAdminMode = (mode) => {
-            if (mode === 'real') {
-                ui.mapContainer.classList.remove('reality-upsidedown');
+        function loadMission(index) {
+            if (index >= MISSIONS.length) {
+                gameWon();
+                return;
+            }
+            const mission = MISSIONS[index];
+            document.getElementById('target-name').innerText = mission.name;
+            document.getElementById('checkpoint-count').innerText = `${index + 1} / ${MISSIONS.length}`;
+            const pct = ((index) / MISSIONS.length) * 100;
+            document.getElementById('progress-fill').style.width = `${pct}%`;
+
+            if(index === 0) showModal("MISSION START", `Target: ${mission.name}.<br>Stay inside the Green Border.`);
+        }
+
+        function levelComplete() {
+            if(document.getElementById('modal-overlay').style.display === 'flex') return;
+            currentLevel++;
+            if (currentLevel >= MISSIONS.length) {
+                gameWon();
             } else {
-                ui.mapContainer.classList.add('reality-upsidedown');
+                const nextMission = MISSIONS[currentLevel];
+                showModal("CHECKPOINT REACHED", `Next Target: <b style="color:var(--primary)">${nextMission.name}</b>`);
+                loadMission(currentLevel);
             }
         }
 
-        window.resetAllTeams = () => {
-            if(confirm("RESET ALL TEAMS?")) {
-                db.collection('teams').get().then(snap => {
-                    snap.forEach(doc => {
-                        doc.ref.update({ logicState: 'wrong', foundIds: [] });
-                    });
-                });
-            }
+        function gameWon() {
+            isGameComplete = true;
+            document.getElementById('progress-fill').style.width = `100%`;
+            showModal("VICTORY", "Welcome to UIT.<br>Mission Accomplished.");
+            document.getElementById('target-name').innerText = "COMPLETE";
+            document.getElementById('hud').style.borderColor = "gold";
         }
 
+        function showModal(title, msg) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerHTML = msg;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+        function toggleDebug() { const p = document.getElementById('debug-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+        function copyCoords() {
+            const str = `{ name: "Point", lat: ${userPos.lat.toFixed(5)}, lng: ${userPos.lng.toFixed(5)} },`;
+            document.getElementById('debug-coords').innerText = str;
+            navigator.clipboard.writeText(str);
+            alert("Copied!");
+        }
+        function skipLevel() { levelComplete(); }
+
+        init();
     </script>
 </body>
 </html>
