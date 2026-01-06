@@ -11,10 +11,10 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Updated for Realtime Database) -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"></script>
 
     <style>
         :root {
@@ -298,12 +298,11 @@
                     </div>
 
                     <div>
-                        <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Party Size</label>
+                        <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Party Size (Max 3)</label>
                         <select id="teamSize" class="w-full p-3 rounded input-field">
                             <option value="1">Solo (1)</option>
                             <option value="2">Duo (2)</option>
                             <option value="3">Trio (3)</option>
-                            <option value="4">Full Party (4)</option>
                         </select>
                     </div>
 
@@ -435,7 +434,7 @@
         // Import Firebase Functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // --- UI References ---
         const loadingScreen = document.getElementById('loading-screen');
@@ -467,28 +466,31 @@
             if(target) target.classList.remove('hidden');
         };
 
-        let app, auth, db, appId, currentUser = null;
+        let app, auth, db, currentUser = null;
 
         // --- Safe Initialization ---
         async function initApp() {
             try {
-                // Initialize Firebase
-                if (typeof __firebase_config === 'undefined' || typeof __app_id === 'undefined') {
-                    throw new Error("Configuration missing. Run in correct environment.");
-                }
+                // Initialize Firebase with USER PROVIDED CONFIG
+                const firebaseConfig = {
+                    apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+                    authDomain: "iist-fd6e8.firebaseapp.com",
+                    databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+                    projectId: "iist-fd6e8",
+                    storageBucket: "iist-fd6e8.firebasestorage.app",
+                    messagingSenderId: "692699808449",
+                    appId: "1:692699808449:web:120c8941a940d071f24a40"
+                };
 
-                const firebaseConfig = JSON.parse(__firebase_config);
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                db = getFirestore(app);
-                appId = __app_id;
+                db = getDatabase(app); // Realtime Database
 
                 // Auth
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Since this is a custom config, we'll try anonymous auth directly.
+                // If you have a custom token process for YOUR firebase, you'd insert it here.
+                // For now, we assume Anonymous Auth is enabled in your Firebase Console.
+                await signInAnonymously(auth);
 
                 // Auth Listener
                 onAuthStateChanged(auth, async (user) => {
@@ -503,30 +505,31 @@
 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                showModal("System Failure", "Could not connect to Hawkins Lab Mainframe. (Check Console)");
+                showModal("System Failure", "Could not connect to the Upside Down. (Check Console)");
                 if(loadingScreen) loadingScreen.innerHTML = `<p class="text-red-500">Connection Failed.</p>`;
             }
         }
 
         const checkRegistration = async (uid) => {
-            if (!db || !appId) return;
+            if (!db) return;
             try {
-                const q = query(
-                    collection(db, 'artifacts', appId, 'public', 'data', 'registrations'),
-                    where('uid', '==', uid)
-                );
+                // Realtime DB Query: Look for a child in 'registrations' with 'uid' matching current user
+                const registrationsRef = ref(db, 'registrations');
+                const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
                 
-                onSnapshot(q, (snapshot) => {
-                    if (!snapshot.empty) {
-                        const data = snapshot.docs[0].data();
+                onValue(userQuery, (snapshot) => {
+                    if (snapshot.exists()) {
+                        // User is registered
+                        const data = Object.values(snapshot.val())[0]; // Get the first match
                         if(userTeamNameDisplay) userTeamNameDisplay.textContent = data.teamName;
                         if(userIdDisplay) userIdDisplay.textContent = uid;
                         switchView('dashboard-view');
                     } else {
+                        // Not registered
                         switchView('registration-view');
                     }
                 }, (error) => {
-                    console.error("Snapshot error:", error);
+                    console.error("Realtime DB error:", error);
                     switchView('registration-view'); 
                 });
 
@@ -557,7 +560,9 @@
                 submitBtn.disabled = true;
 
                 try {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'registrations'), {
+                    // Push to Realtime Database
+                    const newRegRef = push(ref(db, 'registrations'));
+                    await set(newRegRef, {
                         uid: currentUser.uid,
                         teamName,
                         captainName,
@@ -565,6 +570,9 @@
                         teamSize,
                         timestamp: new Date().toISOString()
                     });
+                    
+                    // onValue listener in checkRegistration will handle the UI switch
+                    
                 } catch (error) {
                     console.error("Registration failed:", error);
                     showModal("Transmission Failed", "The Demogorgon intercepted your request. Try again.");
