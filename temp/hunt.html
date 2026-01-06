@@ -472,11 +472,21 @@
                 return;
             }
 
+            // Update status immediately
+            document.getElementById('gps-status').innerText = "Locating...";
+
+            const options = {
+                enableHighAccuracy: true,
+                maximumAge: 5000, // Accept cached position up to 5s old (improves speed)
+                timeout: 15000   // Wait up to 15s for a lock (fixes timeout errors)
+            };
+
             navigator.geolocation.watchPosition(
                 (pos) => {
                     const lat = pos.coords.latitude;
                     const lng = pos.coords.longitude;
                     const acc = pos.coords.accuracy;
+                    
                     userPos = { lat, lng };
 
                     // Broadcast my location to team
@@ -486,14 +496,14 @@
                     
                     if (!inZone) {
                         document.getElementById('hud').classList.add('out-of-zone');
-                        document.getElementById('gps-status').innerText = "OFF THE BOARD";
+                        document.getElementById('gps-status').innerText = `OFF MAP (±${Math.round(acc)}m)`;
                         document.getElementById('gps-status').style.color = "var(--danger)";
                         document.getElementById('target-name').innerText = "RETURN TO MAP";
                     } else {
                         document.getElementById('hud').classList.remove('out-of-zone');
                         // Calculate active teammates
                         const teamCount = Object.keys(otherPlayers).length;
-                        document.getElementById('gps-status').innerText = `Team: ${teamCount + 1} Active`;
+                        document.getElementById('gps-status').innerText = `Team: ${teamCount + 1} Active (±${Math.round(acc)}m)`;
                         document.getElementById('gps-status').style.color = "var(--gold)";
                         
                         if(document.getElementById('target-name').innerText === "RETURN TO MAP") {
@@ -503,8 +513,16 @@
 
                     updateGameLoop(lat, lng, inZone);
                 },
-                (err) => { document.getElementById('gps-status').innerText = "LOST SIGNAL"; },
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+                (err) => { 
+                    console.warn('GPS Error', err);
+                    let msg = "LOST SIGNAL";
+                    if (err.code === 1) msg = "PERM DENIED"; // PERMISSION_DENIED
+                    if (err.code === 2) msg = "NO GPS FIX";  // POSITION_UNAVAILABLE
+                    if (err.code === 3) msg = "TIMEOUT";     // TIMEOUT
+                    document.getElementById('gps-status').innerText = msg; 
+                    document.getElementById('gps-status').style.color = "var(--danger)";
+                },
+                options
             );
         }
 
