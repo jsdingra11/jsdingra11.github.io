@@ -3,33 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GNDU Jumanji Tracker</title>
-    
-    <!-- Google Fonts: Rye for the Jumanji Title feel -->
-    <link href="https://fonts.googleapis.com/css2?family=Rye&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <title>Jumanji: GNDU Expedition</title>
     
     <!-- Leaflet Map CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
-            /* Jumanji Theme Palette */
-            --primary: #ffb700;       /* Amber/Gold */
-            --bg: #0a1f0a;            /* Deep Jungle Green */
-            --panel: #3e2723;         /* Dark Wood */
-            --panel-border: #5d4037;  /* Light Wood */
-            --danger: #d50000;        /* Blood Red */
-            --grid-gap: 4px;
-            --text-main: #e8f5e9;
+            --jungle-dark: #0a1a0a;
+            --jungle-green: #1a4d1a;
+            --gold: #deb887; /* Burlywood/Gold */
+            --gold-bright: #ffd700;
+            --wood-dark: rgba(60, 40, 20, 0.95);
+            --danger: #ff4444;
+            --paper-tint: sepia(0.6) contrast(1.2) brightness(0.9);
         }
 
         body { 
             margin: 0; 
-            background: #051005;
-            background-image: repeating-linear-gradient(45deg, #0a1f0a 25%, #0f2b0f 25%, #0f2b0f 50%, #0a1f0a 50%, #0a1f0a 75%, #0f2b0f 75%, #0f2b0f 100%);
-            background-size: 20px 20px;
-            color: var(--text-main); 
-            font-family: 'Cinzel', serif; 
+            background: #050a05 url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="%23112211" fill-opacity="0.4"><path d="M10 10h20v20h-20z M40 40h20v20h-20z"/></g></svg>'); 
+            color: var(--gold); 
+            font-family: 'Georgia', 'Times New Roman', serif; 
             overflow: hidden; 
             touch-action: none;
             display: flex;
@@ -44,69 +43,63 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr); 
             grid-template-rows: repeat(5, 1fr);
-            gap: var(--grid-gap);
-            background: #2e1e11; /* Dark wood gap color */
-            padding: 5px;
-            border: 4px solid #5d4037;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            gap: 4px;
+            background: #2b1d0e; /* Wood gap color */
+            border: 8px solid #3c2814;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             border-radius: 4px;
         }
 
         .map-tile {
             position: relative;
-            background: #1a1a1a;
+            background: #1a1510;
             overflow: hidden;
-            border: 1px solid #5d4037; 
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            border: 1px solid #5c4033; 
+            transition: transform 0.5s ease;
         }
 
-        /* Sepia Filter for Old Map Look */
+        /* Jumanji Map Style */
         .leaflet-layer {
-            filter: sepia(0.8) contrast(1.2) brightness(0.8) hue-rotate(-30deg);
+            filter: var(--paper-tint);
+        }
+        
+        .leaflet-container {
+            background: #1a1510;
         }
 
         .leaflet-control-container .leaflet-top, 
         .leaflet-control-container .leaflet-bottom { display: none !important; }
 
-        /* --- HUD --- */
+        /* --- HUD (Wooden Panel) --- */
         #hud {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
-            max-width: 450px;
-            background: rgba(62, 39, 35, 0.95); /* Wood panel */
-            border: 2px solid var(--primary);
+            max-width: 400px;
+            background: var(--wood-dark);
+            border: 2px solid var(--gold);
             border-radius: 8px;
-            padding: 15px;
+            padding: 20px;
             z-index: 5000;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0,0,0,0.5);
-            transition: border-color 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(2px);
+            text-shadow: 1px 1px 0 #000;
         }
-        
-        /* Decorative screw heads on HUD */
-        #hud::before, #hud::after {
-            content: '+';
-            position: absolute;
-            color: #8d6e63;
-            font-family: monospace;
-            font-size: 20px;
-        }
-        #hud::before { top: 5px; left: 10px; }
-        #hud::after { top: 5px; right: 10px; }
 
         .hud-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .label { font-size: 10px; color: #a1887f; letter-spacing: 1px; text-transform: uppercase; font-family: 'Cinzel', serif; font-weight: bold; }
-        .value { font-size: 18px; font-weight: bold; color: #fff8e1; text-shadow: 1px 1px 0 #000; }
-        .highlight { color: var(--primary); font-size: 20px; font-family: 'Rye', serif; letter-spacing: 1px; }
+        .label { font-size: 11px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; font-family: monospace; }
+        .value { font-size: 18px; font-weight: bold; color: var(--gold); }
+        .highlight { color: var(--gold-bright); font-size: 20px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
         
         /* Danger State for Out of Zone */
-        .out-of-zone { border-color: var(--danger) !important; box-shadow: 0 0 30px rgba(213, 0, 0, 0.4) !important; }
-        .out-of-zone .highlight { color: var(--danger) !important; }
+        .out-of-zone { border-color: var(--danger) !important; box-shadow: 0 0 20px rgba(255, 50, 50, 0.3) !important; }
+        .out-of-zone .highlight { color: var(--danger) !important; text-shadow: 0 0 5px var(--danger) !important; }
 
-        #progress-bar { width: 100%; height: 8px; background: #251810; margin-top: 10px; border-radius: 4px; border: 1px solid #5d4037; overflow: hidden; }
-        #progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff6f00, #ffb700); transition: width 0.5s ease; }
+        /* Tribal Progress Bar */
+        #progress-bar { width: 100%; height: 6px; background: #221100; margin-top: 12px; border: 1px solid #5c4033; border-radius: 3px; overflow: hidden; }
+        #progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #b8860b, #ffd700); transition: width 0.5s ease; }
 
         /* --- MODALS --- */
         #modal-overlay {
@@ -116,89 +109,69 @@
             text-align: center; padding: 20px; box-sizing: border-box;
         }
         .modal-content { 
-            border: 4px double var(--primary); 
-            padding: 30px; 
-            background: #281a14; /* Dark Wood */
+            border: 4px double var(--gold); 
+            padding: 40px; 
+            background: radial-gradient(circle, #2a1a0a, #000); 
             max-width: 400px; 
-            box-shadow: 0 0 50px rgba(255, 183, 0, 0.2);
-            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
         }
-        /* Corner decorations */
-        .modal-content::after {
-            content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
-            border: 1px dashed #5d4037; pointer-events: none;
-        }
-
-        h1 { color: var(--primary); margin: 0 0 15px 0; font-size: 28px; text-transform: uppercase; font-family: 'Rye', serif; letter-spacing: 2px; }
-        p { color: #d7ccc8; line-height: 1.6; font-size: 16px; margin-bottom: 25px; }
+        h1 { color: var(--gold-bright); margin: 0 0 15px 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; font-weight: normal; border-bottom: 1px solid var(--gold); padding-bottom: 10px; }
+        p { color: #dcb; line-height: 1.6; font-size: 16px; margin-bottom: 25px; }
         button { 
-            background: linear-gradient(to bottom, #ffb700, #ff6f00); 
-            color: #281a14; 
-            border: 1px solid #ffe082; 
+            background: #3c2814; 
+            color: var(--gold); 
+            border: 1px solid var(--gold); 
             padding: 12px 30px; 
             font-weight: bold; 
-            font-family: 'Rye', serif;
-            font-size: 18px; 
+            font-size: 14px; 
             cursor: pointer; 
             text-transform: uppercase; 
-            box-shadow: 0 4px 0 #bf360c;
-            transition: transform 0.1s, box-shadow 0.1s;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            font-family: 'Georgia', serif;
         }
-        button:active { transform: translateY(4px); box-shadow: 0 0 0 #bf360c; }
+        button:hover { background: var(--gold); color: #1a0a00; box-shadow: 0 0 15px var(--gold); }
 
+        /* --- DEBUG --- */
+        #debug-toggle { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; z-index: 6000; opacity: 0.5; }
+        #debug-panel { display: none; position: absolute; top: 50px; right: 10px; background: rgba(0,0,0,0.9); border: 1px solid #555; padding: 10px; width: 200px; z-index: 6000; font-size: 10px; font-family: sans-serif; }
+        
         /* --- MARKERS --- */
+        /* My Player */
         .user-marker { 
-            width: 24px; height: 24px; 
-            background: #ffb700; 
+            width: 16px; height: 16px; 
+            background: #00ff00; 
             border: 2px solid #fff; 
             border-radius: 50%; 
-            box-shadow: 0 0 10px #ffb700; 
-            animation: pulse-gold 2s infinite; 
-            display: flex; justify-content: center; align-items: center;
-            font-size: 14px;
+            box-shadow: 0 0 10px #00ff00; 
+            animation: pulse-green 2s infinite; 
         }
+
+        /* Teammate (Other Players) */
         .teammate-marker {
-            font-size: 24px;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));
-            transition: all 0.5s ease;
+            width: 14px; height: 14px;
+            background: #00aaff;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00aaff;
         }
         .teammate-label {
             position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            color: gold;
-            font-size: 10px;
-            padding: 2px 4px;
-            border-radius: 4px;
+            top: -15px; left: 50%; transform: translateX(-50%);
+            color: white; font-size: 10px; font-weight: bold;
+            text-shadow: 0 0 2px black;
             white-space: nowrap;
         }
 
-        .target-marker { font-size: 32px; animation: bounce 1.5s infinite; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)); }
+        .target-marker { font-size: 28px; animation: bounce 1.5s infinite ease-in-out; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)); }
         
-        @keyframes pulse-gold { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 183, 0, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 183, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 183, 0, 0); } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        /* Debug */
-        #debug-toggle { position: absolute; top: 10px; right: 10px; font-size: 24px; color: #5d4037; cursor: pointer; z-index: 6000; opacity: 0.5; }
-
-        /* Loading Overlay */
-        #loading {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #051005; z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .drum-text { font-family: 'Rye', serif; color: var(--primary); font-size: 24px; animation: throb 1s infinite alternate; }
-        @keyframes throb { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+        @keyframes pulse-green { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
     </style>
 </head>
 <body>
-
-    <div id="loading">
-        <div class="drum-text">SUMMONING THE BOARD...</div>
-        <div style="color: #8d6e63; margin-top: 10px; font-size: 12px;">Waiting for GPS & Satellites</div>
-    </div>
 
     <div id="grid-container"></div>
     
@@ -206,47 +179,56 @@
         <div class="hud-row">
             <div>
                 <div class="label">Current Objective</div>
-                <div class="value highlight" id="target-name">ROLLING DICE...</div>
+                <div class="value highlight" id="target-name">AWAITING...</div>
             </div>
             <div style="text-align: right;">
                 <div class="label">Distance</div>
-                <div class="value" id="dist-display">--- m</div>
+                <div class="value" id="dist-display">---</div>
             </div>
         </div>
         <div class="hud-row">
             <div>
-                <div class="label">Your Badge</div>
-                <div class="value" style="font-size: 14px;" id="my-badge">...</div>
+                <div class="label">Team Status</div>
+                <div class="value" style="font-size: 14px;" id="gps-status">Connecting...</div>
             </div>
             <div style="text-align: right;">
-                <div class="label">Team Status</div>
-                <div class="value" style="font-size: 14px;" id="team-count">Searching...</div>
+                <div class="label">Badge Level</div>
+                <div class="value" style="font-size: 14px;" id="checkpoint-count">0 / 0</div>
             </div>
-        </div>
-        <div class="hud-row" style="margin-top:5px; border-top: 1px solid #5d4037; padding-top:5px;">
-            <div class="label">GPS SIGNAL</div>
-            <div class="value" style="font-size: 12px; color: #a1887f;" id="gps-status">Acquiring...</div>
         </div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </div>
 
     <div id="modal-overlay">
         <div class="modal-content">
-            <h1 id="modal-title">JUMANJI</h1>
-            <p id="modal-msg">A game for those who seek to find<br>a way to leave their world behind.</p>
-            <button onclick="closeModal()">ACCEPT FATE</button>
+            <h1 id="modal-title">THE GAME BEGINS</h1>
+            <p id="modal-msg">Briefing...</p>
+            <button onclick="closeModal()">ACCEPT CHALLENGE</button>
         </div>
     </div>
 
     <div id="debug-toggle" onclick="toggleDebug()">⚙️</div>
+    <div id="debug-panel">
+        <div style="color:white; margin-bottom:5px;">GAME MASTER</div>
+        <button style="padding:5px; font-size:10px; width:100%; margin-top:5px; background:#444; color:white;" onclick="skipLevel()">SKIP LEVEL</button>
+        <button style="padding:5px; font-size:10px; width:100%; margin-top:5px; background:#444; color:white;" onclick="toggleScramble()">TOGGLE BOARD SCRAMBLE</button>
+        <div id="debug-coords" style="margin-top:5px; color:#0f0; word-break: break-all;"></div>
+    </div>
 
-    <!-- FIREBASE SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // --- 1. GAME DATA & CONFIG ---
+        let myUserId = null;
+        let unsubscribePlayers = null;
+        let otherPlayers = {}; // { uid: { lat, lng, lastUpdate } }
+
+        // --- GAME CONSTANTS ---
         const GNDU_POLYGON = [ 
             [31.631552692516745, 74.83082324628221], 
             [31.641265976684306, 74.82907932842214], 
@@ -254,143 +236,149 @@
             [31.630710083556302, 74.82104480288615]
         ];
 
-        // Zones that turn the HUD red and warn the user
-        const RESTRICTED_ZONES = [
-             // Add restricted polygons here if needed
-        ];
-
         const MISSIONS = [
-            { name: "The Ancient Garden",    lat: 31.6295, lng: 74.8235 }, // Botanical
-            { name: "Hall of Echoes",        lat: 31.6370, lng: 74.8300 }, // Auditorium
-            { name: "Sacred Temple",         lat: 31.6355, lng: 74.8255 }, // Gurdwara
-            { name: "Overseer's Post",       lat: 31.6365, lng: 74.8250 }, // Dean Office
-            { name: "Archive of Souls",      lat: 31.6360, lng: 74.8265 }, // Library
-            { name: "Alchemy Lab",           lat: 31.6350, lng: 74.8270 }, // Chem
-            { name: "Tree of Life",          lat: 31.6375, lng: 74.8230 }, // Life Sci
-            { name: "Cosmic Ray",            lat: 31.6340, lng: 74.8230 }, // Physics
-            { name: "The Amphitheater",      lat: 31.6358, lng: 74.8245 }, // Lecture
-            { name: "Cipher Den",            lat: 31.6345, lng: 74.8220 }, // Maths/CSE
-            { name: "The Ivory Tower",       lat: 31.6385, lng: 74.8200 }, // GJCEI
-            { name: "Chamber of Laws",       lat: 31.6380, lng: 74.8195 }, // Law
-            { name: "Vault of Coin",         lat: 31.6390, lng: 74.8190 }, // Economics
-            { name: "The Playground",        lat: 31.6400, lng: 74.8210 }, // Park
-            { name: "Technomancer's Gate",   lat: 31.6405, lng: 74.8195 }  // UIT
+            { name: "Botanical Garden",     lat: 31.6295, lng: 74.8235 }, 
+            { name: "The Auditorium",       lat: 31.6370, lng: 74.8300 },
+            { name: "Sacred Shrine",        lat: 31.6355, lng: 74.8255 },
+            { name: "Dean's Chambers",      lat: 31.6365, lng: 74.8250 },
+            { name: "Great Library",        lat: 31.6360, lng: 74.8265 },
+            { name: "Alchemist Lab",        lat: 31.6350, lng: 74.8270 },
+            { name: "Life Sanctum",         lat: 31.6375, lng: 74.8230 },
+            { name: "Physics Tower",        lat: 31.6340, lng: 74.8230 },
+            { name: "Lecture Hall C",       lat: 31.6358, lng: 74.8245 },
+            { name: "Cipher Dept",          lat: 31.6345, lng: 74.8220 },
+            { name: "Crystal Center",       lat: 31.6385, lng: 74.8200 },
+            { name: "House of Law",         lat: 31.6380, lng: 74.8195 }, 
+            { name: "Merchant Guild",       lat: 31.6390, lng: 74.8190 }, 
+            { name: "Playground",           lat: 31.6400, lng: 74.8210 },
+            { name: "Tech Citadel",         lat: 31.6405, lng: 74.8195 }
         ];
 
-        const BADGES = ['🦁', '🐘', '🐊', '🦏', '🐅', '🐆', '🦍', '🦓', '🦒', '🦅'];
-        const BADGE_NAMES = ['Lion', 'Elephant', 'Croc', 'Rhino', 'Tiger', 'Jaguar', 'Kong', 'Zebra', 'Giraffe', 'Eagle'];
-
-        // --- 2. GLOBAL STATE ---
-        let currentLevel = 0;
-        let mapTiles = []; // Stores {id, map, bounds, userMarker, teammateMarkers{}, targetMarker}
-        let userPos = { lat: 0, lng: 0 };
-        let isGameComplete = false;
-        
-        // Multiplayer State
-        let myBadge = { icon: '🎲', name: 'Player' };
-        let teammates = {}; // { uid: { lat, lng, icon, lastUpdate } }
-        let currentUserUid = null;
-        let db = null;
-        let appId = "default";
-
-        // --- 3. INIT FIREBASE & GAME ---
-        const init = async () => {
-            // Setup Map
-            calculateBounds();
-            optimizeGridDimensions();
-            renderGrid();
-            
-            // Setup Firebase
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'gndu-jumanji';
-            
-            if(firebaseConfig.apiKey) {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                db = getFirestore(app);
-
-                // Auth
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        currentUserUid = user.uid;
-                        assignBadge(user.uid);
-                        startTeamListener();
-                    }
-                });
-            } else {
-                console.warn("No Firebase Config - Multiplayer disabled");
-                document.getElementById('team-count').innerText = "Offline Mode";
-            }
-
-            // Start Game
-            loadMission(0);
-            startTracking();
-            
-            // Remove Loading Screen
-            setTimeout(() => document.getElementById('loading').style.display = 'none', 1500);
+        // Bounds Calculation
+        const lats = GNDU_POLYGON.map(p => p[0]);
+        const lngs = GNDU_POLYGON.map(p => p[1]);
+        const MAP_BOUNDS = {
+            north: Math.max(...lats),
+            south: Math.min(...lats),
+            east:  Math.max(...lngs),
+            west:  Math.min(...lngs)
         };
 
-        // Assign a consistent badge based on UID hash
-        function assignBadge(uid) {
-            let hash = 0;
-            for (let i = 0; i < uid.length; i++) hash = uid.charCodeAt(i) + ((hash << 5) - hash);
-            const index = Math.abs(hash) % BADGES.length;
-            myBadge = { icon: BADGES[index], name: BADGE_NAMES[index] };
-            document.getElementById('my-badge').innerHTML = `<span style="font-size:18px">${myBadge.icon}</span> ${myBadge.name}`;
+        const CHECKPOINT_RADIUS_METERS = 35; 
+        const GRID_ROWS = 5;
+        const GRID_COLS = 5; 
+
+        let currentLevel = 0;
+        let mapTiles = [];
+        let userPos = { lat: 0, lng: 0 };
+        let isGameComplete = false;
+        let isScrambled = true; 
+
+        // --- INIT ---
+        async function init() {
+            // Login Anonymously
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await auth.signInWithCustomToken(__initial_auth_token);
+                } else {
+                    await auth.signInAnonymously();
+                }
+            } catch (e) {
+                console.error("Auth failed", e);
+            }
+
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    myUserId = user.uid;
+                    setupMultiplayerListeners();
+                }
+            });
+
+            optimizeGridDimensions();
+            renderGrid();
+            loadMission(0);
+            startTracking();
         }
 
-        // --- 4. MAP & GRID LOGIC (The Scramble) ---
-        let MAP_BOUNDS = {};
-        
-        function calculateBounds() {
-            const lats = GNDU_POLYGON.map(p => p[0]);
-            const lngs = GNDU_POLYGON.map(p => p[1]);
-            MAP_BOUNDS = {
-                north: Math.max(...lats),
-                south: Math.min(...lats),
-                east:  Math.max(...lngs),
-                west:  Math.min(...lngs)
-            };
+        // --- MULTIPLAYER LOGIC ---
+        function setupMultiplayerListeners() {
+            if (!myUserId) return;
+            const playersRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('players');
+
+            // Listen for other players
+            unsubscribePlayers = playersRef.onSnapshot((snapshot) => {
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (doc.id !== myUserId && data.lat && data.lng) {
+                        // Check if data is recent (e.g., last 10 mins)
+                        const now = Date.now();
+                        if (data.timestamp && (now - data.timestamp < 600000)) {
+                            otherPlayers[doc.id] = data;
+                        }
+                    }
+                });
+                // Trigger a re-render of markers (handled in loop usually, but force update here for smoothness)
+                updateGameLoop(userPos.lat, userPos.lng, true, true);
+            }, (error) => {
+                console.error("Error listening to players:", error);
+            });
         }
 
+        function broadcastLocation(lat, lng) {
+            if (!myUserId) return;
+            const playersRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('players');
+            
+            playersRef.doc(myUserId).set({
+                lat: lat,
+                lng: lng,
+                timestamp: Date.now(),
+                team: 'Explorer'
+            }, { merge: true }).catch(e => console.error("Broadcast failed", e));
+        }
+
+        // --- GRID SYSTEM ---
         function optimizeGridDimensions() {
             const container = document.getElementById('grid-container');
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
+
             const latDiff = MAP_BOUNDS.north - MAP_BOUNDS.south;
             const lngDiff = MAP_BOUNDS.east - MAP_BOUNDS.west;
             const avgLat = (MAP_BOUNDS.north + MAP_BOUNDS.south) / 2;
+            
             const metersH = latDiff * 111132;
             const metersW = lngDiff * 111132 * Math.cos(avgLat * Math.PI / 180);
+            
             const mapRatio = metersW / metersH;
             const screenRatio = screenW / screenH;
 
             if (screenRatio > mapRatio) {
-                container.style.height = '95vh';
-                container.style.width = (window.innerHeight * 0.95 * mapRatio) + 'px';
+                container.style.height = '100vh';
+                container.style.width = (screenH * mapRatio) + 'px';
             } else {
-                container.style.width = '95vw';
-                container.style.height = (window.innerWidth * 0.95 / mapRatio) + 'px';
+                container.style.width = '100vw';
+                container.style.height = (screenW / mapRatio) + 'px';
             }
+        }
+
+        function toggleScramble() {
+            isScrambled = !isScrambled;
+            mapTiles.forEach(t => t.map.remove());
+            mapTiles = [];
+            document.getElementById('grid-container').innerHTML = '';
+            renderGrid();
         }
 
         function renderGrid() {
             const container = document.getElementById('grid-container');
-            const GRID_ROWS = 5;
-            const GRID_COLS = 5;
             const latSpan = MAP_BOUNDS.north - MAP_BOUNDS.south;
             const lngSpan = MAP_BOUNDS.east - MAP_BOUNDS.west;
             const cellH = latSpan / GRID_ROWS;
             const cellW = lngSpan / GRID_COLS;
-            
-            let tiles = [];
 
+            let tiles = [];
+            const worldBox = [[90, -180], [90, 180], [-90, 180], [-90, -180]];
+            
             for (let r = 0; r < GRID_ROWS; r++) {
                 for (let c = 0; c < GRID_COLS; c++) {
                     const div = document.createElement('div');
@@ -407,10 +395,11 @@
                 }
             }
 
-            // SCRAMBLE!
-            for (let i = tiles.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+            if (isScrambled) {
+                for (let i = tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+                }
             }
 
             tiles.forEach(tile => {
@@ -419,36 +408,52 @@
                 const latLngBounds = L.latLngBounds(bounds);
 
                 const map = L.map(tile.id, {
-                    zoomControl: false, attributionControl: false, dragging: false,
-                    scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, 
-                    touchZoom: false, zoomSnap: 0, maxBounds: latLngBounds
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    boxZoom: false,
+                    touchZoom: false,
+                    zoomSnap: 0,
+                    maxBounds: latLngBounds,
+                    maxBoundsViscosity: 1.0
                 });
 
                 map.fitBounds(latLngBounds, { padding: [0, 0] });
                 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 22, maxNativeZoom: 19, opacity: 1
+                    maxZoom: 22,
+                    maxNativeZoom: 19,
+                    detectRetina: true,
+                    opacity: 1
                 }).addTo(map);
 
-                // Styling Layers
-                // World Mask
-                L.polygon([[90, -180], [90, 180], [-90, 180], [-90, -180], GNDU_POLYGON], {
-                    color: 'transparent', fillColor: '#0a1f0a', fillOpacity: 0.9
+                // Dark Mask for Jumanji vibe
+                L.polygon([worldBox, GNDU_POLYGON], {
+                    color: 'transparent',
+                    fillColor: '#0a0500', // Dark brown/black mask
+                    fillOpacity: 0.9
                 }).addTo(map);
 
-                // Border
                 L.polygon(GNDU_POLYGON, {
-                    color: '#ffb700', weight: 3, fill: false, dashArray: '10, 5'
+                    color: '#deb887', // Gold border
+                    weight: 3,
+                    fill: false,
+                    dashArray: '10, 10'
                 }).addTo(map);
 
                 mapTiles.push({
-                    element: tile, map: map, bounds: latLngBounds,
-                    userMarker: null, targetMarker: null, teammateMarkers: {}
+                    id: tile.id,
+                    map: map,
+                    bounds: latLngBounds,
+                    userMarker: null,
+                    targetMarker: null,
+                    teammateMarkers: {} // Map of uid -> markerLayer
                 });
             });
         }
 
-        // --- 5. GPS & GAMEPLAY ---
         function isPointInPolygon(lat, lng, poly) {
             let x = lat, y = lng;
             let inside = false;
@@ -463,9 +468,10 @@
 
         function startTracking() {
             if (!navigator.geolocation) {
-                showModal("CURSE", "Your device does not support GPS magic.");
+                showModal("ERROR", "The compass is broken (GPS Not Supported).");
                 return;
             }
+
             navigator.geolocation.watchPosition(
                 (pos) => {
                     const lat = pos.coords.latitude;
@@ -473,152 +479,110 @@
                     const acc = pos.coords.accuracy;
                     userPos = { lat, lng };
 
-                    // Firebase Update
-                    if(currentUserUid && db) {
-                        const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'locations', currentUserUid);
-                        setDoc(userRef, {
-                            lat: lat, lng: lng,
-                            badgeIcon: myBadge.icon,
-                            badgeName: myBadge.name,
-                            timestamp: serverTimestamp()
-                        }, { merge: true });
-                    }
+                    // Broadcast my location to team
+                    broadcastLocation(lat, lng);
 
-                    // Zone Logic
                     let inZone = isPointInPolygon(lat, lng, GNDU_POLYGON);
                     
                     if (!inZone) {
                         document.getElementById('hud').classList.add('out-of-zone');
-                        document.getElementById('gps-status').innerText = "OUT OF BOUNDS - TURN BACK";
+                        document.getElementById('gps-status').innerText = "OFF THE BOARD";
                         document.getElementById('gps-status').style.color = "var(--danger)";
+                        document.getElementById('target-name').innerText = "RETURN TO MAP";
                     } else {
                         document.getElementById('hud').classList.remove('out-of-zone');
-                        document.getElementById('gps-status').innerText = `GPS Active (±${Math.round(acc)}m)`;
-                        document.getElementById('gps-status').style.color = "#a1887f";
+                        // Calculate active teammates
+                        const teamCount = Object.keys(otherPlayers).length;
+                        document.getElementById('gps-status').innerText = `Team: ${teamCount + 1} Active`;
+                        document.getElementById('gps-status').style.color = "var(--gold)";
+                        
+                        if(document.getElementById('target-name').innerText === "RETURN TO MAP") {
+                            document.getElementById('target-name').innerText = MISSIONS[currentLevel].name;
+                        }
                     }
 
-                    updateVisuals(lat, lng, inZone);
+                    updateGameLoop(lat, lng, inZone);
                 },
                 (err) => { document.getElementById('gps-status').innerText = "LOST SIGNAL"; },
                 { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
             );
         }
 
-        function updateVisuals(lat, lng, isSafe) {
-            if (isGameComplete) return;
+        function updateGameLoop(lat, lng, isSafe, forceUpdate = false) {
+            if (isGameComplete && !forceUpdate) return;
+
             const target = MISSIONS[currentLevel];
             const userLatLng = L.latLng(lat, lng);
             const targetLatLng = L.latLng(target.lat, target.lng);
+
+            // Distance
             const dist = userLatLng.distanceTo(targetLatLng);
-            
-            document.getElementById('dist-display').innerText = `${Math.round(dist)} m`;
+            document.getElementById('dist-display').innerText = `${Math.round(dist)}m`;
 
-            // Victory Check
-            if (isSafe && dist <= 35) levelComplete();
+            // Win Check
+            if (isSafe && dist <= CHECKPOINT_RADIUS_METERS && !isGameComplete) {
+                levelComplete();
+            }
 
-            // Render My Marker & Target
+            // Update Markers across all tiles
             mapTiles.forEach((tile) => {
-                // My Marker
+                // 1. My Marker
                 if (tile.userMarker) { tile.map.removeLayer(tile.userMarker); tile.userMarker = null; }
                 if (tile.bounds.contains(userLatLng)) {
-                    const icon = L.divIcon({ className: 'user-marker', html: myBadge.icon, iconSize: [24, 24] });
-                    tile.userMarker = L.marker([lat, lng], {icon: icon, zIndexOffset: 1000}).addTo(tile.map);
+                    const icon = L.divIcon({ className: 'user-marker', iconSize: [16, 16] });
+                    tile.userMarker = L.marker([lat, lng], {icon: icon}).addTo(tile.map);
                 }
 
-                // Target Marker
+                // 2. Target Marker
                 if (tile.targetMarker) { tile.map.removeLayer(tile.targetMarker); tile.targetMarker = null; }
-                if (tile.bounds.contains(targetLatLng)) {
-                    const emoji = currentLevel === MISSIONS.length - 1 ? '🏆' : '💎';
-                    const icon = L.divIcon({ className: 'target-marker', html: emoji, iconSize: [32, 32], iconAnchor: [16, 32] });
+                if (!isGameComplete && tile.bounds.contains(targetLatLng)) {
+                    const emoji = currentLevel === MISSIONS.length - 1 ? '💎' : '📜';
+                    const icon = L.divIcon({ 
+                        className: 'target-marker', 
+                        html: emoji, 
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32]
+                    });
                     tile.targetMarker = L.marker([target.lat, target.lng], {icon: icon}).addTo(tile.map);
                 }
-            });
 
-            // Update Teammates Visuals
-            renderTeammates();
-        }
+                // 3. Teammate Markers
+                // Clean up existing
+                Object.values(tile.teammateMarkers).forEach(m => tile.map.removeLayer(m));
+                tile.teammateMarkers = {};
 
-        // --- 6. MULTIPLAYER LOGIC ---
-        function startTeamListener() {
-            if(!db) return;
-            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'locations'));
-            
-            onSnapshot(q, (snapshot) => {
-                let count = 0;
-                const now = Date.now();
-                
-                snapshot.docChanges().forEach((change) => {
-                    const data = change.doc.data();
-                    const uid = change.doc.id;
-                    if(uid === currentUserUid) return; // Ignore self
+                // Add new
+                Object.entries(otherPlayers).forEach(([uid, data]) => {
+                    const pLat = data.lat;
+                    const pLng = data.lng;
+                    const pLatLng = L.latLng(pLat, pLng);
 
-                    if (change.type === "added" || change.type === "modified") {
-                        // Check freshness (ignore stale data > 5 mins)
-                        const time = data.timestamp ? data.timestamp.toMillis() : now;
-                        if (now - time < 5 * 60 * 1000) {
-                            teammates[uid] = data;
-                        }
-                    }
-                    if (change.type === "removed") {
-                        delete teammates[uid];
-                    }
-                });
-                
-                // Cleanup stale users
-                Object.keys(teammates).forEach(uid => {
-                    const t = teammates[uid].timestamp ? teammates[uid].timestamp.toMillis() : 0;
-                    if (now - t > 5 * 60 * 1000) delete teammates[uid];
-                });
-
-                count = Object.keys(teammates).length;
-                document.getElementById('team-count').innerText = count > 0 ? `${count} Active` : "Searching...";
-                
-                renderTeammates();
-            });
-        }
-
-        function renderTeammates() {
-            // Loop through all tiles
-            mapTiles.forEach(tile => {
-                // Clear existing teammates on this tile
-                Object.keys(tile.teammateMarkers).forEach(uid => {
-                    tile.map.removeLayer(tile.teammateMarkers[uid]);
-                    delete tile.teammateMarkers[uid];
-                });
-
-                // Add teammates if they are in this tile's bounds
-                Object.keys(teammates).forEach(uid => {
-                    const tm = teammates[uid];
-                    const tmLatLng = L.latLng(tm.lat, tm.lng);
-                    
-                    if (tile.bounds.contains(tmLatLng)) {
-                        const html = `
-                            <div style="position:relative; text-align:center;">
-                                <div class="teammate-marker">${tm.badgeIcon}</div>
-                                <div class="teammate-label">${tm.badgeName}</div>
-                            </div>
-                        `;
-                        const icon = L.divIcon({ 
-                            className: 'tm-icon-container', 
-                            html: html, 
-                            iconSize: [30, 40], 
-                            iconAnchor: [15, 20] 
+                    if (tile.bounds.contains(pLatLng)) {
+                        const icon = L.divIcon({
+                            className: 'teammate-div',
+                            html: `<div class="teammate-marker"></div>`, // Simple blue dot
+                            iconSize: [14, 14],
+                            iconAnchor: [7, 7]
                         });
-                        tile.teammateMarkers[uid] = L.marker([tm.lat, tm.lng], {icon: icon}).addTo(tile.map);
+                        const marker = L.marker([pLat, pLng], {icon: icon}).addTo(tile.map);
+                        tile.teammateMarkers[uid] = marker;
                     }
                 });
             });
         }
 
-        // --- 7. GAME PROGRESS ---
         function loadMission(index) {
-            if (index >= MISSIONS.length) { gameWon(); return; }
+            if (index >= MISSIONS.length) {
+                gameWon();
+                return;
+            }
             const mission = MISSIONS[index];
             document.getElementById('target-name').innerText = mission.name;
+            document.getElementById('checkpoint-count').innerText = `${index + 1} / ${MISSIONS.length}`;
             const pct = ((index) / MISSIONS.length) * 100;
             document.getElementById('progress-fill').style.width = `${pct}%`;
 
-            if(index === 0) showModal("JUMANJI", `A game for those who seek to find...<br><br>Target: <span style="color:var(--primary)">${mission.name}</span>`);
+            if(index === 0) showModal("JUMANJI", `Welcome to the jungle.<br><br>Find: <b style="color:var(--gold-bright)">${mission.name}</b><br>Stay within the Golden Border.`);
         }
 
         function levelComplete() {
@@ -628,7 +592,7 @@
                 gameWon();
             } else {
                 const nextMission = MISSIONS[currentLevel];
-                showModal("DRUMS BEATING...", `The jungle shifts.<br>New Target: <span style="color:var(--primary)">${nextMission.name}</span>`);
+                showModal("DISCOVERED", `The board shifts...<br><br>Next Clue: <b style="color:var(--gold-bright)">${nextMission.name}</b>`);
                 loadMission(currentLevel);
             }
         }
@@ -636,21 +600,21 @@
         function gameWon() {
             isGameComplete = true;
             document.getElementById('progress-fill').style.width = `100%`;
-            showModal("JUMANJI!", "You have reached the center.<br>Call out its name to finish the game.");
-            document.getElementById('target-name').innerText = "GAME OVER";
-            document.getElementById('hud').style.borderColor = "gold";
+            showModal("JUMANJI", "You have restored the jewel.<br>The curse is lifted.");
+            document.getElementById('target-name').innerText = "CURSE LIFTED";
+            document.getElementById('hud').style.borderColor = "var(--gold-bright)";
         }
 
-        // --- EXPORTS for HTML OnClick ---
-        window.closeModal = () => document.getElementById('modal-overlay').style.display = 'none';
-        window.toggleDebug = () => {
-             const mode = document.getElementById('grid-container').style.opacity;
-             document.getElementById('grid-container').style.opacity = mode === '0.5' ? '1' : '0.5';
-        };
+        function showModal(title, msg) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerHTML = msg;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+        function toggleDebug() { const p = document.getElementById('debug-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+        function skipLevel() { levelComplete(); }
 
-        // Start
         init();
     </script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>
