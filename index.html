@@ -155,6 +155,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <h2 class="text-3xl font-bold mb-8">About Me</h2>
             <div class="grid md:grid-cols-2 gap-8">
+                <!-- Left Column -->
                 <div class="space-y-4">
                     <p>I'm a computational astronomy student passionate about understanding the cosmos through the lens of data science and machine learning. My research focuses on AGNs, galaxy evolution, and deep learning applications in astronomy.</p>
                     
@@ -173,9 +174,10 @@
 
                         <!-- NEW SECTION FOR SITEE.IN -->
                         <div>
-                            <h3 class="text-xl font-bold mb-2">Generative AI Startup</h3>
-                            <div class="bg-gray-100 dark:bg-dark-secondary p-4 rounded-lg flex flex-col items-center text-center border-l-4 border-indigo-500 relative overflow-hidden">
-                                <span class="absolute top-0 right-0 bg-indigo-500 text-white text-xs px-2 py-1 rounded-bl-lg font-bold uppercase">Startup</span>
+                            <h3 class="text-xl font-bold mb-2">Generative AI Startup <small>(Founder + CTO)</small></h3>
+                            <!-- CHANGED TO MATCH TEXWOLF CARD STYLE -->
+                            <div class="bg-gray-100 dark:bg-dark-secondary p-4 rounded-lg flex flex-col items-center text-center border-l-4 border-gray-800 dark:border-gray-200 relative overflow-hidden">
+                                <span class="absolute top-0 right-0 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-bl-lg font-bold uppercase">Startup</span>
                                 <div class="mb-2">
                                     <img src="https://www.sitee.in/assets/img/logo.svg" style="height: 40px;" class="mb-2 dark:invert" alt="Sitee.in Logo" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'bi bi-cpu-fill text-3xl text-indigo-500\'></i>'">
                                 </div>
@@ -191,59 +193,66 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-100 dark:bg-dark-secondary rounded-lg p-6 h-fit">
-                    <h3 class="text-xl font-bold mb-4">Education</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="font-bold">M.Sc. FYIP Physics</p>
-                            <p class="text-sm">Expected 2027 • Guru Nanak Dev University</p>
+                <!-- Right Column Wrapper -->
+                <div class="space-y-6">
+                    <!-- Education Card -->
+                    <div class="bg-gray-100 dark:bg-dark-secondary rounded-lg p-6 h-fit">
+                        <h3 class="text-xl font-bold mb-4">Education</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="font-bold">M.Sc. FYIP Physics</p>
+                                <p class="text-sm">Expected 2027 • Guru Nanak Dev University</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">High School in Maths, Chemistry, Physics Majors</p>
+                                <p class="text-sm">2024 • The Millennium School</p>
+                            </div>
+                            <hr class="border-gray-300 dark:border-dark-border">
+                            <div>
+                                <a href="cv_jsdingra.pdf" class="text-blue-600 hover:underline flex items-center gap-2" target="_blank">
+                                    <i class="bi bi-file-earmark-person"></i> Check out my CV
+                                </a>
+                            </div>
+                            <div>
+                                <a href="https://www.youtube.com/playlist?list=PL54Wg1cwz_jO8lR12W_DJWXkAUlpTlx4w" class="text-blue-600 hover:underline flex items-center gap-2" target="_blank">
+                                    <i class="bi bi-youtube"></i> Lecture Series on Computational Physics
+                                </a>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-bold">High School in Maths, Chemistry, Physics Majors</p>
-                            <p class="text-sm">2024 • The Millennium School</p>
-                        </div>
-                        <hr class="border-gray-300 dark:border-dark-border">
-                        <div>
-                            <a href="cv_jsdingra.pdf" class="text-blue-600 hover:underline flex items-center gap-2" target="_blank">
-                                <i class="bi bi-file-earmark-person"></i> Check out my CV
-                            </a>
-                        </div>
-                        <div>
-                            <a href="https://www.youtube.com/playlist?list=PL54Wg1cwz_jO8lR12W_DJWXkAUlpTlx4w" class="text-blue-600 hover:underline flex items-center gap-2" target="_blank">
-                                <i class="bi bi-youtube"></i> Lecture Series on Computational Physics
+                    </div>
+
+                    <!-- TEXWOLF BOX -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Latex Startup <small>(Founder + CTO)</small></h3>
+                        <div class="bg-gray-100 dark:bg-dark-secondary p-4 rounded-lg flex flex-col items-center text-center border-l-4 border-gray-800 dark:border-gray-200 relative overflow-hidden">
+                            
+                            <!-- ADDED STARTUP LABEL -->
+                            <span class="absolute top-0 right-0 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-bl-lg font-bold uppercase">Free</span>
+                            
+                            <!-- LOGO (Inverted in Light, Normal in Dark) -->
+                            <img src="https://texwolf.com/light.png"
+                                 alt="TexWolf Logo"
+                                 class="h-14 mb-2 invert dark:invert-0" />
+
+                            <!-- NAME -->
+                            <h4 class="font-bold text-lg">TexWolf</h4>
+
+                            <!-- COPY -->
+                            <p class="text-sm mb-2 mt-1">
+                                Founder of <strong>TexWolf</strong>, a free, local-first LaTeX editor with
+                                <strong>unlimited collaborative projects</strong>. Built as a private, offline-first
+                                alternative to Overleaf, no cloud, no limits and totally for <strong>free</strong>.
+                            </p>
+
+                            <!-- LINK -->
+                            <a href="https://texwolf.com"
+                               class="text-blue-600 hover:text-blue-500 font-semibold"
+                               target="_blank">
+                                Visit TexWolf →
                             </a>
                         </div>
                     </div>
                 </div>
-                <!-- TEXWOLF BOX -->
-<div class="mt-6">
-    <h3 class="text-xl font-bold mb-2">Founder Project</h3>
-
-    <div class="bg-gray-100 dark:bg-dark-secondary p-4 rounded-lg flex flex-col items-center text-center border-l-4 border-gray-800 dark:border-gray-200">
-        
-        <!-- LOGO -->
-        <img src="https://texwolf.com/light.png"
-             alt="TexWolf Logo"
-             class="h-10 mb-2 dark:invert" />
-
-        <!-- NAME -->
-        <h4 class="font-bold text-lg">TexWolf</h4>
-
-        <!-- COPY (SAME ENERGY AS SITEE) -->
-        <p class="text-sm mb-2 mt-1">
-            Founder of <strong>TexWolf</strong>, a free, local-first LaTeX editor with
-            <strong>unlimited collaborators</strong>. Built as a private, offline-first
-            alternative to Overleaf — no cloud, no limits.
-        </p>
-
-        <!-- LINK -->
-        <a href="https://texwolf.com"
-           class="text-blue-600 hover:text-blue-500 font-semibold"
-           target="_blank">
-            Visit TexWolf →
-        </a>
-    </div>
-</div>
 
             </div>
         </div>
