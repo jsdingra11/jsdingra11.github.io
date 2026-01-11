@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Realistic AGN & Star Formation Simulation</title>
     <style>
+        /* --- Core Layout --- */
         body {
             margin: 0;
             overflow: hidden;
@@ -12,18 +13,25 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
             overscroll-behavior: none;
+            touch-action: none; /* Disables browser zooming/scrolling on mobile */
         }
         #canvas-container {
             width: 100vw;
             height: 100vh;
-            height: 100dvh; 
+            height: 100dvh; /* Dynamic viewport height for mobile browsers */
             display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
+
+        /* --- UI Layer --- */
         #ui-layer {
             position: absolute;
             top: 20px;
             left: 20px;
-            pointer-events: none;
+            pointer-events: none; /* Let clicks pass through to canvas where empty */
             max-width: 400px;
             width: calc(100% - 40px);
             background: rgba(0, 0, 0, 0.7);
@@ -31,37 +39,49 @@
             border-radius: 8px;
             border: 1px solid #333;
             backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             box-sizing: border-box;
             z-index: 10;
         }
+
         h1 {
             font-size: 1.2rem;
             margin: 0 0 10px 0;
             color: #4facfe;
             text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
         }
+
         p {
             font-size: 0.9rem;
             line-height: 1.4;
             color: #ccc;
             margin-bottom: 15px;
         }
+
+        /* --- Indicators --- */
+        .indicator-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
         .indicator {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
             font-size: 0.85rem;
         }
         .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 6px;
             display: inline-block;
             flex-shrink: 0;
         }
+
+        /* --- Status Box --- */
         #status-box {
-            margin-top: 15px;
+            margin-top: 10px;
             padding: 12px;
             background: rgba(20, 20, 30, 0.8);
             border-radius: 4px;
@@ -74,11 +94,12 @@
             font-size: 0.9rem;
         }
         
+        /* --- Buttons --- */
         .btn-group {
             display: flex;
             gap: 10px;
             margin-top: 15px;
-            pointer-events: auto;
+            pointer-events: auto; /* Re-enable clicks for buttons */
         }
 
         button {
@@ -93,6 +114,7 @@
             transition: transform 0.1s, background 0.3s;
             -webkit-tap-highlight-color: transparent;
             flex: 1; 
+            touch-action: manipulation;
         }
 
         #restart-btn { background: #333; color: #fff; border: 1px solid #555; }
@@ -111,20 +133,53 @@
             100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
         }
         
-        button:active { transform: scale(0.98); }
+        button:active { transform: scale(0.96); }
         
-        #stats { margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #888; }
+        #stats { 
+            margin-top: 10px; 
+            font-family: monospace; 
+            font-size: 0.75rem; 
+            color: #888; 
+            text-align: right;
+        }
 
+        /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 768px) {
             #ui-layer {
-                top: auto; bottom: 0; left: 0; width: 100%; max-width: 100%;
-                border-radius: 15px 15px 0 0; border: none; padding: 15px 20px 30px 20px;
-                max-height: 45vh; overflow-y: auto;
+                top: auto; 
+                bottom: 0; 
+                left: 0; 
+                width: 100%; 
+                max-width: 100%;
+                border-radius: 20px 20px 0 0; 
+                border: none; 
+                border-top: 1px solid #333;
+                padding: 20px;
+                /* iPhone Safe Area support */
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+                background: rgba(0, 0, 0, 0.85);
             }
-            h1 { font-size: 1.1rem; }
-            p { display: none; }
-            #status-box { padding: 8px; font-size: 0.8rem; }
-            .indicator { display: inline-flex; margin-right: 10px; }
+            h1 { font-size: 1.1rem; text-align: center; }
+            p.description { display: none; } /* Hide description to save space */
+            
+            #status-box { 
+                padding: 8px; 
+                font-size: 0.8rem; 
+                margin-top: 5px;
+            }
+            
+            .indicator-container {
+                justify-content: center;
+                margin-bottom: 5px;
+            }
+
+            .btn-group {
+                margin-top: 10px;
+            }
+            
+            button {
+                padding: 14px; /* Larger touch targets */
+            }
         }
     </style>
 </head>
@@ -132,9 +187,9 @@
 
     <div id="ui-layer">
         <h1>Astrophysical Simulation</h1>
-        <p>Simulating the co-evolution of a galaxy and its Supermassive Black Hole.</p>
+        <p class="description">Simulating the co-evolution of a galaxy and its Supermassive Black Hole.</p>
         
-        <div style="display: flex; flex-wrap: wrap;">
+        <div class="indicator-container">
             <div class="indicator"><span class="dot" style="background: #a54;"></span> Gas</div>
             <div class="indicator"><span class="dot" style="background: #fff; box-shadow: 0 0 5px #fff;"></span> Stars</div>
             <div class="indicator"><span class="dot" style="background: #fc0; box-shadow: 0 0 8px #fc0;"></span> AGN</div>
@@ -146,7 +201,7 @@
         
         <div class="btn-group">
             <button id="restart-btn">Reset</button>
-            <button id="download-btn">Download Video</button>
+            <button id="download-btn">Record Video (HD)</button>
         </div>
     </div>
 
@@ -156,11 +211,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
+        // Device Detection
         const isMobile = window.innerWidth < 768;
 
-        const G_MASS = 2000;         
-        const DISC_SCALE = 60;       
-        const NUM_PARTICLES = isMobile ? 6000 : 20000; 
+        // --- Configuration ---
+        const G_MASS = 2000;        
+        const DISC_SCALE = isMobile ? 50 : 60; // Slightly smaller galaxy on mobile       
+        const NUM_PARTICLES = isMobile ? 6000 : 20000; // Performance reduction for mobile
         const NUM_JET_PARTICLES = isMobile ? 800 : 2000;
         const SPIRAL_ARMS = 2;
         const ARM_WINDING = 0.5;    
@@ -186,7 +243,7 @@
         let recordedChunks = [];
         let isRecording = false;
         let selectedMimeType = '';
-        let selectedExtension = 'webm';
+        let selectedExtension = 'mp4';
         let compositeCanvas, compositeCtx;
 
         const TYPE_GAS = 0; const TYPE_STAR = 1; const TYPE_DEAD = 2;
@@ -194,12 +251,19 @@
         function init() {
             const container = document.getElementById('canvas-container');
             
-            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance", preserveDrawingBuffer: true });
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: !isMobile, 
+                powerPreference: "high-performance", 
+                preserveDrawingBuffer: true 
+            });
+            
+            // Handle resizing correctly regarding pixel ratio
+            const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+            renderer.setPixelRatio(pixelRatio); 
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2)); 
             container.appendChild(renderer.domElement);
 
-            // Initialize Composite Canvas for recording with text
+            // Composite Canvas Init
             compositeCanvas = document.getElementById('composite-canvas');
             compositeCtx = compositeCanvas.getContext('2d');
 
@@ -208,14 +272,21 @@
             scene.fog = new THREE.FogExp2(0x020205, 0.008);
 
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, isMobile ? 80 : 50, isMobile ? 110 : 80);
+            // Camera further back on mobile to fit the galaxy width-wise
+            camera.position.set(0, isMobile ? 90 : 50, isMobile ? 120 : 80);
             camera.lookAt(0, 0, 0);
 
             createGalaxy(); createJets(); createAGN();
             scene.add(new THREE.AmbientLight(0x111111));
 
+            // Events
             window.addEventListener('resize', onResize);
+            
+            // Mouse & Touch Inputs
             document.addEventListener('mousemove', onMouseMove);
+            
+            // Mobile specific touch handling
+            document.addEventListener('touchstart', onTouchStart, { passive: false });
             document.addEventListener('touchmove', onTouchMove, { passive: false });
             
             document.getElementById('restart-btn').addEventListener('click', (e) => { e.preventDefault(); resetSimulation(false); });
@@ -224,7 +295,45 @@
             animate();
         }
 
-        // --- Drawing Text Caption for Video ---
+        // --- Input Handling ---
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        function onMouseMove(e) { 
+            mouseX = (e.clientX - window.innerWidth/2) * 0.001; 
+            mouseY = (e.clientY - window.innerHeight/2) * 0.001; 
+        }
+
+        function onTouchStart(e) {
+            // Prevent default to stop scrolling, but allow button clicks
+            if(e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+            }
+        }
+
+        function onTouchMove(e) { 
+            // Prevent scrolling on the canvas
+            e.preventDefault(); 
+            const touch = e.touches[0]; 
+            // Higher sensitivity for touch
+            mouseX = (touch.clientX - window.innerWidth/2) * 0.003; 
+            mouseY = (touch.clientY - window.innerHeight/2) * 0.003; 
+        }
+
+        function onResize() { 
+            if(!isRecording) { 
+                camera.aspect = window.innerWidth / window.innerHeight; 
+                camera.updateProjectionMatrix(); 
+                renderer.setSize(window.innerWidth, window.innerHeight); 
+                
+                // Adjust camera distance if orientation changes
+                const isNowMobile = window.innerWidth < 768;
+                camera.position.z = isNowMobile ? 120 : 80;
+                camera.position.y = isNowMobile ? 90 : 50;
+            } 
+        }
+
+        // --- Text & Rendering Logic ---
         function getPhaseText() {
             if (currentPhase === 1) return "Phase 1: Quiescent Galaxy (Gas Cooling)";
             if (currentPhase === 2) return "Phase 2: Secular Evolution (Star Formation)";
@@ -237,21 +346,17 @@
             const width = renderer.domElement.width;
             const height = renderer.domElement.height;
             
-            // 1. Draw WebGL frame
             compositeCtx.drawImage(renderer.domElement, 0, 0, width, height);
             
-            // 2. Configure Text
-            const fontSize = Math.floor(width * 0.04); // Responsive font size
+            const fontSize = Math.max(20, Math.floor(width * 0.04)); 
             compositeCtx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
             compositeCtx.textAlign = 'center';
             compositeCtx.textBaseline = 'bottom';
             
-            // 3. Draw Text Shadow (Black Outline)
             compositeCtx.lineWidth = 4;
             compositeCtx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
             compositeCtx.strokeText(getPhaseText(), width / 2, height - 50);
             
-            // 4. Draw Text Fill
             if (currentPhase === 1) compositeCtx.fillStyle = '#ffcccc';
             else if (currentPhase === 2) compositeCtx.fillStyle = '#4facfe';
             else if (currentPhase === 3) compositeCtx.fillStyle = '#ffcc00';
@@ -260,38 +365,53 @@
             compositeCtx.fillText(getPhaseText(), width / 2, height - 50);
         }
 
-        // --- Auto Recording Logic ---
+        // --- Recording Logic ---
         function startAutoRecord() {
+            if (isMobile) {
+                alert("Note: High Quality Video recording on mobile devices may take time or crash due to memory limits.");
+            }
             if (isRecording) return; 
             
-            // Set resolution for recording
-            renderer.setPixelRatio(1);
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            // --- HIGH QUALITY SETUP ---
+            // Force 1920x1080 (FHD) resolution regardless of screen size
+            const recWidth = 1920;
+            const recHeight = 1080;
             
-            // Sync Composite Canvas size
-            compositeCanvas.width = renderer.domElement.width;
-            compositeCanvas.height = renderer.domElement.height;
+            renderer.setPixelRatio(1); // Use 1:1 pixel ratio for video export
+            renderer.setSize(recWidth, recHeight);
+            
+            // Adjust camera for 16:9 aspect ratio
+            camera.aspect = recWidth / recHeight;
+            camera.updateProjectionMatrix();
+            // Reset position to "Desktop" standard for the recording
+            camera.position.z = 80;
+            camera.position.y = 50;
+
+            compositeCanvas.width = recWidth;
+            compositeCanvas.height = recHeight;
 
             resetSimulation(true); 
             
             const btn = document.getElementById('download-btn');
-            btn.innerText = "Recording...";
+            btn.innerText = "Recording HD...";
             btn.classList.add('recording');
             
             recordedChunks = [];
+            // Capture at 60 FPS for smoothness
+            const stream = compositeCanvas.captureStream(60); 
             
-            // Capture stream from COMPOSITE canvas, not WebGL
-            const stream = compositeCanvas.captureStream(24); 
-            
-            // Mime Type Logic
-            const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=h264', 'video/webm'];
+            // Prioritize MP4, fall back to WebM
+            const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
             selectedMimeType = '';
             for (let type of mimeTypes) { if (MediaRecorder.isTypeSupported(type)) { selectedMimeType = type; break; } }
+            
             selectedExtension = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
-            const options = { mimeType: selectedMimeType, videoBitsPerSecond: 2500000 };
+            
+            // Ultra High Quality Bitrate: 15 Mbps
+            const options = selectedMimeType ? { mimeType: selectedMimeType, videoBitsPerSecond: 15000000 } : undefined;
 
             try {
-                mediaRecorder = new MediaRecorder(stream, selectedMimeType ? options : undefined);
+                mediaRecorder = new MediaRecorder(stream, options);
             } catch (e) {
                 alert("Recording failed: Browser not supported.");
                 finishRecordingUI();
@@ -306,11 +426,21 @@
 
         function finishRecordingUI() {
             const btn = document.getElementById('download-btn');
-            btn.innerText = "Download Video";
+            btn.innerText = "Record Video (HD)";
             btn.classList.remove('recording');
             isRecording = false;
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+            
+            // Restore original screen settings
+            const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+            renderer.setPixelRatio(pixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            
+            const isNowMobile = window.innerWidth < 768;
+            camera.position.z = isNowMobile ? 120 : 80;
+            camera.position.y = isNowMobile ? 90 : 50;
         }
 
         function downloadVideo() {
@@ -322,12 +452,12 @@
             document.body.appendChild(a);
             a.style = "display: none";
             a.href = url;
-            a.download = "Galaxy_Simulation_" + Date.now() + "." + selectedExtension;
+            a.download = "HD_Galaxy_Sim_" + Date.now() + "." + selectedExtension;
             a.click();
             setTimeout(() => { window.URL.revokeObjectURL(url); document.body.removeChild(a); recordedChunks = []; }, 100);
         }
 
-        // --- Standard Simulation ---
+        // --- Simulation Logic ---
         function createGalaxy() {
             galaxyGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(NUM_PARTICLES * 3);
@@ -472,17 +602,28 @@
 
         function activateAGN() { agnActive = true; currentPhase = 3; agnCore.visible = true; updateStatusBox(3); }
         function shutdownAGN() { if(currentPhase !== 4) { agnActive = false; currentPhase = 4; phase4Timer = 0; updateStatusBox(4); } }
-        let mouseX = 0, mouseY = 0;
-        function onMouseMove(e) { mouseX = (e.clientX - window.innerWidth/2) * 0.001; mouseY = (e.clientY - window.innerHeight/2) * 0.001; }
-        function onTouchMove(e) { e.preventDefault(); const touch = e.touches[0]; mouseX = (touch.clientX - window.innerWidth/2) * 0.002; mouseY = (touch.clientY - window.innerHeight/2) * 0.002; }
-        function onResize() { if(!isRecording) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); } }
+        
         function updateStatusBox(phase) {
             const box = document.getElementById('status-box');
-            if (phase === 1) { box.innerHTML = "Phase 1: Quiescent Galaxy<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Gas cooling. Low star formation.</span>"; box.style.borderLeftColor = "#a54"; box.style.color = "#fff"; }
-            else if (phase === 2) { box.innerHTML = "Phase 2: Secular Evolution<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Spiral arms trigger star formation.</span>"; box.style.borderLeftColor = "#4facfe"; box.style.color = "#fff"; }
-            else if (phase === 3) { box.innerHTML = "Phase 3: AGN Ignition<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Quasar Mode. Jets launch.</span>"; box.style.borderLeftColor = "#fc0"; box.style.color = "#fc0"; }
-            else if (phase === 4) { box.innerHTML = "Phase 4: Quenching<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Red & Dead. Fuel exhausted.</span>"; box.style.borderLeftColor = "#555"; box.style.color = "#aaa"; }
+            // Simplified status box content for mobile readability
+            if (phase === 1) { 
+                box.innerHTML = "Phase 1: Quiescent Galaxy<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Gas cooling. Low star formation.</span>"; 
+                box.style.borderLeftColor = "#a54"; box.style.color = "#fff"; 
+            }
+            else if (phase === 2) { 
+                box.innerHTML = "Phase 2: Secular Evolution<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Spiral arms trigger star formation.</span>"; 
+                box.style.borderLeftColor = "#4facfe"; box.style.color = "#fff"; 
+            }
+            else if (phase === 3) { 
+                box.innerHTML = "Phase 3: AGN Ignition<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Quasar Mode. Jets launch.</span>"; 
+                box.style.borderLeftColor = "#fc0"; box.style.color = "#fc0"; 
+            }
+            else if (phase === 4) { 
+                box.innerHTML = "Phase 4: Quenching<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Red & Dead. Fuel exhausted.</span>"; 
+                box.style.borderLeftColor = "#555"; box.style.color = "#aaa"; 
+            }
         }
+        
         function resetSimulation(fromRecord) {
             if(!fromRecord && isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
             agnActive = false; agnMass = 0; currentPhase = 1; agnCore.visible = false; time = 0; phase4Timer = 0;
@@ -502,11 +643,19 @@
             requestAnimationFrame(animate);
             const dt = 0.05; time += dt;
             updateGalaxy(dt); updateJets(dt);
-            camera.position.x += (mouseX * 50 - camera.position.x) * 0.05;
-            const baseHeight = isMobile ? 80 : 50; camera.position.y += (baseHeight + mouseY * 20 - camera.position.y) * 0.05;
+            
+            // Smooth Camera Movement with inertia
+            targetX += (mouseX * 50 - targetX) * 0.05;
+            targetY += (mouseY * 20 - targetY) * 0.05;
+            
+            const baseHeight = (isMobile && !isRecording) ? 90 : 50; 
+            camera.position.x += (targetX - camera.position.x) * 0.05;
+            camera.position.y += (baseHeight + targetY - camera.position.y) * 0.05;
+            
             camera.lookAt(0,0,0);
+            
             renderer.render(scene, camera);
-            if (isRecording) drawComposition(); // Draw text overlay for video
+            if (isRecording) drawComposition(); 
         }
 
         init(); updateStatusBox(1);
