@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Responsive Astrophysics Simulation</title>
+    <title>Realistic AGN & Star Formation Simulation</title>
     <style>
         body {
             margin: 0;
@@ -11,161 +11,120 @@
             background-color: #000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            touch-action: none; /* Disables browser gestures like swipe-back */
+            overscroll-behavior: none;
         }
         #canvas-container {
             width: 100vw;
             height: 100vh;
-            height: 100dvh; /* Mobile browser friendly height */
+            height: 100dvh; 
             display: block;
         }
-        
-        /* UI Layer - Default (Desktop) */
         #ui-layer {
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 380px;
-            background: rgba(0, 0, 0, 0.75);
+            pointer-events: none;
+            max-width: 400px;
+            width: calc(100% - 40px);
+            background: rgba(0, 0, 0, 0.7);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid #333;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
+            box-sizing: border-box;
             z-index: 10;
-            pointer-events: none; /* Clicks pass through to canvas */
-            transition: all 0.3s ease;
         }
-
-        /* Interactive elements inside UI need pointer-events back */
-        #ui-layer * {
-            pointer-events: auto;
-        }
-
         h1 {
             font-size: 1.2rem;
-            margin: 0 0 8px 0;
+            margin: 0 0 10px 0;
             color: #4facfe;
             text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
         }
-        
         p {
-            font-size: 0.85rem;
-            color: #ccc;
-            margin-bottom: 12px;
+            font-size: 0.9rem;
             line-height: 1.4;
-        }
-
-        /* Indicators Grid */
-        .indicators-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
+            color: #ccc;
+            margin-bottom: 15px;
         }
         .indicator {
             display: flex;
             align-items: center;
-            font-size: 0.8rem;
-            color: #eee;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
         }
         .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 10px;
+            display: inline-block;
+            flex-shrink: 0;
         }
-
-        /* Status Box */
         #status-box {
-            padding: 10px;
-            background: rgba(30, 30, 40, 0.8);
-            border-radius: 6px;
-            font-weight: 600;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 4px;
+            font-weight: bold;
             color: #fff;
             text-align: center;
             border-left: 4px solid #4facfe;
-            font-size: 0.85rem;
-            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
         }
-
-        #stats {
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: #aaa;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        /* Buttons */
+        
         .btn-group {
             display: flex;
             gap: 10px;
+            margin-top: 15px;
+            pointer-events: auto;
         }
+
         button {
-            flex: 1;
             border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.8rem;
-            text-transform: uppercase;
+            padding: 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            transition: transform 0.1s, background 0.3s;
             -webkit-tap-highlight-color: transparent;
+            flex: 1; 
         }
-        button:active { transform: scale(0.96); opacity: 0.9; }
-        
-        #restart-btn { background: #333; color: white; border: 1px solid #555; }
-        #download-btn { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #000; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3); }
+
+        #restart-btn { background: #333; color: #fff; border: 1px solid #555; }
+        #download-btn { background: linear-gradient(45deg, #4facfe, #00f2fe); color: #000; }
         
         #download-btn.recording {
-            background: #ff4757;
+            background: #e74c3c;
             color: white;
             animation: pulse 1.5s infinite;
-            pointer-events: none;
+            pointer-events: none; 
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
         }
-
-        /* --- MOBILE RESPONSIVE STYLES --- */
         
-        /* 1. Portrait Mobile: UI at Bottom */
+        button:active { transform: scale(0.98); }
+        
+        #stats { margin-top: 10px; font-family: monospace; font-size: 0.8rem; color: #888; }
+
         @media (max-width: 768px) {
             #ui-layer {
-                top: auto;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 90%;
-                max-width: 400px;
-                padding: 15px;
-                padding-bottom: 25px; /* Extra padding for bottom gestures */
+                top: auto; bottom: 0; left: 0; width: 100%; max-width: 100%;
+                border-radius: 15px 15px 0 0; border: none; padding: 15px 20px 30px 20px;
+                max-height: 45vh; overflow-y: auto;
             }
-            h1 { font-size: 1.1rem; text-align: center; }
-            p { display: none; } /* Hide description to save space */
-            .indicators-grid { margin-bottom: 10px; }
-        }
-
-        /* 2. Landscape Mobile: UI Top-Left (Compact) */
-        @media (max-width: 900px) and (orientation: landscape) {
-            #ui-layer {
-                top: 10px;
-                left: 10px;
-                bottom: auto;
-                right: auto;
-                transform: none;
-                width: 280px;
-                max-height: 90vh;
-                overflow-y: auto;
-                padding: 12px;
-            }
-            h1 { font-size: 1rem; }
-            button { padding: 10px; font-size: 0.7rem; }
-            .btn-group { flex-direction: column; }
+            h1 { font-size: 1.1rem; }
+            p { display: none; }
+            #status-box { padding: 8px; font-size: 0.8rem; }
+            .indicator { display: inline-flex; margin-right: 10px; }
         }
     </style>
 </head>
@@ -173,21 +132,21 @@
 
     <div id="ui-layer">
         <h1>Astrophysical Simulation</h1>
-        <p>Simulation of Galaxy Formation, AGN Feedback, and Quenching.</p>
+        <p>Simulating the co-evolution of a galaxy and its Supermassive Black Hole.</p>
         
-        <div class="indicators-grid">
+        <div style="display: flex; flex-wrap: wrap;">
             <div class="indicator"><span class="dot" style="background: #a54;"></span> Gas</div>
-            <div class="indicator"><span class="dot" style="background: #fff; box-shadow: 0 0 4px #fff;"></span> Stars</div>
-            <div class="indicator"><span class="dot" style="background: #fc0; box-shadow: 0 0 6px #fc0;"></span> AGN</div>
-            <div class="indicator"><span class="dot" style="background: #f0f; box-shadow: 0 0 4px #f0f;"></span> Jets</div>
+            <div class="indicator"><span class="dot" style="background: #fff; box-shadow: 0 0 5px #fff;"></span> Stars</div>
+            <div class="indicator"><span class="dot" style="background: #fc0; box-shadow: 0 0 8px #fc0;"></span> AGN</div>
+            <div class="indicator"><span class="dot" style="background: #f0f; box-shadow: 0 0 5px #f0f;"></span> Jets</div>
         </div>
 
-        <div id="status-box">Ready</div>
-        <div id="stats">Vel: <span id="vel-disp">0</span> | Acc: <span id="acc-rate">0</span></div>
+        <div id="status-box">Initializing...</div>
+        <div id="stats">Vel: <span id="vel-disp">0</span> km/s | Acc: <span id="acc-rate">0</span> M☉/yr</div>
         
         <div class="btn-group">
             <button id="restart-btn">Reset</button>
-            <button id="download-btn">Record Video</button>
+            <button id="download-btn">Download Video</button>
         </div>
     </div>
 
@@ -197,28 +156,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        // --- Configuration ---
         const isMobile = window.innerWidth < 768;
-        
-        // Physics Constants
+
         const G_MASS = 2000;         
         const DISC_SCALE = 60;       
-        // Performance: Reduce particles on mobile to keep FPS high
         const NUM_PARTICLES = isMobile ? 6000 : 20000; 
         const NUM_JET_PARTICLES = isMobile ? 800 : 2000;
         const SPIRAL_ARMS = 2;
         const ARM_WINDING = 0.5;    
         const VISCOSITY = 0.025;    
+        const AGN_CRITICAL_MASS = 500; 
+        const AGN_SHUTDOWN_MASS = 1500; 
+        const STAR_FORMATION_THRESH = 0.03; 
         
-        // --- Global Variables ---
         let scene, camera, renderer;
         let galaxyGeo, galaxyMat, galaxyPoints;
         let jetGeo, jetMat, jetPoints;
         let agnCore, agnGlow;
         let particlesData = []; 
         let jetData = [];
-        
-        // Simulation State
         let agnActive = false;
         let currentPhase = 1;
         let agnMass = 0;
@@ -229,6 +185,8 @@
         let mediaRecorder;
         let recordedChunks = [];
         let isRecording = false;
+        let selectedMimeType = '';
+        let selectedExtension = 'webm';
         let compositeCanvas, compositeCtx;
 
         const TYPE_GAS = 0; const TYPE_STAR = 1; const TYPE_DEAD = 2;
@@ -236,117 +194,41 @@
         function init() {
             const container = document.getElementById('canvas-container');
             
-            // Renderer Setup
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: !isMobile, // Disable antialiasing on mobile for performance
-                powerPreference: "high-performance", 
-                preserveDrawingBuffer: true 
-            });
+            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance", preserveDrawingBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2)); 
             container.appendChild(renderer.domElement);
 
-            // Composite Canvas for Video Text
+            // Initialize Composite Canvas for recording with text
             compositeCanvas = document.getElementById('composite-canvas');
             compositeCtx = compositeCanvas.getContext('2d');
 
-            // Scene Setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x020205); 
             scene.fog = new THREE.FogExp2(0x020205, 0.008);
 
-            // Camera Setup
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-            // Move camera further back on mobile to see everything in portrait mode
-            camera.position.set(0, isMobile ? 90 : 50, isMobile ? 120 : 80);
+            camera.position.set(0, isMobile ? 80 : 50, isMobile ? 110 : 80);
             camera.lookAt(0, 0, 0);
 
-            // Create Objects
-            createGalaxy(); 
-            createJets(); 
-            createAGN();
+            createGalaxy(); createJets(); createAGN();
             scene.add(new THREE.AmbientLight(0x111111));
 
-            // Events
             window.addEventListener('resize', onResize);
             document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
             
-            // Touch Events
-            const touchZone = document.body;
-            touchZone.addEventListener('touchstart', onTouchStart, { passive: false });
-            touchZone.addEventListener('touchmove', onTouchMove, { passive: false });
-            
-            // UI Buttons
-            document.getElementById('restart-btn').addEventListener('click', (e) => { 
-                e.preventDefault(); resetSimulation(false); 
-            });
-            document.getElementById('download-btn').addEventListener('click', (e) => { 
-                e.preventDefault(); startAutoRecord(); 
-            });
+            document.getElementById('restart-btn').addEventListener('click', (e) => { e.preventDefault(); resetSimulation(false); });
+            document.getElementById('download-btn').addEventListener('click', (e) => { e.preventDefault(); startAutoRecord(); });
 
-            updateStatusBox(1);
             animate();
         }
 
-        // --- Touch & Interaction Logic ---
-        let mouseX = 0, mouseY = 0;
-        let touchStartDist = 0;
-        let baseZoom = 0;
-
-        function onMouseMove(e) { 
-            mouseX = (e.clientX - window.innerWidth/2) * 0.001; 
-            mouseY = (e.clientY - window.innerHeight/2) * 0.001; 
-        }
-
-        function onTouchStart(e) {
-            if(e.touches.length === 2) {
-                // Pinch to zoom start
-                const dx = e.touches[0].pageX - e.touches[1].pageX;
-                const dy = e.touches[0].pageY - e.touches[1].pageY;
-                touchStartDist = Math.sqrt(dx*dx + dy*dy);
-                baseZoom = camera.position.y;
-            }
-        }
-
-        function onTouchMove(e) { 
-            e.preventDefault(); 
-            
-            // 1 Finger: Rotate
-            if (e.touches.length === 1) {
-                const touch = e.touches[0]; 
-                mouseX = (touch.clientX - window.innerWidth/2) * 0.0025; 
-                mouseY = (touch.clientY - window.innerHeight/2) * 0.0025; 
-            }
-            
-            // 2 Fingers: Zoom
-            if (e.touches.length === 2) {
-                const dx = e.touches[0].pageX - e.touches[1].pageX;
-                const dy = e.touches[0].pageY - e.touches[1].pageY;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                const factor = touchStartDist / dist;
-                let newY = baseZoom * factor;
-                newY = Math.max(20, Math.min(newY, 150)); // Clamp zoom
-                
-                // Smoothly update camera
-                camera.position.y += (newY - camera.position.y) * 0.1;
-                camera.position.z += (newY * 1.5 - camera.position.z) * 0.1;
-            }
-        }
-
-        function onResize() { 
-            if(!isRecording) { 
-                camera.aspect = window.innerWidth / window.innerHeight; 
-                camera.updateProjectionMatrix(); 
-                renderer.setSize(window.innerWidth, window.innerHeight); 
-            } 
-        }
-
-        // --- Video Recording Logic ---
+        // --- Drawing Text Caption for Video ---
         function getPhaseText() {
-            if (currentPhase === 1) return "Phase 1: Gas Cooling & Inflow";
-            if (currentPhase === 2) return "Phase 2: Star Formation";
-            if (currentPhase === 3) return "Phase 3: AGN Ignition (Quasar)";
+            if (currentPhase === 1) return "Phase 1: Quiescent Galaxy (Gas Cooling)";
+            if (currentPhase === 2) return "Phase 2: Secular Evolution (Star Formation)";
+            if (currentPhase === 3) return "Phase 3: AGN Ignition (Quasar Mode)";
             if (currentPhase === 4) return "Phase 4: Quenching (Red & Dead)";
             return "";
         }
@@ -355,35 +237,38 @@
             const width = renderer.domElement.width;
             const height = renderer.domElement.height;
             
-            // Draw 3D scene
+            // 1. Draw WebGL frame
             compositeCtx.drawImage(renderer.domElement, 0, 0, width, height);
             
-            // Draw Text Overlay
-            const fontSize = Math.max(16, Math.floor(width * 0.04)); // Responsive font
+            // 2. Configure Text
+            const fontSize = Math.floor(width * 0.04); // Responsive font size
             compositeCtx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
             compositeCtx.textAlign = 'center';
             compositeCtx.textBaseline = 'bottom';
             
-            // Shadow
+            // 3. Draw Text Shadow (Black Outline)
             compositeCtx.lineWidth = 4;
-            compositeCtx.strokeStyle = 'rgba(0,0,0,0.8)';
-            compositeCtx.strokeText(getPhaseText(), width / 2, height - 40);
+            compositeCtx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            compositeCtx.strokeText(getPhaseText(), width / 2, height - 50);
             
-            // Color based on phase
+            // 4. Draw Text Fill
             if (currentPhase === 1) compositeCtx.fillStyle = '#ffcccc';
             else if (currentPhase === 2) compositeCtx.fillStyle = '#4facfe';
             else if (currentPhase === 3) compositeCtx.fillStyle = '#ffcc00';
             else compositeCtx.fillStyle = '#aaaaaa';
             
-            compositeCtx.fillText(getPhaseText(), width / 2, height - 40);
+            compositeCtx.fillText(getPhaseText(), width / 2, height - 50);
         }
 
+        // --- Auto Recording Logic ---
         function startAutoRecord() {
-            if (isRecording) return;
+            if (isRecording) return; 
             
-            // Force Standard Resolution (Save Memory)
+            // Set resolution for recording
             renderer.setPixelRatio(1);
             renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Sync Composite Canvas size
             compositeCanvas.width = renderer.domElement.width;
             compositeCanvas.height = renderer.domElement.height;
 
@@ -394,52 +279,55 @@
             btn.classList.add('recording');
             
             recordedChunks = [];
-            const stream = compositeCanvas.captureStream(24); // 24 FPS
             
-            // Format Selection
+            // Capture stream from COMPOSITE canvas, not WebGL
+            const stream = compositeCanvas.captureStream(24); 
+            
+            // Mime Type Logic
             const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=h264', 'video/webm'];
-            let selectedMimeType = '';
+            selectedMimeType = '';
             for (let type of mimeTypes) { if (MediaRecorder.isTypeSupported(type)) { selectedMimeType = type; break; } }
-            
+            selectedExtension = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
+            const options = { mimeType: selectedMimeType, videoBitsPerSecond: 2500000 };
+
             try {
-                mediaRecorder = new MediaRecorder(stream, selectedMimeType ? { mimeType: selectedMimeType, videoBitsPerSecond: 2500000 } : undefined);
+                mediaRecorder = new MediaRecorder(stream, selectedMimeType ? options : undefined);
             } catch (e) {
-                alert("Browser does not support recording.");
-                finishRecordingUI(); return;
+                alert("Recording failed: Browser not supported.");
+                finishRecordingUI();
+                return;
             }
 
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-            mediaRecorder.onstop = () => downloadVideo(selectedMimeType);
+            mediaRecorder.ondataavailable = function(event) { if (event.data.size > 0) recordedChunks.push(event.data); };
+            mediaRecorder.onstop = downloadVideo;
             mediaRecorder.start();
             isRecording = true;
         }
 
-        function downloadVideo(mimeType) {
+        function finishRecordingUI() {
+            const btn = document.getElementById('download-btn');
+            btn.innerText = "Download Video";
+            btn.classList.remove('recording');
+            isRecording = false;
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function downloadVideo() {
             finishRecordingUI();
             if(recordedChunks.length === 0) return;
-            
-            const blob = new Blob(recordedChunks, { type: mimeType || 'video/webm' });
+            const blob = new Blob(recordedChunks, { type: selectedMimeType || 'video/webm' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             document.body.appendChild(a);
             a.style = "display: none";
             a.href = url;
-            a.download = `Galaxy_Sim_${Date.now()}.${mimeType && mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+            a.download = "Galaxy_Simulation_" + Date.now() + "." + selectedExtension;
             a.click();
-            
             setTimeout(() => { window.URL.revokeObjectURL(url); document.body.removeChild(a); recordedChunks = []; }, 100);
         }
 
-        function finishRecordingUI() {
-            document.getElementById('download-btn').innerText = "Record Video";
-            document.getElementById('download-btn').classList.remove('recording');
-            isRecording = false;
-            // Restore High Quality
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // --- Physics & Animation ---
+        // --- Standard Simulation ---
         function createGalaxy() {
             galaxyGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(NUM_PARTICLES * 3);
@@ -447,17 +335,10 @@
             const sizes = new Float32Array(NUM_PARTICLES);
             particlesData = [];
             const colorGas = new THREE.Color(0x884444); 
-            
             for(let i=0; i<NUM_PARTICLES; i++) {
                 const r = 5 + Math.random() * DISC_SCALE; 
-                const angleOffset = Math.random() * Math.PI * 2; 
-                particlesData.push({ 
-                    r: r, theta: angleOffset, 
-                    y: (Math.random() - 0.5) * (r * 0.05), 
-                    vTheta: Math.sqrt(G_MASS / r), 
-                    type: TYPE_GAS, age: 0, 
-                    baseSize: Math.random() * 0.5 + 0.2 
-                });
+                const angleOffset = (Math.random() * Math.PI * 2); 
+                particlesData.push({ r: r, theta: angleOffset, y: (Math.random() - 0.5) * (r * 0.05), vRadial: 0, vTheta: Math.sqrt(G_MASS / r), type: TYPE_GAS, age: 0, baseSize: Math.random() * 0.5 + 0.2 });
                 positions[i*3] = Math.cos(angleOffset) * r; positions[i*3+1] = particlesData[i].y; positions[i*3+2] = Math.sin(angleOffset) * r;
                 colors[i*3] = colorGas.r; colors[i*3+1] = colorGas.g; colors[i*3+2] = colorGas.b; sizes[i] = particlesData[i].baseSize;
             }
@@ -487,146 +368,130 @@
         }
 
         function createAGN() {
-            agnCore = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+            const geometry = new THREE.SphereGeometry(1.5, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            agnCore = new THREE.Mesh(geometry, material);
             scene.add(agnCore);
-            agnGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: generateSprite(), color: 0xffaa00, blending: THREE.AdditiveBlending }));
+            const glowGeo = new THREE.SpriteMaterial({ map: generateSprite(), color: 0xffaa00, blending: THREE.AdditiveBlending });
+            agnGlow = new THREE.Sprite(glowGeo);
             agnGlow.scale.set(10, 10, 1);
             agnCore.add(agnGlow);
             agnCore.visible = false; 
         }
 
         function generateSprite() {
-            const canvas = document.createElement('canvas'); canvas.width = 32; canvas.height = 32;
+            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
             const ctx = canvas.getContext('2d');
-            const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-            grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.5, 'rgba(255,255,255,0.2)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = grad; ctx.fillRect(0,0,32,32);
+            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.4, 'rgba(255,255,255,0.2)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad; ctx.fillRect(0,0,64,64);
             return new THREE.CanvasTexture(canvas);
         }
 
         function updateGalaxy(dt) {
-            const pos = galaxyGeo.attributes.position.array; const col = galaxyGeo.attributes.color.array; const sz = galaxyGeo.attributes.size.array;
+            const positions = galaxyGeo.attributes.position.array; const colors = galaxyGeo.attributes.color.array; const sizes = galaxyGeo.attributes.size.array;
             let accretionCount = 0;
-
             if (currentPhase === 1 && time > 3.0) { currentPhase = 2; updateStatusBox(2); }
-            const armPhase = time * 0.15;
-
+            const armPhase = time * 1.5 * 0.1;
             for(let i=0; i<NUM_PARTICLES; i++) {
                 const p = particlesData[i];
                 if(p.type === TYPE_DEAD) {
-                    // Respawn logic
                     if(currentPhase < 4 && Math.random() < 0.001) {
-                        p.type = TYPE_GAS; p.r = DISC_SCALE; p.theta = Math.random() * Math.PI * 2;
-                        p.vTheta = Math.sqrt(G_MASS/p.r); p.age = 0; sz[i] = p.baseSize;
-                        col[i*3] = 0.5; col[i*3+1] = 0.2; col[i*3+2] = 0.2;
+                         p.type = TYPE_GAS; p.r = DISC_SCALE; p.theta = Math.random() * Math.PI * 2;
+                         p.vTheta = Math.sqrt(G_MASS/p.r); p.age = 0; sizes[i] = p.baseSize;
+                         colors[i*3] = 0.5; colors[i*3+1] = 0.2; colors[i*3+2] = 0.2;
                     }
-                    pos[i*3] = 9999; continue;
+                    positions[i*3] = 9999; continue;
                 }
-
-                p.theta += (Math.sqrt(G_MASS) / Math.pow(p.r, 1.5)) * dt; // Gravity
-                if (p.type === TYPE_GAS) p.r -= VISCOSITY * (10/p.r) * dt; // Viscosity
-
-                // Spiral Arms & Star Formation
+                p.theta += (Math.sqrt(G_MASS) / Math.pow(p.r, 1.5)) * dt;
+                if (p.type === TYPE_GAS) p.r -= VISCOSITY * (10/p.r) * dt; 
                 const spiralTheta = (Math.log(p.r/5) / Math.tan(ARM_WINDING)) + armPhase;
-                let diff = (p.theta - spiralTheta) % Math.PI; if(diff < 0) diff += Math.PI;
-                
-                if (p.type === TYPE_GAS && diff < 0.3 && currentPhase >= 2 && currentPhase < 4) {
-                    if (Math.random() < 0.03 * dt) {
-                        p.type = TYPE_STAR; p.age = 0; 
-                        col[i*3] = 0.7; col[i*3+1] = 0.8; col[i*3+2] = 1.0; sz[i] = p.baseSize * 3.0; 
+                let angleDiff = (p.theta - spiralTheta) % (Math.PI); 
+                if (angleDiff < 0) angleDiff += Math.PI;
+                const inArm = (angleDiff < 0.3);
+                if (p.type === TYPE_GAS && inArm && currentPhase >= 2 && currentPhase < 4) {
+                    if (Math.random() < STAR_FORMATION_THRESH * dt) {
+                        p.type = TYPE_STAR; p.age = 0; colors[i*3] = 0.7; colors[i*3+1] = 0.8; colors[i*3+2] = 1.0; sizes[i] = p.baseSize * 3.0; 
                     }
                 }
-
-                // Star Aging
                 if (p.type === TYPE_STAR) {
-                    p.age += dt; 
-                    if (p.age > 2.0 && p.age < 5.0) { col[i*3] = 1.0; col[i*3+1] = 0.9; col[i*3+2] = 0.7; } // Yellow
-                    else if (p.age >= 5.0) { col[i*3] = 0.8; col[i*3+1] = 0.4; col[i*3+2] = 0.2; sz[i] *= 0.99; } // Red
-                    if (sz[i] < 0.05) p.type = TYPE_DEAD; 
+                    p.age += dt; const lifeRatio = p.age / 10.0; 
+                    if (lifeRatio < 0.2) sizes[i] *= 0.98; 
+                    else if (lifeRatio < 0.5) { colors[i*3] = 1.0; colors[i*3+1] = 0.9; colors[i*3+2] = 0.7; }
+                    else { colors[i*3] = 0.8; colors[i*3+1] = 0.4; colors[i*3+2] = 0.2; sizes[i] *= 0.99; }
+                    if (sizes[i] < 0.05) p.type = TYPE_DEAD; 
                 }
-
-                // AGN Feedback
                 if (agnActive && p.r < 30 && p.type === TYPE_GAS) {
-                    p.r += 0.8 * dt; col[i*3] = 1.0; col[i*3+1] = 0.5; col[i*3+2] = 0.0;
-                    if(Math.random() < 0.01) p.type = TYPE_DEAD;
+                     p.r += 0.8 * dt; colors[i*3] = 1.0; colors[i*3+1] = 0.5; colors[i*3+2] = 0.0;
+                     if(Math.random() < 0.01) p.type = TYPE_DEAD;
                 }
-
-                // Accretion
                 if (p.r < 2) { p.type = TYPE_DEAD; agnMass++; accretionCount++; }
-
-                pos[i*3] = Math.cos(p.theta) * p.r; pos[i*3+1] = p.y; pos[i*3+2] = Math.sin(p.theta) * p.r;
+                positions[i*3] = Math.cos(p.theta) * p.r; positions[i*3+1] = p.y; positions[i*3+2] = Math.sin(p.theta) * p.r;
             }
             galaxyGeo.attributes.position.needsUpdate = true; galaxyGeo.attributes.color.needsUpdate = true; galaxyGeo.attributes.size.needsUpdate = true;
 
-            // Phase Logic
-            if (!agnActive && currentPhase < 4 && (agnMass > 500 || (currentPhase === 2 && time > 15.0))) activateAGN();
-            if (agnActive && (agnMass > 1500 || time > 35.0)) shutdownAGN();
+            if (!agnActive && currentPhase < 4 && (agnMass > AGN_CRITICAL_MASS || (currentPhase === 2 && time > 15.0))) activateAGN();
+            if (agnActive && (agnMass > AGN_SHUTDOWN_MASS || time > 35.0)) shutdownAGN();
             
-            // Auto-Stop Recording
             if (currentPhase === 4 && isRecording) {
                 phase4Timer += dt;
                 if (phase4Timer > 5.0) mediaRecorder.stop();
             }
 
             if (Math.random() > 0.9) { 
-                document.getElementById('acc-rate').innerText = (accretionCount * 10).toFixed(0);
-                document.getElementById('vel-disp').innerText = Math.sqrt(G_MASS/10).toFixed(0);
+                 document.getElementById('acc-rate').innerText = (accretionCount * 10).toFixed(0);
+                 document.getElementById('vel-disp').innerText = Math.sqrt(G_MASS/10).toFixed(0);
             }
         }
 
         function updateJets(dt) {
             if (!agnActive && currentPhase !== 4) return;
-            const pos = jetGeo.attributes.position.array; const col = jetGeo.attributes.color.array;
-            
+            const positions = jetGeo.attributes.position.array; const colors = jetGeo.attributes.color.array;
             if (agnActive) {
-                const s = 1 + Math.sin(time * 20) * 0.2;
-                agnGlow.scale.set(8 * s, 8 * s, 1);
+                const intensity = 1 + Math.sin(time * 20) * 0.2;
+                agnGlow.material.opacity = 0.8 + Math.random() * 0.2; agnGlow.scale.set(8 * intensity, 8 * intensity, 1);
             } else { agnGlow.material.opacity *= 0.95; }
-
             for(let i=0; i<NUM_JET_PARTICLES; i++) {
                 const p = jetData[i];
                 if (!p.active) {
                     if (agnActive && Math.random() < 0.1) {
                         p.active = true; p.life = 0; p.dir = Math.random() > 0.5 ? 1 : -1; p.speed = 15 + Math.random() * 5; 
-                        pos[i*3] = (Math.random()-0.5) * 0.5; pos[i*3+1] = 0; pos[i*3+2] = (Math.random()-0.5) * 0.5;
+                        positions[i*3] = (Math.random()-0.5) * 0.5; positions[i*3+1] = 0; positions[i*3+2] = (Math.random()-0.5) * 0.5;
                     }
-                    if(!p.active) pos[i*3+1] = 9999; continue;
+                    if(!p.active) positions[i*3+1] = 9999; continue;
                 }
-                p.life += dt; pos[i*3+1] += p.speed * p.dir * dt;
-                pos[i*3] *= 1.01; pos[i*3+2] *= 1.01;
-                
-                if (p.life < 0.5) { col[i*3] = 0.5; col[i*3+1] = 0.8; col[i*3+2] = 1.0; } // Blue
-                else if (p.life < 1.0) { col[i*3] = 0.8; col[i*3+1] = 0.0; col[i*3+2] = 1.0; } // Purple
-                else { col[i*3] = 0.4; col[i*3+1] = 0.0; col[i*3+2] = 0.1; } // Dark Red
-                
-                if (Math.abs(pos[i*3+1]) > 60) p.active = false;
+                p.life += dt; positions[i*3+1] += p.speed * p.dir * dt;
+                positions[i*3] *= 1.01; positions[i*3+2] *= 1.01;
+                if (p.life < 0.5) { colors[i*3] = 0.5; colors[i*3+1] = 0.8; colors[i*3+2] = 1.0; }
+                else if (p.life < 1.0) { colors[i*3] = 0.8; colors[i*3+1] = 0.0; colors[i*3+2] = 1.0; }
+                else { colors[i*3] = 0.4; colors[i*3+1] = 0.0; colors[i*3+2] = 0.1; }
+                if (Math.abs(positions[i*3+1]) > 60) p.active = false;
             }
             jetGeo.attributes.position.needsUpdate = true; jetGeo.attributes.color.needsUpdate = true;
         }
 
         function activateAGN() { agnActive = true; currentPhase = 3; agnCore.visible = true; updateStatusBox(3); }
         function shutdownAGN() { if(currentPhase !== 4) { agnActive = false; currentPhase = 4; phase4Timer = 0; updateStatusBox(4); } }
-
+        let mouseX = 0, mouseY = 0;
+        function onMouseMove(e) { mouseX = (e.clientX - window.innerWidth/2) * 0.001; mouseY = (e.clientY - window.innerHeight/2) * 0.001; }
+        function onTouchMove(e) { e.preventDefault(); const touch = e.touches[0]; mouseX = (touch.clientX - window.innerWidth/2) * 0.002; mouseY = (touch.clientY - window.innerHeight/2) * 0.002; }
+        function onResize() { if(!isRecording) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); } }
         function updateStatusBox(phase) {
             const box = document.getElementById('status-box');
-            if (phase === 1) { box.innerText = "Phase 1: Gas Cooling"; box.style.borderLeftColor = "#a54"; }
-            else if (phase === 2) { box.innerText = "Phase 2: Star Formation"; box.style.borderLeftColor = "#4facfe"; }
-            else if (phase === 3) { box.innerText = "Phase 3: AGN Ignition"; box.style.borderLeftColor = "#fc0"; }
-            else if (phase === 4) { box.innerText = "Phase 4: Quenching"; box.style.borderLeftColor = "#555"; }
+            if (phase === 1) { box.innerHTML = "Phase 1: Quiescent Galaxy<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Gas cooling. Low star formation.</span>"; box.style.borderLeftColor = "#a54"; box.style.color = "#fff"; }
+            else if (phase === 2) { box.innerHTML = "Phase 2: Secular Evolution<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Spiral arms trigger star formation.</span>"; box.style.borderLeftColor = "#4facfe"; box.style.color = "#fff"; }
+            else if (phase === 3) { box.innerHTML = "Phase 3: AGN Ignition<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Quasar Mode. Jets launch.</span>"; box.style.borderLeftColor = "#fc0"; box.style.color = "#fc0"; }
+            else if (phase === 4) { box.innerHTML = "Phase 4: Quenching<br><span style='font-size:0.8em; font-weight:normal; display: " + (isMobile ? 'none' : 'inline') + "'>Red & Dead. Fuel exhausted.</span>"; box.style.borderLeftColor = "#555"; box.style.color = "#aaa"; }
         }
-
         function resetSimulation(fromRecord) {
-            if(!fromRecord && isRecording) mediaRecorder.stop();
+            if(!fromRecord && isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
             agnActive = false; agnMass = 0; currentPhase = 1; agnCore.visible = false; time = 0; phase4Timer = 0;
-            const pos = galaxyGeo.attributes.position.array; const col = galaxyGeo.attributes.color.array; const sz = galaxyGeo.attributes.size.array;
-            const colorGas = new THREE.Color(0x884444);
-            
+            const positions = galaxyGeo.attributes.position.array; const colors = galaxyGeo.attributes.color.array; const sizes = galaxyGeo.attributes.size.array; const colorGas = new THREE.Color(0x884444);
             for(let i=0; i<NUM_PARTICLES; i++) {
-                const r = 5 + Math.random() * DISC_SCALE;
-                particlesData[i].r = r; particlesData[i].theta = Math.random() * Math.PI * 2;
+                const r = 5 + Math.random() * DISC_SCALE; particlesData[i].r = r; particlesData[i].theta = Math.random() * Math.PI * 2;
                 particlesData[i].type = TYPE_GAS; particlesData[i].age = 0;
-                pos[i*3] = Math.cos(particlesData[i].theta) * r; pos[i*3+1] = particlesData[i].y; pos[i*3+2] = Math.sin(particlesData[i].theta) * r;
-                col[i*3] = colorGas.r; col[i*3+1] = colorGas.g; col[i*3+2] = colorGas.b; sz[i] = particlesData[i].baseSize;
+                positions[i*3] = Math.cos(particlesData[i].theta) * r; positions[i*3+1] = particlesData[i].y; positions[i*3+2] = Math.sin(particlesData[i].theta) * r;
+                colors[i*3] = colorGas.r; colors[i*3+1] = colorGas.g; colors[i*3+2] = colorGas.b; sizes[i] = particlesData[i].baseSize;
             }
             galaxyGeo.attributes.position.needsUpdate = true; galaxyGeo.attributes.color.needsUpdate = true;
             for(let i=0; i<NUM_JET_PARTICLES; i++) { jetData[i].active = false; jetGeo.attributes.position.array[i*3+1] = 9999; }
@@ -637,22 +502,14 @@
             requestAnimationFrame(animate);
             const dt = 0.05; time += dt;
             updateGalaxy(dt); updateJets(dt);
-            
-            // Camera Inertia
             camera.position.x += (mouseX * 50 - camera.position.x) * 0.05;
-            const targetY = isMobile ? 90 : 50;
-            const targetZ = isMobile ? 120 : 80;
-            // Only strictly enforce return-to-center if not currently pinching/zooming (simplified check)
-            if(!isRecording) {
-                 camera.position.y += (targetY + mouseY * 20 - camera.position.y) * 0.05;
-            }
+            const baseHeight = isMobile ? 80 : 50; camera.position.y += (baseHeight + mouseY * 20 - camera.position.y) * 0.05;
             camera.lookAt(0,0,0);
-            
             renderer.render(scene, camera);
-            if (isRecording) drawComposition();
+            if (isRecording) drawComposition(); // Draw text overlay for video
         }
 
-        init();
+        init(); updateStatusBox(1);
     </script>
 </body>
 </html>
