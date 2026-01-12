@@ -139,6 +139,7 @@
             // Search Logic
             const participant = participants.find(p => {
                 // Check if name matches (case insensitive)
+                // This ensures "noora" matches "Noora"
                 const nameMatch = p.name.toLowerCase() === inputName.toLowerCase();
                 
                 // Check if email matches (case insensitive)
@@ -152,15 +153,21 @@
                 successMessage.classList.remove('hidden');
                 foundNameSpan.textContent = participant.name;
                 
-                // Construct filename: "certificates/Exact Name.pdf"
-                // Using encodeURIComponent to safely handle spaces and special characters in the URL
-                const encodedFilename = encodeURIComponent(participant.name);
+                // Construct filename logic:
+                // 1. Get the name from our database (e.g., "Noora Abbas Alameri")
+                // 2. Convert to lowercase -> "noora abbas alameri"
+                // 3. Replace spaces with underscores -> "noora_abbas_alameri"
+                // 4. Append suffix -> "noora_abbas_alameri_certificate.png"
+                
+                const normalizeName = participant.name.toLowerCase().trim().replace(/\s+/g, '_');
+                const filename = `${normalizeName}_certificate.png`; // Using standard spelling 'certificate'
                 
                 // Update the download link
-                downloadBtn.href = `certificates/${encodedFilename}.pdf`;
+                downloadBtn.href = `certificates/${filename}`;
+                downloadBtn.download = filename;
                 
-                // Optional: Log to console for debugging
-                console.log(`Searching for file: certificates/${encodedFilename}.pdf`);
+                // Log for debugging
+                console.log(`Searching for file: certificates/${filename}`);
                 
             } else {
                 // Not found
