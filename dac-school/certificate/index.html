@@ -43,7 +43,7 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-user text-gray-400"></i>
                     </div>
-                    <input type="text" id="fullName" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="e.g. Soumik Dutta Gupta" required>
+                    <input type="text" id="fullName" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="e.g. Full Name" required>
                 </div>
             </div>
 
@@ -55,7 +55,7 @@
                     </div>
                     <input type="email" id="email" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="e.g. example@gmail.com" required>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">* Used for verification purposes</p>
+                <p class="text-xs text-gray-400 mt-1">* Used during registration</p>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-transform transform active:scale-95 flex items-center justify-center gap-2">
@@ -73,8 +73,8 @@
                 <h3 class="text-lg font-semibold text-gray-800">Certificate Found!</h3>
                 <p class="text-sm text-gray-600 mb-4">We found a record for <span id="foundName" class="font-bold"></span>.</p>
                 
-                <a id="downloadBtn" href="#" download class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex items-center justify-center gap-2">
-                    <i class="fas fa-download"></i> Download PDF
+                <a id="downloadBtn" href="#" target="_blank" download class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-download"></i> Download Certificate
                 </a>
             </div>
 
@@ -94,7 +94,7 @@
     </div>
 
     <script>
-        // Database of participants extracted from your provided text
+        // Database of participants
         const participants = [
             { name: "NRUSINGHA PRASAD MAHAPATRA", email: "nrusinghaprasadmahapatra@gmail.com" },
             { name: "Soumik Dutta Gupta", email: "soumikduttagupta26@gmail.com" },
@@ -121,7 +121,7 @@
         document.getElementById('searchForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get inputs and normalize them (trim whitespace, lowercase)
+            // Get inputs and normalize them (trim whitespace, lowercase for comparison)
             const inputName = document.getElementById('fullName').value.trim();
             const inputEmail = document.getElementById('email').value.trim();
             
@@ -142,8 +142,6 @@
                 const nameMatch = p.name.toLowerCase() === inputName.toLowerCase();
                 
                 // Check if email matches (case insensitive)
-                // If you want to allow ANY email as long as the name matches, 
-                // remove the '&& emailMatch' part below.
                 const emailMatch = p.email.toLowerCase() === inputEmail.toLowerCase();
                 
                 return nameMatch && emailMatch; 
@@ -155,9 +153,14 @@
                 foundNameSpan.textContent = participant.name;
                 
                 // Construct filename: "certificates/Exact Name.pdf"
-                // This assumes your files are named EXACTLY like the database names
+                // Using encodeURIComponent to safely handle spaces and special characters in the URL
                 const encodedFilename = encodeURIComponent(participant.name);
-                downloadBtn.href = `certificates/${participant.name}.pdf`; // or .jpg if images
+                
+                // Update the download link
+                downloadBtn.href = `certificates/${encodedFilename}.pdf`;
+                
+                // Optional: Log to console for debugging
+                console.log(`Searching for file: certificates/${encodedFilename}.pdf`);
                 
             } else {
                 // Not found
