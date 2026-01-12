@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGN School Feedback</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 4s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        /* Custom Radio Button Styling */
+        input[type="radio"] {
+            accent-color: #818cf8;
+            cursor: pointer;
+            width: 1.2em;
+            height: 1.2em;
+        }
+        .form-section {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .form-section:hover {
+            border-color: rgba(129, 140, 248, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen font-sans">
+
+    <!-- Background Stars (Decor) -->
+    <div id="stars-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <div class="relative z-10 container mx-auto px-4 py-12 max-w-3xl">
+        
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <div class="inline-block p-4 rounded-full bg-indigo-500/10 mb-4 border border-indigo-500/20">
+                <i class="fa-solid fa-star text-3xl text-indigo-400"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 mb-4">
+                AGN School Feedback
+            </h1>
+            <p class="text-slate-400 text-lg">Thank you for participating. Your feedback helps us improve future schools.</p>
+        </header>
+
+        <!-- Success Message (Hidden by default) -->
+        <div id="success-message" class="hidden mb-8 p-6 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-center animate-pulse">
+            <i class="fa-solid fa-check-circle text-4xl text-emerald-400 mb-2"></i>
+            <h3 class="text-2xl font-bold text-emerald-200">Feedback Received!</h3>
+            <p class="text-emerald-100">Thank you for your valuable input.</p>
+            <button onclick="window.location.reload()" class="mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-semibold transition">Submit Another</button>
+        </div>
+
+        <!-- Form -->
+        <form id="feedbackForm" class="space-y-8">
+            
+            <!-- Q1: Academic Level -->
+            <div class="form-section p-6 rounded-2xl">
+                <label class="block text-xl font-semibold text-indigo-200 mb-4">1. Your academic level</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-white/5 transition">
+                        <input type="radio" name="academic_level" value="BSc" required>
+                        <span>BSc</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-white/5 transition">
+                        <input type="radio" name="academic_level" value="MSc">
+                        <span>MSc</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-white/5 transition">
+                        <input type="radio" name="academic_level" value="PhD">
+                        <span>PhD</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-white/5 transition">
+                        <input type="radio" name="academic_level" value="Postdoc">
+                        <span>Postdoc</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-white/5 transition">
+                        <input type="radio" name="academic_level" value="Faculty">
+                        <span>Faculty</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-white/5 transition">
+                        <input type="radio" name="academic_level" value="Other">
+                        <span>Other</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Q2: Experience -->
+            <div class="form-section p-6 rounded-2xl">
+                <label class="block text-xl font-semibold text-indigo-200 mb-4">2. Before this school, your experience with astronomical data was</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-4 py-3 rounded-lg cursor-pointer hover:bg-indigo-900/30 transition border border-transparent hover:border-indigo-500/30 flex-1 min-w-[140px]">
+                        <input type="radio" name="data_experience" value="None" required>
+                        <span>None</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-4 py-3 rounded-lg cursor-pointer hover:bg-indigo-900/30 transition border border-transparent hover:border-indigo-500/30 flex-1 min-w-[140px]">
+                        <input type="radio" name="data_experience" value="Basic">
+                        <span>Basic</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-4 py-3 rounded-lg cursor-pointer hover:bg-indigo-900/30 transition border border-transparent hover:border-indigo-500/30 flex-1 min-w-[140px]">
+                        <input type="radio" name="data_experience" value="Moderate">
+                        <span>Moderate</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-4 py-3 rounded-lg cursor-pointer hover:bg-indigo-900/30 transition border border-transparent hover:border-indigo-500/30 flex-1 min-w-[140px]">
+                        <input type="radio" name="data_experience" value="Advanced">
+                        <span>Advanced</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Likert Scales Q3-Q7 -->
+            <div class="form-section p-6 rounded-2xl space-y-8">
+                <h2 class="text-xl font-bold text-white border-b border-white/10 pb-2">Evaluation (1 = Lowest, 5 = Highest)</h2>
+                
+                <!-- Q3 -->
+                <div>
+                    <label class="block text-lg text-indigo-200 mb-3">3. The school improved my understanding of AGN physics</label>
+                    <div class="flex justify-between items-center max-w-md mx-auto bg-slate-800/50 p-4 rounded-xl">
+                        <span class="text-xs text-slate-400">Low</span>
+                        <div class="flex space-x-4 md:space-x-8">
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                                <span class="mb-1 text-sm text-slate-400">1</span>
+                                <input type="radio" name="q3_agn_physics" value="1" required>
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                                <span class="mb-1 text-sm text-slate-400">2</span>
+                                <input type="radio" name="q3_agn_physics" value="2">
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                                <span class="mb-1 text-sm text-slate-400">3</span>
+                                <input type="radio" name="q3_agn_physics" value="3">
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                                <span class="mb-1 text-sm text-slate-400">4</span>
+                                <input type="radio" name="q3_agn_physics" value="4">
+                            </label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                                <span class="mb-1 text-sm text-slate-400">5</span>
+                                <input type="radio" name="q3_agn_physics" value="5">
+                            </label>
+                        </div>
+                        <span class="text-xs text-slate-400">High</span>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div>
+                    <label class="block text-lg text-indigo-200 mb-3">4. The school improved my ability to work with real data (SDSS, Astroquery, etc.)</label>
+                    <div class="flex justify-between items-center max-w-md mx-auto bg-slate-800/50 p-4 rounded-xl">
+                        <span class="text-xs text-slate-400">Low</span>
+                        <div class="flex space-x-4 md:space-x-8">
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">1</span><input type="radio" name="q4_real_data" value="1" required></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">2</span><input type="radio" name="q4_real_data" value="2"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">3</span><input type="radio" name="q4_real_data" value="3"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">4</span><input type="radio" name="q4_real_data" value="4"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">5</span><input type="radio" name="q4_real_data" value="5"></label>
+                        </div>
+                        <span class="text-xs text-slate-400">High</span>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div>
+                    <label class="block text-lg text-indigo-200 mb-3">5. The pace and difficulty were appropriate</label>
+                    <div class="flex justify-between items-center max-w-md mx-auto bg-slate-800/50 p-4 rounded-xl">
+                        <span class="text-xs text-slate-400">Low</span>
+                        <div class="flex space-x-4 md:space-x-8">
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">1</span><input type="radio" name="q5_pace" value="1" required></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">2</span><input type="radio" name="q5_pace" value="2"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">3</span><input type="radio" name="q5_pace" value="3"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">4</span><input type="radio" name="q5_pace" value="4"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">5</span><input type="radio" name="q5_pace" value="5"></label>
+                        </div>
+                        <span class="text-xs text-slate-400">High</span>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div>
+                    <label class="block text-lg text-indigo-200 mb-3">6. The hands-on sessions were useful</label>
+                    <div class="flex justify-between items-center max-w-md mx-auto bg-slate-800/50 p-4 rounded-xl">
+                        <span class="text-xs text-slate-400">Low</span>
+                        <div class="flex space-x-4 md:space-x-8">
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">1</span><input type="radio" name="q6_hands_on" value="1" required></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">2</span><input type="radio" name="q6_hands_on" value="2"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">3</span><input type="radio" name="q6_hands_on" value="3"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">4</span><input type="radio" name="q6_hands_on" value="4"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">5</span><input type="radio" name="q6_hands_on" value="5"></label>
+                        </div>
+                        <span class="text-xs text-slate-400">High</span>
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div>
+                    <label class="block text-lg text-indigo-200 mb-3">7. Overall, I would recommend this AGN School to others</label>
+                    <div class="flex justify-between items-center max-w-md mx-auto bg-slate-800/50 p-4 rounded-xl">
+                        <span class="text-xs text-slate-400">Low</span>
+                        <div class="flex space-x-4 md:space-x-8">
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">1</span><input type="radio" name="q7_recommend" value="1" required></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">2</span><input type="radio" name="q7_recommend" value="2"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">3</span><input type="radio" name="q7_recommend" value="3"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">4</span><input type="radio" name="q7_recommend" value="4"></label>
+                            <label class="flex flex-col items-center cursor-pointer hover:scale-110 transition"><span class="mb-1 text-sm text-slate-400">5</span><input type="radio" name="q7_recommend" value="5"></label>
+                        </div>
+                        <span class="text-xs text-slate-400">High</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Areas Q8-Q9 -->
+            <div class="form-section p-6 rounded-2xl space-y-6">
+                <div>
+                    <label class="block text-xl font-semibold text-indigo-200 mb-2">8. Which part was most useful?</label>
+                    <textarea name="q8_most_useful" rows="3" class="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Short answer..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xl font-semibold text-indigo-200 mb-2">9. What should be improved?</label>
+                    <textarea name="q9_improvements" rows="3" class="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Short answer..."></textarea>
+                </div>
+            </div>
+
+            <!-- Q10: Motivation -->
+            <div class="form-section p-6 rounded-2xl">
+                <label class="block text-xl font-semibold text-indigo-200 mb-4">10. Did this school motivate you to do AGN or galaxy-evolution research?</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-6 py-3 rounded-lg cursor-pointer hover:bg-emerald-900/30 hover:border-emerald-500/30 border border-transparent transition">
+                        <input type="radio" name="motivation" value="Yes" required>
+                        <span>Yes</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-6 py-3 rounded-lg cursor-pointer hover:bg-amber-900/30 hover:border-amber-500/30 border border-transparent transition">
+                        <input type="radio" name="motivation" value="Maybe">
+                        <span>Maybe</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-slate-800/50 px-6 py-3 rounded-lg cursor-pointer hover:bg-rose-900/30 hover:border-rose-500/30 border border-transparent transition">
+                        <input type="radio" name="motivation" value="No">
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg transform transition hover:-translate-y-1 hover:shadow-indigo-500/25 flex items-center justify-center space-x-2">
+                <span>Submit Feedback</span>
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Generate stars
+        const starsContainer = document.getElementById('stars-container');
+        for(let i=0; i<100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 4 + 's';
+            starsContainer.appendChild(star);
+        }
+    </script>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+            authDomain: "iist-fd6e8.firebaseapp.com",
+            databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+            projectId: "iist-fd6e8",
+            storageBucket: "iist-fd6e8.firebasestorage.app",
+            messagingSenderId: "692699808449",
+            appId: "1:692699808449:web:120c8941a940d071f24a40",
+            measurementId: "G-GPFG8LWF2H"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Form handling
+        const form = document.getElementById('feedbackForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMsg = document.getElementById('success-message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+            submitBtn.classList.add('opacity-75');
+
+            // Gather Data
+            const formData = new FormData(form);
+            const data = {
+                timestamp: serverTimestamp(),
+                academic_level: formData.get('academic_level'),
+                data_experience: formData.get('data_experience'),
+                q3_agn_physics: formData.get('q3_agn_physics'),
+                q4_real_data: formData.get('q4_real_data'),
+                q5_pace: formData.get('q5_pace'),
+                q6_hands_on: formData.get('q6_hands_on'),
+                q7_recommend: formData.get('q7_recommend'),
+                q8_most_useful: formData.get('q8_most_useful') || "",
+                q9_improvements: formData.get('q9_improvements') || "",
+                motivation: formData.get('motivation')
+            };
+
+            try {
+                // Push to Realtime Database
+                const feedbackRef = ref(db, 'feedback');
+                await push(feedbackRef, data);
+
+                // Show Success
+                form.style.display = 'none';
+                successMsg.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error("Error submitting feedback:", error);
+                alert("There was an error submitting your feedback. Please try again. \n" + error.message);
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Submit Feedback</span><i class="fa-solid fa-paper-plane"></i>';
+                submitBtn.classList.remove('opacity-75');
+            }
+        });
+    </script>
+</body>
+</html>
