@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Download Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass-panel w-full max-w-md rounded-2xl p-8 transform transition-all hover:scale-[1.01] duration-300">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-white text-2xl">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Certificate Portal</h1>
+            <p class="text-gray-500 text-sm mt-2">Enter your details to retrieve your document</p>
+        </div>
+
+        <!-- Search Form -->
+        <form id="searchForm" class="space-y-4">
+            <div>
+                <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="fullName" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="e.g. Soumik Dutta Gupta" required>
+                </div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-400"></i>
+                    </div>
+                    <input type="email" id="email" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="e.g. example@gmail.com" required>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">* Used for verification purposes</p>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-transform transform active:scale-95 flex items-center justify-center gap-2">
+                <i class="fas fa-search"></i> Search Certificate
+            </button>
+        </form>
+
+        <!-- Result Area (Hidden by default) -->
+        <div id="resultArea" class="hidden mt-6 pt-6 border-t border-gray-100">
+            <!-- Success State -->
+            <div id="successMessage" class="hidden text-center animate-fade-in-up">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-check text-green-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Certificate Found!</h3>
+                <p class="text-sm text-gray-600 mb-4">We found a record for <span id="foundName" class="font-bold"></span>.</p>
+                
+                <a id="downloadBtn" href="#" download class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-download"></i> Download PDF
+                </a>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorMessage" class="hidden text-center animate-fade-in-up">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-times text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">No Record Found</h3>
+                <p class="text-sm text-gray-600">We couldn't find a certificate matching those details. Please check your spelling and try again.</p>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-xs text-gray-400">&copy; 2024 Certificate Validation System</p>
+        </div>
+    </div>
+
+    <script>
+        // Database of participants extracted from your provided text
+        const participants = [
+            { name: "NRUSINGHA PRASAD MAHAPATRA", email: "nrusinghaprasadmahapatra@gmail.com" },
+            { name: "Soumik Dutta Gupta", email: "soumikduttagupta26@gmail.com" },
+            { name: "Avinash kale", email: "kaleavinash474@gmail.com" },
+            { name: "Sudeep Das", email: "dassudeep17@gmail.com" },
+            { name: "Huda Valiyathodi", email: "hudakkv@gmail.com" },
+            { name: "Jibin V Sunny", email: "jibinvsunny@gmail.com" },
+            { name: "Niladri Biswas", email: "niladrineilbiswas@gmail.com" },
+            { name: "Anaadi Wadekar", email: "wadekaranaadi18@gmail.com" },
+            { name: "Katyayni Parkewar", email: "katyayniparkewar@gmail.com" },
+            { name: "Noora Abbas Alameri", email: "nalameri@sharjah.ac.ae" },
+            { name: "Badrish Khanna R R", email: "badrishofficial@gmail.com" },
+            { name: "Vibhas Chengalavala", email: "vibhasmeanlight@gmail.com" },
+            { name: "Shaza Fathima Azeez", email: "shazafathimaazeez@gmail.com" },
+            { name: "Rajdeep Mondal", email: "rajdeepmondal26@gmail.com" },
+            { name: "Zonuntluanga", email: "zonunt7@gmail.com" },
+            { name: "Akshay Seepathi", email: "seepathi.akshay@gmail.com" },
+            { name: "Shah Nawaz Ali", email: "alis07655@gmail.com" },
+            { name: "EKLAVYA", email: "ms25269@iisermohali.ac.in" },
+            { name: "Bibhu Prasad Sahoo", email: "sbibhuprasad581@gmail.com" },
+            { name: "Himalaya", email: "himalayagaur@icloud.com" }
+        ];
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get inputs and normalize them (trim whitespace, lowercase)
+            const inputName = document.getElementById('fullName').value.trim();
+            const inputEmail = document.getElementById('email').value.trim();
+            
+            const resultArea = document.getElementById('resultArea');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const foundNameSpan = document.getElementById('foundName');
+
+            // Reset display
+            resultArea.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            // Search Logic
+            const participant = participants.find(p => {
+                // Check if name matches (case insensitive)
+                const nameMatch = p.name.toLowerCase() === inputName.toLowerCase();
+                
+                // Check if email matches (case insensitive)
+                // If you want to allow ANY email as long as the name matches, 
+                // remove the '&& emailMatch' part below.
+                const emailMatch = p.email.toLowerCase() === inputEmail.toLowerCase();
+                
+                return nameMatch && emailMatch; 
+            });
+
+            if (participant) {
+                // Found
+                successMessage.classList.remove('hidden');
+                foundNameSpan.textContent = participant.name;
+                
+                // Construct filename: "certificates/Exact Name.pdf"
+                // This assumes your files are named EXACTLY like the database names
+                const encodedFilename = encodeURIComponent(participant.name);
+                downloadBtn.href = `certificates/${participant.name}.pdf`; // or .jpg if images
+                
+            } else {
+                // Not found
+                errorMessage.classList.remove('hidden');
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+    </style>
+</body>
+</html>
