@@ -2,663 +2,749 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Realistic AGN & Star Formation Simulation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE RIFT | Stranger Things Treasure Hunt</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs (Updated for Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"></script>
+
     <style>
-        /* --- Core Layout --- */
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            overscroll-behavior: none;
-            touch-action: none; /* Disables browser zooming/scrolling on mobile */
+        :root {
+            --stranger-red: #ff0000;
+            --dark-bg: #0a0a0a;
+            --neon-glow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ff0000;
         }
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh; /* Dynamic viewport height for mobile browsers */
-            display: block;
+
+        body {
+            background-color: var(--dark-bg);
+            color: #dcdcdc;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        /* The Title Font styling */
+        .title-font {
+            font-family: 'Libre Baskerville', serif;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--stranger-red);
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+            letter-spacing: -2px;
+        }
+        
+        .title-font-filled {
+            font-family: 'Libre Baskerville', serif;
+            color: var(--stranger-red);
+            text-shadow: var(--neon-glow);
+        }
+
+        /* CRT Scanline Effect */
+        .scanlines {
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
         }
 
-        /* --- UI Layer --- */
-        #ui-layer {
+        .flicker {
+            animation: flicker 4s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                opacity: 1;
+                text-shadow: var(--neon-glow);
+            }
+            20%, 24%, 55% {
+                opacity: 0.5;
+                text-shadow: none;
+            }
+        }
+
+        /* Upside Down Atmosphere */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
+        }
+
+        /* Rolling Mist/Fog */
+        .fog-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .fog-img {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            pointer-events: none; /* Let clicks pass through to canvas where empty */
-            max-width: 400px;
-            width: calc(100% - 40px);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            box-sizing: border-box;
-            z-index: 10;
+            height: 100vh;
+            width: 300vw;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjMiLz48L3N2Zz4=');
+            background-size: cover;
+            opacity: 0.15;
+            animation: fogFlow 60s linear infinite;
+        }
+        .fog-img-2 {
+            animation: fogFlow 40s linear infinite reverse;
+            opacity: 0.1;
         }
 
-        h1 {
-            font-size: 1.2rem;
-            margin: 0 0 10px 0;
-            color: #4facfe;
-            text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        @keyframes fogFlow {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-200vw, 0, 0); }
         }
 
-        p {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            color: #ccc;
-            margin-bottom: 15px;
+        /* Demogorgon Silhouette */
+        .monster-wrapper {
+            position: fixed;
+            bottom: -50px;
+            right: -50px;
+            width: 500px;
+            height: 600px;
+            z-index: 1; /* Behind content, in front of bg */
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease-in-out;
+            filter: blur(1px) drop-shadow(0 0 10px rgba(0,0,0,0.8));
         }
 
-        /* --- Indicators --- */
-        .indicator-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .indicator {
-            display: flex;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-            display: inline-block;
-            flex-shrink: 0;
+        /* Vines Styles - Updated for All-over effect */
+        .vine-base {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            z-index: 40; /* Behind flashlight (z-45) but above bg */
+            pointer-events: none;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 0 5px #000);
         }
 
-        /* --- Status Box --- */
-        #status-box {
-            margin-top: 10px;
-            padding: 12px;
-            background: rgba(20, 20, 30, 0.8);
-            border-radius: 4px;
-            font-weight: bold;
-            color: #fff;
-            text-align: center;
-            border-left: 4px solid #4facfe;
+        /* Specific static corners (kept for framing) */
+        .vine-tl { top: -50px; left: -50px; transform: rotate(135deg); opacity: 0.9; }
+        .vine-tr { top: -50px; right: -50px; transform: rotate(-135deg); opacity: 0.9; }
+        .vine-bl { bottom: -50px; left: -50px; transform: rotate(45deg); opacity: 0.9; }
+        .vine-br { bottom: -50px; right: -50px; transform: rotate(-45deg); opacity: 0.9; }
+
+        /* The vine SVG shape (inline data URI for single file) */
+        .vine-shape {
+            /* Lighter colors for better visibility in the dark */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 100C50 100 60 60 30 50C0 40 20 10 20 10' stroke='%23632222' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 100C50 100 40 70 70 60C100 50 80 10 80 10' stroke='%234a1515' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M55 90C55 90 85 85 90 50' stroke='%23380808' stroke-width='4'/%3E%3C/svg%3E");
+            background-size: contain;
+        }
+
+        .input-field {
+            background: rgba(20, 0, 0, 0.6);
+            border: 1px solid #4a0000;
+            color: #ffcccc;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            font-size: 0.9rem;
         }
-        
-        /* --- Buttons --- */
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            pointer-events: auto; /* Re-enable clicks for buttons */
+        .input-field:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
         }
 
-        button {
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
+        .btn-rift {
+            background: transparent;
+            border: 2px solid var(--stranger-red);
+            color: var(--stranger-red);
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            transition: transform 0.1s, background 0.3s;
-            -webkit-tap-highlight-color: transparent;
-            flex: 1; 
-            touch-action: manipulation;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
         }
 
-        #restart-btn { background: #333; color: #fff; border: 1px solid #555; }
-        #download-btn { background: linear-gradient(45deg, #4facfe, #00f2fe); color: #000; }
+        .btn-rift:hover {
+            background: var(--stranger-red);
+            color: black;
+            box-shadow: var(--neon-glow);
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid rgba(255, 0, 0, 0.1);
+            border-left-color: #ff0000;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #download-btn.recording {
-            background: #e74c3c;
-            color: white;
-            animation: pulse 1.5s infinite;
-            pointer-events: none; 
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
-        }
-        
-        button:active { transform: scale(0.96); }
-        
-        #stats { 
-            margin-top: 10px; 
-            font-family: monospace; 
-            font-size: 0.75rem; 
-            color: #888; 
-            text-align: right;
-        }
-
-        /* --- MOBILE RESPONSIVENESS --- */
-        @media (max-width: 768px) {
-            #ui-layer {
-                top: auto; 
-                bottom: 0; 
-                left: 0; 
-                width: 100%; 
-                max-width: 100%;
-                border-radius: 20px 20px 0 0; 
-                border: none; 
-                border-top: 1px solid #333;
-                padding: 20px;
-                /* iPhone Safe Area support */
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-                background: rgba(0, 0, 0, 0.85);
-            }
-            h1 { font-size: 1.1rem; text-align: center; }
-            p.description { display: none; } /* Hide description to save space */
-            
-            #status-box { 
-                padding: 8px; 
-                font-size: 0.8rem; 
-                margin-top: 5px;
-            }
-            
-            .indicator-container {
-                justify-content: center;
-                margin-bottom: 5px;
-            }
-
-            .btn-group {
-                margin-top: 10px;
-            }
-            
-            button {
-                padding: 14px; /* Larger touch targets */
-            }
+        /* Flashlight effect */
+        .flashlight {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle 300px at var(--x, 50%) var(--y, 50%), transparent 10%, rgba(0,0,0,0.95) 45%);
+            z-index: 45;
+            pointer-events: none;
+            mix-blend-mode: multiply;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-center">
 
-    <div id="ui-layer">
-        <h1>Astrophysical Simulation</h1>
-        <p class="description">Simulating the co-evolution of a galaxy and its Supermassive Black Hole.</p>
+    <!-- Backgrounds & Effects -->
+    <div class="scanlines"></div>
+    <div id="canvas-container"><canvas id="spores"></canvas></div>
+    
+    <!-- Mist Layers -->
+    <div class="fog-container">
+        <div class="fog-img"></div>
+        <div class="fog-img-2"></div>
+    </div>
+
+    <!-- Creeping Vines (Static Corners) -->
+    <div class="vine-base vine-shape vine-tl"></div>
+    <div class="vine-base vine-shape vine-tr"></div>
+    <div class="vine-base vine-shape vine-bl"></div>
+    <div class="vine-base vine-shape vine-br"></div>
+    
+    <!-- Dynamic Vines Container (For JS generated vines) -->
+    <div id="dynamic-vines"></div>
+
+    <!-- The Monster (Hidden by default, revealed by flicker) -->
+    <div id="demogorgon" class="monster-wrapper">
+        <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+            <!-- Dark Silhouette Body -->
+            <path d="M70,300 L60,200 C50,150 40,140 30,120 C20,100 10,80 30,60 C40,50 60,80 70,100 C80,120 90,120 100,100 C110,80 130,50 140,60 C160,80 150,100 140,120 C130,140 120,150 110,200 L100,300 Z" fill="#050000" stroke="none"/>
+            <!-- Head Petals (The Flower) -->
+            <path d="M85,100 Q60,60 50,20 Q70,40 85,60 Z" fill="#1a0000" />
+            <path d="M115,100 Q140,60 150,20 Q130,40 115,60 Z" fill="#1a0000" />
+            <path d="M100,100 Q100,40 100,10 Q110,40 110,60 Z" fill="#2b0000" />
+            <path d="M85,100 Q40,110 10,100 Q50,120 75,110 Z" fill="#1a0000" />
+            <path d="M115,100 Q160,110 190,100 Q150,120 125,110 Z" fill="#1a0000" />
+            <!-- Teeth hints -->
+            <circle cx="100" cy="90" r="10" fill="#330000" />
+        </svg>
+    </div>
+
+    <div class="flashlight" id="flashlight"></div>
+
+    <!-- Main Container -->
+    <main class="relative z-50 w-full max-w-4xl p-6 mx-auto">
         
-        <div class="indicator-container">
-            <div class="indicator"><span class="dot" style="background: #a54;"></span> Gas</div>
-            <div class="indicator"><span class="dot" style="background: #fff; box-shadow: 0 0 5px #fff;"></span> Stars</div>
-            <div class="indicator"><span class="dot" style="background: #fc0; box-shadow: 0 0 8px #fc0;"></span> AGN</div>
-            <div class="indicator"><span class="dot" style="background: #f0f; box-shadow: 0 0 5px #f0f;"></span> Jets</div>
+        <!-- Header / Logo -->
+        <header class="text-center mb-12 animate-fade-in-down">
+            <h2 class="text-red-600 tracking-widest text-sm uppercase mb-2 flicker">Welcome to Hawkin's Ultimate Challenge</h2>
+            <div class="relative inline-block">
+                <h1 class="text-6xl md:text-8xl font-bold uppercase title-font mb-4">
+                    The Rift
+                </h1>
+                <!-- Top border line styled like the show's intro -->
+                <div class="h-1 w-full bg-red-600 shadow-[0_0_10px_#ff0000] mb-8"></div>
+            </div>
+            <p class="text-gray-400 max-w-lg mx-auto text-lg leading-relaxed">
+                The gate has opened. Strange signals are coming from the Upside Down. 
+                Assemble your party, solve the riddles, and close the rift before it's too late.
+            </p>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div id="app-content" class="bg-black/60 backdrop-blur-sm border border-red-900/30 p-8 rounded-lg shadow-2xl relative overflow-hidden mb-12">
+            
+            <!-- Loading State -->
+            <div id="loading-screen" class="flex flex-col items-center justify-center py-12">
+                <div class="loader mb-4"></div>
+                <p class="text-red-500 animate-pulse">Establishing Connection to the Upside Down...</p>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="registration-view" class="hidden">
+                <h3 class="text-2xl text-red-500 mb-6 font-bold border-b border-red-900/50 pb-2">Party Registration</h3>
+                <form id="reg-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Party Name</label>
+                            <input type="text" id="teamName" required class="w-full p-3 rounded input-field" placeholder="e.g. The Hellfire Club">
+                        </div>
+                        <div>
+                            <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Captain's Callsign</label>
+                            <input type="text" id="captainName" required class="w-full p-3 rounded input-field" placeholder="e.g. Dungeon Master">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Contact Frequency (Email)</label>
+                        <input type="email" id="email" required class="w-full p-3 rounded input-field" placeholder="will@byers.com">
+                    </div>
+
+                    <div>
+                        <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Party Size (Max 3)</label>
+                        <select id="teamSize" class="w-full p-3 rounded input-field">
+                            <option value="1">Solo (1)</option>
+                            <option value="2">Duo (2)</option>
+                            <option value="3">Trio (3)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full py-4 text-xl font-bold btn-rift group">
+                            <span class="group-hover:hidden">Enter The Rift</span>
+                            <span class="hidden group-hover:block">Run!</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Dashboard / Game Start -->
+            <div id="dashboard-view" class="hidden text-center">
+                <div class="mb-8">
+                    <h3 class="text-3xl text-red-500 font-bold mb-2">Welcome, <span id="user-team-name" class="text-white">Traveler</span></h3>
+                    <p class="text-gray-400">Status: <span class="text-green-500">Registered</span> | ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-red-900/10 border border-red-900/50 p-4 rounded">
+                        <h4 class="text-red-400 uppercase text-xs mb-2">Current Objective</h4>
+                        <p class="text-lg font-bold">Await Further Instructions</p>
+                    </div>
+                    <div class="bg-red-900/10 border border-red-900/50 p-4 rounded">
+                        <h4 class="text-red-400 uppercase text-xs mb-2">Time To Rift Opening</h4>
+                        <p id="countdown" class="text-lg font-bold font-mono text-red-500">00:00:00</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-red-900/30 pt-8">
+                    <p class="mb-4 text-sm text-gray-500">The first clue will manifest here when the hunt begins.</p>
+                    <div class="p-6 bg-black border border-dashed border-red-800 rounded opacity-50 relative">
+                        <p class="text-red-800 font-mono text-xs uppercase animate-pulse">Signal Weak... Reconnecting...</p>
+                        <div class="mt-4 text-4xl text-red-900">? ? ?</div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <div id="status-box">Initializing...</div>
-        <div id="stats">Vel: <span id="vel-disp">0</span> km/s | Acc: <span id="acc-rate">0</span> M☉/yr</div>
-        
-        <div class="btn-group">
-            <button id="restart-btn">Reset</button>
-            <button id="download-btn">Record Video (HD)</button>
+        <!-- NEW SECTION: Classified Dossier (Rules, Rounds, Organizers) -->
+        <div id="classified-dossier" class="max-w-4xl mx-auto space-y-8 animate-fade-in-up mb-12">
+            
+            <!-- Section Header -->
+            <div class="text-center border-b border-red-900/50 pb-4">
+                <h3 class="text-2xl font-bold text-red-600 uppercase tracking-widest title-font-filled">Classified Dossier</h3>
+                <p class="text-gray-500 text-xs font-mono mt-1">EYES ONLY // LEVEL 4 CLEARANCE</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Card 1: Protocols (Rules) -->
+                <div class="bg-black/80 border border-red-900/40 p-6 rounded hover:border-red-600 transition-colors duration-300">
+                    <h4 class="text-xl text-red-500 font-bold mb-4 uppercase flex items-center gap-2">
+                        <span class="text-2xl">⚠</span> Protocols
+                    </h4>
+                    <ul class="text-sm text-gray-400 space-y-3 font-mono list-disc pl-4">
+                        <li><strong class="text-gray-300">Fair Play:</strong> No psychic powers or AI solvers allowed. Integrity is paramount.</li>
+                        <li><strong class="text-gray-300">The Clock:</strong> The gate closes precisely at the designated hour. No extensions.</li>
+                        <li><strong class="text-gray-300">Safety:</strong> Do not enter restricted zones. The Upside Down is dangerous enough.</li>
+                        <li><strong class="text-gray-300">Admin Word:</strong> Decisions made by the SCIROX Gamemakers are final.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: Stages (Rounds) -->
+                <div class="bg-black/80 border border-red-900/40 p-6 rounded hover:border-red-600 transition-colors duration-300">
+                    <h4 class="text-xl text-red-500 font-bold mb-4 uppercase flex items-center gap-2">
+                        <span class="text-2xl">⎋</span> Stages
+                    </h4>
+                    <div class="space-y-4 text-sm font-mono text-gray-400">
+                        <div class="border-l-2 border-red-800 pl-3">
+                            <p class="text-red-400 font-bold text-xs uppercase">Round 01</p>
+                            <p class="text-white">The Vanishing</p>
+                            <p class="text-xs mt-1">Cipher breaking & logic puzzles to locate the entrance.</p>
+                        </div>
+                        <div class="border-l-2 border-red-800 pl-3">
+                            <p class="text-red-400 font-bold text-xs uppercase">Round 02</p>
+                            <p class="text-white">The Upside Down</p>
+                            <p class="text-xs mt-1">Physical treasure hunt across the venue perimeter.</p>
+                        </div>
+                        <div class="border-l-2 border-red-800 pl-3">
+                            <p class="text-red-400 font-bold text-xs uppercase">Final Round</p>
+                            <p class="text-white">Closing The Gate</p>
+                            <p class="text-xs mt-1">The ultimate showdown for the top surviving parties.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Agency (Organizers) -->
+                <div class="bg-black/80 border border-red-900/40 p-6 rounded hover:border-red-600 transition-colors duration-300 flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-xl text-red-500 font-bold mb-4 uppercase flex items-center gap-2">
+                            <span class="text-2xl">☢</span> Agency
+                        </h4>
+                        <p class="text-sm text-gray-400 font-mono leading-relaxed mb-4">
+                            This operation is strictly monitored and authorized by the <strong class="text-white">SCIROX</strong> Science Club. 
+                        </p>
+                        <p class="text-xs text-gray-600 font-mono">
+                            Any anomalies should be reported to SCIROX officers immediately.
+                        </p>
+                    </div>
+                    <div class="mt-6 text-center pt-6 border-t border-dashed border-red-900/30">
+                        <span class="text-3xl font-black tracking-tighter text-red-700 block title-font-filled" style="text-shadow: none; -webkit-text-stroke: 1px red;">SCIROX</span>
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-red-900">Official Organizer</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="mt-12 text-center text-gray-600 text-xs">
+            <p>&copy; 2026 SCIROX x Hawkins National Laboratory. All rights reserved.</p>
+            <p class="mt-2">Warning: Participation may induce nosebleeds.</p>
+        </footer>
+
+    </main>
+
+    <!-- Modal for Messages -->
+    <div id="modal" class="fixed inset-0 bg-black/90 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border-2 border-red-600 p-8 max-w-md w-full text-center rounded shadow-[0_0_50px_rgba(255,0,0,0.5)]">
+            <h3 id="modal-title" class="text-2xl text-red-500 font-bold mb-4 font-serif">Message from the Upside Down</h3>
+            <p id="modal-message" class="text-gray-300 mb-8">Something went wrong.</p>
+            <button onclick="closeModal()" class="px-6 py-2 btn-rift w-full">Close</button>
         </div>
     </div>
 
-    <div id="canvas-container"></div>
-    <canvas id="composite-canvas" style="display: none;"></canvas>
+    <script type="module">
+        // Import Firebase Functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        // --- UI References ---
+        const loadingScreen = document.getElementById('loading-screen');
+        const registrationView = document.getElementById('registration-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const regForm = document.getElementById('reg-form');
+        const userTeamNameDisplay = document.getElementById('user-team-name');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
 
-    <script>
-        // Device Detection
-        const isMobile = window.innerWidth < 768;
+        // --- Global Functions (exposed to window for HTML attributes) ---
+        window.closeModal = () => {
+            if (modal) modal.classList.add('hidden');
+        };
 
-        // --- Configuration ---
-        const G_MASS = 2000;        
-        const DISC_SCALE = isMobile ? 50 : 60; // Slightly smaller galaxy on mobile       
-        const NUM_PARTICLES = isMobile ? 6000 : 20000; // Performance reduction for mobile
-        const NUM_JET_PARTICLES = isMobile ? 800 : 2000;
-        const SPIRAL_ARMS = 2;
-        const ARM_WINDING = 0.5;    
-        const VISCOSITY = 0.025;    
-        const AGN_CRITICAL_MASS = 500; 
-        const AGN_SHUTDOWN_MASS = 1500; 
-        const STAR_FORMATION_THRESH = 0.03; 
-        
-        let scene, camera, renderer;
-        let galaxyGeo, galaxyMat, galaxyPoints;
-        let jetGeo, jetMat, jetPoints;
-        let agnCore, agnGlow;
-        let particlesData = []; 
-        let jetData = [];
-        let agnActive = false;
-        let currentPhase = 1;
-        let agnMass = 0;
-        let time = 0;
-        let phase4Timer = 0; 
-        
-        // Recording State
-        let mediaRecorder;
-        let recordedChunks = [];
-        let isRecording = false;
-        let selectedMimeType = '';
-        let selectedExtension = 'mp4';
-        let compositeCanvas, compositeCtx;
+        const showModal = (title, msg) => {
+            if (modalTitle) modalTitle.textContent = title;
+            if (modalMessage) modalMessage.textContent = msg;
+            if (modal) modal.classList.remove('hidden');
+        };
 
-        const TYPE_GAS = 0; const TYPE_STAR = 1; const TYPE_DEAD = 2;
+        const switchView = (viewId) => {
+            if(loadingScreen) loadingScreen.classList.add('hidden');
+            if(registrationView) registrationView.classList.add('hidden');
+            if(dashboardView) dashboardView.classList.add('hidden');
+            const target = document.getElementById(viewId);
+            if(target) target.classList.remove('hidden');
+        };
 
-        function init() {
-            const container = document.getElementById('canvas-container');
-            
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: !isMobile, 
-                powerPreference: "high-performance", 
-                preserveDrawingBuffer: true 
-            });
-            
-            // Handle resizing correctly regarding pixel ratio
-            const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-            renderer.setPixelRatio(pixelRatio); 
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
+        let app, auth, db, currentUser = null;
 
-            // Composite Canvas Init
-            compositeCanvas = document.getElementById('composite-canvas');
-            compositeCtx = compositeCanvas.getContext('2d');
-
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x020205); 
-            scene.fog = new THREE.FogExp2(0x020205, 0.008);
-
-            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-            // Camera further back on mobile to fit the galaxy width-wise
-            camera.position.set(0, isMobile ? 90 : 50, isMobile ? 120 : 80);
-            camera.lookAt(0, 0, 0);
-
-            createGalaxy(); createJets(); createAGN();
-            scene.add(new THREE.AmbientLight(0x111111));
-
-            // Events
-            window.addEventListener('resize', onResize);
-            
-            // Mouse & Touch Inputs
-            document.addEventListener('mousemove', onMouseMove);
-            
-            // Mobile specific touch handling
-            document.addEventListener('touchstart', onTouchStart, { passive: false });
-            document.addEventListener('touchmove', onTouchMove, { passive: false });
-            
-            document.getElementById('restart-btn').addEventListener('click', (e) => { e.preventDefault(); resetSimulation(false); });
-            document.getElementById('download-btn').addEventListener('click', (e) => { e.preventDefault(); startAutoRecord(); });
-
-            animate();
-        }
-
-        // --- Input Handling ---
-        let mouseX = 0, mouseY = 0;
-        let targetX = 0, targetY = 0;
-
-        function onMouseMove(e) { 
-            mouseX = (e.clientX - window.innerWidth/2) * 0.001; 
-            mouseY = (e.clientY - window.innerHeight/2) * 0.001; 
-        }
-
-        function onTouchStart(e) {
-            // Prevent default to stop scrolling, but allow button clicks
-            if(e.target.tagName !== 'BUTTON') {
-                e.preventDefault();
-            }
-        }
-
-        function onTouchMove(e) { 
-            // Prevent scrolling on the canvas
-            e.preventDefault(); 
-            const touch = e.touches[0]; 
-            // Higher sensitivity for touch
-            mouseX = (touch.clientX - window.innerWidth/2) * 0.003; 
-            mouseY = (touch.clientY - window.innerHeight/2) * 0.003; 
-        }
-
-        function onResize() { 
-            if(!isRecording) { 
-                camera.aspect = window.innerWidth / window.innerHeight; 
-                camera.updateProjectionMatrix(); 
-                renderer.setSize(window.innerWidth, window.innerHeight); 
-                
-                // Adjust camera distance if orientation changes
-                const isNowMobile = window.innerWidth < 768;
-                camera.position.z = isNowMobile ? 120 : 80;
-                camera.position.y = isNowMobile ? 90 : 50;
-            } 
-        }
-
-        // --- Text & Rendering Logic ---
-        function getPhaseText() {
-            if (currentPhase === 1) return "Phase 1: Quiescent Galaxy (Gas Cooling)";
-            if (currentPhase === 2) return "Phase 2: Secular Evolution (Star Formation)";
-            if (currentPhase === 3) return "Phase 3: AGN Ignition (Quasar Mode)";
-            if (currentPhase === 4) return "Phase 4: Quenching (Red & Dead)";
-            return "";
-        }
-
-        function drawComposition() {
-            const width = renderer.domElement.width;
-            const height = renderer.domElement.height;
-            
-            compositeCtx.drawImage(renderer.domElement, 0, 0, width, height);
-            
-            const fontSize = Math.max(20, Math.floor(width * 0.04)); 
-            compositeCtx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
-            compositeCtx.textAlign = 'center';
-            compositeCtx.textBaseline = 'bottom';
-            
-            compositeCtx.lineWidth = 4;
-            compositeCtx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-            compositeCtx.strokeText(getPhaseText(), width / 2, height - 50);
-            
-            if (currentPhase === 1) compositeCtx.fillStyle = '#ffcccc';
-            else if (currentPhase === 2) compositeCtx.fillStyle = '#4facfe';
-            else if (currentPhase === 3) compositeCtx.fillStyle = '#ffcc00';
-            else compositeCtx.fillStyle = '#aaaaaa';
-            
-            compositeCtx.fillText(getPhaseText(), width / 2, height - 50);
-        }
-
-        // --- Recording Logic ---
-        function startAutoRecord() {
-            if (isMobile) {
-                alert("Note: High Quality Video recording on mobile devices may take time or crash due to memory limits.");
-            }
-            if (isRecording) return; 
-            
-            // --- HIGH QUALITY SETUP ---
-            // Force 1920x1080 (FHD) resolution regardless of screen size
-            const recWidth = 1920;
-            const recHeight = 1080;
-            
-            renderer.setPixelRatio(1); // Use 1:1 pixel ratio for video export
-            renderer.setSize(recWidth, recHeight);
-            
-            // Adjust camera for 16:9 aspect ratio
-            camera.aspect = recWidth / recHeight;
-            camera.updateProjectionMatrix();
-            // Reset position to "Desktop" standard for the recording
-            camera.position.z = 80;
-            camera.position.y = 50;
-
-            compositeCanvas.width = recWidth;
-            compositeCanvas.height = recHeight;
-
-            resetSimulation(true); 
-            
-            const btn = document.getElementById('download-btn');
-            btn.innerText = "Recording HD...";
-            btn.classList.add('recording');
-            
-            recordedChunks = [];
-            // Capture at 60 FPS for smoothness
-            const stream = compositeCanvas.captureStream(60); 
-            
-            // Prioritize MP4, fall back to WebM
-            const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
-            selectedMimeType = '';
-            for (let type of mimeTypes) { if (MediaRecorder.isTypeSupported(type)) { selectedMimeType = type; break; } }
-            
-            selectedExtension = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
-            
-            // Ultra High Quality Bitrate: 15 Mbps
-            const options = selectedMimeType ? { mimeType: selectedMimeType, videoBitsPerSecond: 15000000 } : undefined;
-
+        // --- Safe Initialization ---
+        async function initApp() {
             try {
-                mediaRecorder = new MediaRecorder(stream, options);
+                // Initialize Firebase with USER PROVIDED CONFIG
+                const firebaseConfig = {
+                    apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
+                    authDomain: "iist-fd6e8.firebaseapp.com",
+                    databaseURL: "https://iist-fd6e8-default-rtdb.firebaseio.com",
+                    projectId: "iist-fd6e8",
+                    storageBucket: "iist-fd6e8.firebasestorage.app",
+                    messagingSenderId: "692699808449",
+                    appId: "1:692699808449:web:120c8941a940d071f24a40"
+                };
+
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getDatabase(app); // Realtime Database
+
+                // Auth
+                // Since this is a custom config, we'll try anonymous auth directly.
+                // If you have a custom token process for YOUR firebase, you'd insert it here.
+                // For now, we assume Anonymous Auth is enabled in your Firebase Console.
+                await signInAnonymously(auth);
+
+                // Auth Listener
+                onAuthStateChanged(auth, async (user) => {
+                    currentUser = user;
+                    if (user) {
+                        await checkRegistration(user.uid);
+                    }
+                });
+
+                // Spawn the infection (vines)
+                spawnVines();
+
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                showModal("System Failure", "Could not connect to the Upside Down. (Check Console)");
+                if(loadingScreen) loadingScreen.innerHTML = `<p class="text-red-500">Connection Failed.</p>`;
+            }
+        }
+
+        const checkRegistration = async (uid) => {
+            if (!db) return;
+            try {
+                // Realtime DB Query: Look for a child in 'registrations' with 'uid' matching current user
+                const registrationsRef = ref(db, 'registrations');
+                const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
+                
+                onValue(userQuery, (snapshot) => {
+                    if (snapshot.exists()) {
+                        // User is registered
+                        const data = Object.values(snapshot.val())[0]; // Get the first match
+                        if(userTeamNameDisplay) userTeamNameDisplay.textContent = data.teamName;
+                        if(userIdDisplay) userIdDisplay.textContent = uid;
+                        switchView('dashboard-view');
+                    } else {
+                        // Not registered
+                        switchView('registration-view');
+                    }
+                }, (error) => {
+                    console.error("Realtime DB error:", error);
+                    switchView('registration-view'); 
+                });
+
             } catch (e) {
-                alert("Recording failed: Browser not supported.");
-                finishRecordingUI();
-                return;
+                console.error("Query Error", e);
+                switchView('registration-view');
             }
+        };
 
-            mediaRecorder.ondataavailable = function(event) { if (event.data.size > 0) recordedChunks.push(event.data); };
-            mediaRecorder.onstop = downloadVideo;
-            mediaRecorder.start();
-            isRecording = true;
+        // Handle Form Submission
+        if (regForm) {
+            regForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!currentUser || !db) {
+                    showModal("Error", "No secure connection found. Refresh page.");
+                    return;
+                }
+
+                const teamName = document.getElementById('teamName').value;
+                const captainName = document.getElementById('captainName').value;
+                const email = document.getElementById('email').value;
+                const teamSize = document.getElementById('teamSize').value;
+
+                const submitBtn = regForm.querySelector('button');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = "Transmitting...";
+                submitBtn.disabled = true;
+
+                try {
+                    // Push to Realtime Database
+                    const newRegRef = push(ref(db, 'registrations'));
+                    await set(newRegRef, {
+                        uid: currentUser.uid,
+                        teamName,
+                        captainName,
+                        email,
+                        teamSize,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // onValue listener in checkRegistration will handle the UI switch
+                    
+                } catch (error) {
+                    console.error("Registration failed:", error);
+                    showModal("Transmission Failed", "The Demogorgon intercepted your request. Try again.");
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
         }
 
-        function finishRecordingUI() {
-            const btn = document.getElementById('download-btn');
-            btn.innerText = "Record Video (HD)";
-            btn.classList.remove('recording');
-            isRecording = false;
-            
-            // Restore original screen settings
-            const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-            renderer.setPixelRatio(pixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            
-            const isNowMobile = window.innerWidth < 768;
-            camera.position.z = isNowMobile ? 120 : 80;
-            camera.position.y = isNowMobile ? 90 : 50;
-        }
-
-        function downloadVideo() {
-            finishRecordingUI();
-            if(recordedChunks.length === 0) return;
-            const blob = new Blob(recordedChunks, { type: selectedMimeType || 'video/webm' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            a.href = url;
-            a.download = "HD_Galaxy_Sim_" + Date.now() + "." + selectedExtension;
-            a.click();
-            setTimeout(() => { window.URL.revokeObjectURL(url); document.body.removeChild(a); recordedChunks = []; }, 100);
-        }
-
-        // --- Simulation Logic ---
-        function createGalaxy() {
-            galaxyGeo = new THREE.BufferGeometry();
-            const positions = new Float32Array(NUM_PARTICLES * 3);
-            const colors = new Float32Array(NUM_PARTICLES * 3);
-            const sizes = new Float32Array(NUM_PARTICLES);
-            particlesData = [];
-            const colorGas = new THREE.Color(0x884444); 
-            for(let i=0; i<NUM_PARTICLES; i++) {
-                const r = 5 + Math.random() * DISC_SCALE; 
-                const angleOffset = (Math.random() * Math.PI * 2); 
-                particlesData.push({ r: r, theta: angleOffset, y: (Math.random() - 0.5) * (r * 0.05), vRadial: 0, vTheta: Math.sqrt(G_MASS / r), type: TYPE_GAS, age: 0, baseSize: Math.random() * 0.5 + 0.2 });
-                positions[i*3] = Math.cos(angleOffset) * r; positions[i*3+1] = particlesData[i].y; positions[i*3+2] = Math.sin(angleOffset) * r;
-                colors[i*3] = colorGas.r; colors[i*3+1] = colorGas.g; colors[i*3+2] = colorGas.b; sizes[i] = particlesData[i].baseSize;
-            }
-            galaxyGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            galaxyGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            galaxyGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-            galaxyMat = new THREE.PointsMaterial({ size: 1, map: generateSprite(), vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 });
-            galaxyPoints = new THREE.Points(galaxyGeo, galaxyMat);
-            scene.add(galaxyPoints);
-        }
-
-        function createJets() {
-            jetGeo = new THREE.BufferGeometry();
-            const positions = new Float32Array(NUM_JET_PARTICLES * 3);
-            const colors = new Float32Array(NUM_JET_PARTICLES * 3);
-            jetData = [];
-            for(let i=0; i<NUM_JET_PARTICLES; i++) {
-                jetData.push({ life: 0, speed: 0, dir: 1, active: false });
-                positions[i*3] = 0; positions[i*3+1] = 0; positions[i*3+2] = 0;
-                colors[i*3] = 0.5; colors[i*3+1] = 0.8; colors[i*3+2] = 1.0;
-            }
-            jetGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            jetGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            jetMat = new THREE.PointsMaterial({ size: 2.0, map: generateSprite(), vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
-            jetPoints = new THREE.Points(jetGeo, jetMat);
-            scene.add(jetPoints);
-        }
-
-        function createAGN() {
-            const geometry = new THREE.SphereGeometry(1.5, 32, 32);
-            const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            agnCore = new THREE.Mesh(geometry, material);
-            scene.add(agnCore);
-            const glowGeo = new THREE.SpriteMaterial({ map: generateSprite(), color: 0xffaa00, blending: THREE.AdditiveBlending });
-            agnGlow = new THREE.Sprite(glowGeo);
-            agnGlow.scale.set(10, 10, 1);
-            agnCore.add(agnGlow);
-            agnCore.visible = false; 
-        }
-
-        function generateSprite() {
-            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
+        // --- Visual Effects Logic ---
+        
+        // 1. Spores / Dust Particles
+        const canvas = document.getElementById('spores');
+        if (canvas) {
             const ctx = canvas.getContext('2d');
-            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-            grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(0.4, 'rgba(255,255,255,0.2)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = grad; ctx.fillRect(0,0,64,64);
-            return new THREE.CanvasTexture(canvas);
+            let width, height;
+            let particles = [];
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                reset() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 3 + 1; 
+                    this.alpha = Math.random() * 0.4 + 0.1;
+                    this.life = Math.random() * 200 + 100;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life--;
+                    
+                    this.vx += (Math.random() - 0.5) * 0.02;
+                    this.vy += (Math.random() - 0.5) * 0.02;
+
+                    if (this.life <= 0 || this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                        this.reset();
+                    }
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(180, 190, 200, ${this.alpha})`;
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < 150; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                if (!width || !height) return requestAnimationFrame(animateParticles); // wait for resize
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animateParticles);
+            }
+
+            window.addEventListener('resize', resize);
+            resize(); // Init size
+            initParticles();
+            animateParticles();
         }
 
-        function updateGalaxy(dt) {
-            const positions = galaxyGeo.attributes.position.array; const colors = galaxyGeo.attributes.color.array; const sizes = galaxyGeo.attributes.size.array;
-            let accretionCount = 0;
-            if (currentPhase === 1 && time > 3.0) { currentPhase = 2; updateStatusBox(2); }
-            const armPhase = time * 1.5 * 0.1;
-            for(let i=0; i<NUM_PARTICLES; i++) {
-                const p = particlesData[i];
-                if(p.type === TYPE_DEAD) {
-                    if(currentPhase < 4 && Math.random() < 0.001) {
-                         p.type = TYPE_GAS; p.r = DISC_SCALE; p.theta = Math.random() * Math.PI * 2;
-                         p.vTheta = Math.sqrt(G_MASS/p.r); p.age = 0; sizes[i] = p.baseSize;
-                         colors[i*3] = 0.5; colors[i*3+1] = 0.2; colors[i*3+2] = 0.2;
-                    }
-                    positions[i*3] = 9999; continue;
-                }
-                p.theta += (Math.sqrt(G_MASS) / Math.pow(p.r, 1.5)) * dt;
-                if (p.type === TYPE_GAS) p.r -= VISCOSITY * (10/p.r) * dt; 
-                const spiralTheta = (Math.log(p.r/5) / Math.tan(ARM_WINDING)) + armPhase;
-                let angleDiff = (p.theta - spiralTheta) % (Math.PI); 
-                if (angleDiff < 0) angleDiff += Math.PI;
-                const inArm = (angleDiff < 0.3);
-                if (p.type === TYPE_GAS && inArm && currentPhase >= 2 && currentPhase < 4) {
-                    if (Math.random() < STAR_FORMATION_THRESH * dt) {
-                        p.type = TYPE_STAR; p.age = 0; colors[i*3] = 0.7; colors[i*3+1] = 0.8; colors[i*3+2] = 1.0; sizes[i] = p.baseSize * 3.0; 
-                    }
-                }
-                if (p.type === TYPE_STAR) {
-                    p.age += dt; const lifeRatio = p.age / 10.0; 
-                    if (lifeRatio < 0.2) sizes[i] *= 0.98; 
-                    else if (lifeRatio < 0.5) { colors[i*3] = 1.0; colors[i*3+1] = 0.9; colors[i*3+2] = 0.7; }
-                    else { colors[i*3] = 0.8; colors[i*3+1] = 0.4; colors[i*3+2] = 0.2; sizes[i] *= 0.99; }
-                    if (sizes[i] < 0.05) p.type = TYPE_DEAD; 
-                }
-                if (agnActive && p.r < 30 && p.type === TYPE_GAS) {
-                     p.r += 0.8 * dt; colors[i*3] = 1.0; colors[i*3+1] = 0.5; colors[i*3+2] = 0.0;
-                     if(Math.random() < 0.01) p.type = TYPE_DEAD;
-                }
-                if (p.r < 2) { p.type = TYPE_DEAD; agnMass++; accretionCount++; }
-                positions[i*3] = Math.cos(p.theta) * p.r; positions[i*3+1] = p.y; positions[i*3+2] = Math.sin(p.theta) * p.r;
-            }
-            galaxyGeo.attributes.position.needsUpdate = true; galaxyGeo.attributes.color.needsUpdate = true; galaxyGeo.attributes.size.needsUpdate = true;
-
-            if (!agnActive && currentPhase < 4 && (agnMass > AGN_CRITICAL_MASS || (currentPhase === 2 && time > 15.0))) activateAGN();
-            if (agnActive && (agnMass > AGN_SHUTDOWN_MASS || time > 35.0)) shutdownAGN();
-            
-            if (currentPhase === 4 && isRecording) {
-                phase4Timer += dt;
-                if (phase4Timer > 5.0) mediaRecorder.stop();
-            }
-
-            if (Math.random() > 0.9) { 
-                 document.getElementById('acc-rate').innerText = (accretionCount * 10).toFixed(0);
-                 document.getElementById('vel-disp').innerText = Math.sqrt(G_MASS/10).toFixed(0);
-            }
-        }
-
-        function updateJets(dt) {
-            if (!agnActive && currentPhase !== 4) return;
-            const positions = jetGeo.attributes.position.array; const colors = jetGeo.attributes.color.array;
-            if (agnActive) {
-                const intensity = 1 + Math.sin(time * 20) * 0.2;
-                agnGlow.material.opacity = 0.8 + Math.random() * 0.2; agnGlow.scale.set(8 * intensity, 8 * intensity, 1);
-            } else { agnGlow.material.opacity *= 0.95; }
-            for(let i=0; i<NUM_JET_PARTICLES; i++) {
-                const p = jetData[i];
-                if (!p.active) {
-                    if (agnActive && Math.random() < 0.1) {
-                        p.active = true; p.life = 0; p.dir = Math.random() > 0.5 ? 1 : -1; p.speed = 15 + Math.random() * 5; 
-                        positions[i*3] = (Math.random()-0.5) * 0.5; positions[i*3+1] = 0; positions[i*3+2] = (Math.random()-0.5) * 0.5;
-                    }
-                    if(!p.active) positions[i*3+1] = 9999; continue;
-                }
-                p.life += dt; positions[i*3+1] += p.speed * p.dir * dt;
-                positions[i*3] *= 1.01; positions[i*3+2] *= 1.01;
-                if (p.life < 0.5) { colors[i*3] = 0.5; colors[i*3+1] = 0.8; colors[i*3+2] = 1.0; }
-                else if (p.life < 1.0) { colors[i*3] = 0.8; colors[i*3+1] = 0.0; colors[i*3+2] = 1.0; }
-                else { colors[i*3] = 0.4; colors[i*3+1] = 0.0; colors[i*3+2] = 0.1; }
-                if (Math.abs(positions[i*3+1]) > 60) p.active = false;
-            }
-            jetGeo.attributes.position.needsUpdate = true; jetGeo.attributes.color.needsUpdate = true;
-        }
-
-        function activateAGN() { agnActive = true; currentPhase = 3; agnCore.visible = true; updateStatusBox(3); }
-        function shutdownAGN() { if(currentPhase !== 4) { agnActive = false; currentPhase = 4; phase4Timer = 0; updateStatusBox(4); } }
+        // 2. Flashlight & Monster Reveal Effect
+        const flashlight = document.getElementById('flashlight');
+        const monster = document.getElementById('demogorgon');
         
-        function updateStatusBox(phase) {
-            const box = document.getElementById('status-box');
-            // Simplified status box content for mobile readability
-            if (phase === 1) { 
-                box.innerHTML = "Phase 1: Quiescent Galaxy<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Gas cooling. Low star formation.</span>"; 
-                box.style.borderLeftColor = "#a54"; box.style.color = "#fff"; 
-            }
-            else if (phase === 2) { 
-                box.innerHTML = "Phase 2: Secular Evolution<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Spiral arms trigger star formation.</span>"; 
-                box.style.borderLeftColor = "#4facfe"; box.style.color = "#fff"; 
-            }
-            else if (phase === 3) { 
-                box.innerHTML = "Phase 3: AGN Ignition<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Quasar Mode. Jets launch.</span>"; 
-                box.style.borderLeftColor = "#fc0"; box.style.color = "#fc0"; 
-            }
-            else if (phase === 4) { 
-                box.innerHTML = "Phase 4: Quenching<br><span style='font-size:0.8em; font-weight:normal; opacity:0.7;'>Red & Dead. Fuel exhausted.</span>"; 
-                box.style.borderLeftColor = "#555"; box.style.color = "#aaa"; 
-            }
-        }
-        
-        function resetSimulation(fromRecord) {
-            if(!fromRecord && isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-            agnActive = false; agnMass = 0; currentPhase = 1; agnCore.visible = false; time = 0; phase4Timer = 0;
-            const positions = galaxyGeo.attributes.position.array; const colors = galaxyGeo.attributes.color.array; const sizes = galaxyGeo.attributes.size.array; const colorGas = new THREE.Color(0x884444);
-            for(let i=0; i<NUM_PARTICLES; i++) {
-                const r = 5 + Math.random() * DISC_SCALE; particlesData[i].r = r; particlesData[i].theta = Math.random() * Math.PI * 2;
-                particlesData[i].type = TYPE_GAS; particlesData[i].age = 0;
-                positions[i*3] = Math.cos(particlesData[i].theta) * r; positions[i*3+1] = particlesData[i].y; positions[i*3+2] = Math.sin(particlesData[i].theta) * r;
-                colors[i*3] = colorGas.r; colors[i*3+1] = colorGas.g; colors[i*3+2] = colorGas.b; sizes[i] = particlesData[i].baseSize;
-            }
-            galaxyGeo.attributes.position.needsUpdate = true; galaxyGeo.attributes.color.needsUpdate = true;
-            for(let i=0; i<NUM_JET_PARTICLES; i++) { jetData[i].active = false; jetGeo.attributes.position.array[i*3+1] = 9999; }
-            jetGeo.attributes.position.needsUpdate = true; updateStatusBox(1);
+        if (flashlight) {
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth) * 100;
+                const y = (e.clientY / window.innerHeight) * 100;
+                flashlight.style.setProperty('--x', `${x}%`);
+                flashlight.style.setProperty('--y', `${y}%`);
+            });
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            const dt = 0.05; time += dt;
-            updateGalaxy(dt); updateJets(dt);
-            
-            // Smooth Camera Movement with inertia
-            targetX += (mouseX * 50 - targetX) * 0.05;
-            targetY += (mouseY * 20 - targetY) * 0.05;
-            
-            const baseHeight = (isMobile && !isRecording) ? 90 : 50; 
-            camera.position.x += (targetX - camera.position.x) * 0.05;
-            camera.position.y += (baseHeight + targetY - camera.position.y) * 0.05;
-            
-            camera.lookAt(0,0,0);
-            
-            renderer.render(scene, camera);
-            if (isRecording) drawComposition(); 
+        if (monster) {
+            function flickeringLights() {
+                const randomTime = Math.random() * 5000 + 2000; 
+                setTimeout(() => {
+                    monster.style.opacity = Math.random() * 0.6; 
+                    setTimeout(() => {
+                        monster.style.opacity = 0;
+                    }, 200); 
+                    flickeringLights();
+                }, randomTime);
+            }
+            flickeringLights();
         }
 
-        init(); updateStatusBox(1);
+        // 3. Simple Countdown
+        function startCountdown() {
+            const el = document.getElementById('countdown');
+            if (!el) return;
+            let timeLeft = 24 * 60 * 60; 
+            setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600);
+                const m = Math.floor((timeLeft % 3600) / 60);
+                const s = timeLeft % 60;
+                el.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+        startCountdown();
+
+        // 4. Dynamic Vines
+        function spawnVines() {
+            const container = document.getElementById('dynamic-vines');
+            if (!container) return;
+
+            const vineCount = 25; // Increased count
+            
+            // Helper to create vine
+            const addVine = (x, y, r, s, op) => {
+                const el = document.createElement('div');
+                el.className = 'vine-base vine-shape';
+                el.style.left = x;
+                el.style.top = y;
+                el.style.transform = `rotate(${r}deg) scale(${s})`;
+                el.style.opacity = op;
+                container.appendChild(el);
+            };
+
+            // Edges (Fill the gaps for "all around" effect)
+            // Top
+            addVine('20%', '-100px', 150, 0.8, 0.85);
+            addVine('50%', '-100px', 180, 0.8, 0.85);
+            addVine('80%', '-100px', 210, 0.8, 0.85);
+            // Bottom
+            addVine('20%', 'calc(100% - 200px)', 30, 0.8, 0.85);
+            addVine('50%', 'calc(100% - 200px)', 0, 0.8, 0.85);
+            addVine('80%', 'calc(100% - 200px)', -30, 0.8, 0.85);
+            // Left
+            addVine('-100px', '20%', 120, 0.8, 0.85);
+            addVine('-100px', '50%', 90, 0.8, 0.85);
+            addVine('-100px', '80%', 60, 0.8, 0.85);
+            // Right
+            addVine('calc(100% - 200px)', '20%', -120, 0.8, 0.85);
+            addVine('calc(100% - 200px)', '50%', -90, 0.8, 0.85);
+            addVine('calc(100% - 200px)', '80%', -60, 0.8, 0.85);
+
+            // Random Scatter inside
+            for(let i=0; i<vineCount; i++) {
+                const x = Math.random() * 100 + '%';
+                const y = Math.random() * 100 + '%';
+                const r = Math.random() * 360;
+                const s = Math.random() * 0.5 + 0.5;
+                addVine(x, y, r, s, 0.7);
+            }
+        }
+
+        // Start App with Safety
+        initApp();
+
     </script>
 </body>
 </html>
