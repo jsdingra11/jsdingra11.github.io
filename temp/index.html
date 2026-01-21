@@ -108,7 +108,7 @@
     <div id="dynamic-vines"></div>
 
     <div class="fixed top-[15%] right-[5%] w-[300px] h-[500px] z-10 pointer-events-none opacity-90 animate-[floatDementor_25s_infinite_alternate]">
-        <img src="demon.png" alt="Dementor" class="w-full h-full object-contain brightness-75">
+        <img src="demon.png" alt="Dementor" onerror="this.style.display='none'" class="w-full h-full object-contain brightness-75">
     </div>
 
     <div class="lumos-cursor" id="lumos-glow"></div>
@@ -120,11 +120,11 @@
             
             <div class="flex justify-center items-center gap-6 mb-8">
                 <div class="relative group">
-                    <img src="scirox.png" alt="SciRox Logo" class="h-20 md:h-24 object-contain opacity-80 group-hover:opacity-100 transition-all duration-500 drop-shadow-[0_0_15px_rgba(116,199,213,0.3)]">
+                    <img src="scirox.png" alt="SciRox" onerror="this.style.display='none'" class="h-20 md:h-24 object-contain opacity-80 group-hover:opacity-100 transition-all duration-500 drop-shadow-[0_0_15px_rgba(116,199,213,0.3)]">
                 </div>
                 <div class="h-12 w-[1px] bg-gradient-to-b from-transparent via-[#c5a059] to-transparent opacity-50"></div>
                 <div class="relative group">
-                    <img src="harry.png" alt="Harry Potter Logo" class="h-20 md:h-24 object-contain opacity-80 group-hover:opacity-100 transition-all duration-500 drop-shadow-[0_0_15px_rgba(197,160,89,0.3)]">
+                    <img src="harry.png" alt="HP" onerror="this.style.display='none'" class="h-20 md:h-24 object-contain opacity-80 group-hover:opacity-100 transition-all duration-500 drop-shadow-[0_0_15px_rgba(197,160,89,0.3)]">
                 </div>
             </div>
             <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">SciRox - Science Club | Department of Mysteries</h2>
@@ -220,13 +220,14 @@
                                 <img src="scanner.png" 
                                      alt="Payment QR Code" 
                                      id="payment-qr"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'text-xs\'>Payment QR</span>'"
                                      class="w-48 h-48 border-4 border-white rounded-lg shadow-[0_0_20px_rgba(197,160,89,0.5)]">
                             </div>
                             <p class="text-xs text-gray-500 italic">Scan with any muggle app (GPay, Paytm, PhonePe)</p>
                         </div>
 
                         <div>
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Upload Payment Screenshot</label>
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Upload Payment Screenshot <span id="upload-optional-tag" class="hidden text-[#c5a059]">(Optional if unchanged)</span></label>
                             <input type="file" id="paymentScreenshot" accept="image/*" required class="w-full p-3 rounded-sm input-field text-sm">
                         </div>
 
@@ -234,8 +235,8 @@
                             <button type="button" id="back-btn" class="w-1/3 py-3 text-sm font-bold border border-gray-600 text-gray-400 hover:text-white hover:border-white transition-all rounded-sm">
                                 &larr; Back
                             </button>
-                            <button type="submit" class="w-2/3 py-4 text-xl font-bold btn-magic group rounded-sm">
-                                <span class="group-hover:hidden">Confirm Registration</span>
+                            <button type="submit" id="final-submit-btn" class="w-2/3 py-4 text-xl font-bold btn-magic group rounded-sm">
+                                <span class="group-hover:hidden" id="submit-btn-text">Confirm Registration</span>
                                 <span class="hidden group-hover:block">Expecto Patronum!</span>
                             </button>
                         </div>
@@ -253,6 +254,10 @@
                         <span class="mx-2 text-gray-700">|</span> 
                         ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span>
                     </p>
+                    <!-- Resubmit / Edit Option -->
+                    <button id="edit-entry-btn" class="mt-4 text-xs text-[#c5a059] underline hover:text-white transition-colors uppercase tracking-widest opacity-80 hover:opacity-100">
+                        <span class="mr-1">✎</span> Mistake in your parchment? Edit Entry
+                    </button>
                 </div>
 
                 <div class="max-w-2xl mx-auto bg-black/40 border border-[#c5a059]/30 p-8 rounded-sm mb-8 backdrop-blur-sm shadow-[0_0_15px_rgba(0,0,0,0.5)]">
@@ -379,7 +384,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         const tokenPart1 = "ghp_"; 
         const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; 
         const GITHUB_TOKEN = tokenPart1 + tokenPart2;
@@ -405,6 +410,10 @@
         const displayAmount = document.getElementById('display-amount');
         const member2Group = document.getElementById('member2-group');
         const member3Group = document.getElementById('member3-group');
+        const editEntryBtn = document.getElementById('edit-entry-btn');
+        const finalSubmitBtn = document.getElementById('final-submit-btn');
+        const submitBtnText = document.getElementById('submit-btn-text');
+        const uploadOptionalTag = document.getElementById('upload-optional-tag');
 
         // Utils
         window.closeModal = () => modal.classList.add('hidden');
@@ -422,6 +431,10 @@
 
         // --- Firebase Init ---
         let app, auth, db, currentUser = null;
+        let currentEntryKey = null;
+        let currentEntryData = null;
+        let isEditing = false;
+
         async function initApp() {
             try {
                 const firebaseConfig = {
@@ -454,11 +467,20 @@
             const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
             onValue(userQuery, (snapshot) => {
                 if (snapshot.exists()) {
-                    const data = Object.values(snapshot.val())[0];
-                    userTeamNameDisplay.textContent = data.teamName;
+                    // Capture the key and data for editing later
+                    const keys = Object.keys(snapshot.val());
+                    currentEntryKey = keys[0];
+                    currentEntryData = snapshot.val()[currentEntryKey];
+
+                    userTeamNameDisplay.textContent = currentEntryData.teamName;
                     userIdDisplay.textContent = uid;
-                    switchView('dashboard-view');
+                    
+                    // If we are currently editing and submitting, don't force switch
+                    // But usually, after submit we want to show dashboard
+                    if (!isEditing) switchView('dashboard-view');
                 } else {
+                    currentEntryKey = null;
+                    currentEntryData = null;
                     switchView('registration-view');
                 }
             });
@@ -481,15 +503,53 @@
             else member3Group.classList.add('hidden');
         });
 
+        // --- Logic: Edit Mode ---
+        editEntryBtn.addEventListener('click', () => {
+            if (!currentEntryData) return;
+
+            // 1. Populate fields
+            document.getElementById('teamName').value = currentEntryData.teamName;
+            document.getElementById('captainName').value = currentEntryData.captain.name;
+            document.getElementById('email').value = currentEntryData.captain.email;
+            document.getElementById('captainPhone').value = currentEntryData.captain.phone;
+            document.getElementById('captainDept').value = currentEntryData.captain.department;
+            
+            teamSizeSelect.value = currentEntryData.teamSize;
+            // Trigger change event to show/hide correct member fields
+            teamSizeSelect.dispatchEvent(new Event('change'));
+
+            if (currentEntryData.member2) {
+                document.getElementById('member2Name').value = currentEntryData.member2.name || '';
+                document.getElementById('member2Phone').value = currentEntryData.member2.phone || '';
+                document.getElementById('member2Dept').value = currentEntryData.member2.department || '';
+            }
+            if (currentEntryData.member3) {
+                document.getElementById('member3Name').value = currentEntryData.member3.name || '';
+                document.getElementById('member3Phone').value = currentEntryData.member3.phone || '';
+                document.getElementById('member3Dept').value = currentEntryData.member3.department || '';
+            }
+
+            // 2. Set State
+            isEditing = true;
+            submitBtnText.innerText = "Update Registration";
+            uploadOptionalTag.classList.remove('hidden');
+            document.getElementById('paymentScreenshot').required = false; // Optional on edit
+
+            // 3. Switch View
+            switchView('registration-view');
+            formStep2.classList.add('hidden');
+            formStep1.classList.remove('hidden');
+        });
+
+
         // --- Logic: Navigation & Validation ---
         
         // Function to check if team name exists
         async function checkTeamNameUnique(name) {
             const registrationsRef = ref(db, 'registrations');
-            // Query where 'teamName' equals the input
             const q = query(registrationsRef, orderByChild('teamName'), equalTo(name));
             const snapshot = await get(q);
-            return !snapshot.exists(); // Returns true if unique (does not exist)
+            return !snapshot.exists(); 
         }
 
         proceedBtn.addEventListener('click', async () => {
@@ -538,12 +598,21 @@
                 }
 
                 // 3. Check for Duplicate Team Name
-                const isUnique = await checkTeamNameUnique(teamName);
-                if (!isUnique) {
-                    showModal("Dark Mark Detected", `The house name "${teamName}" is already taken. Please choose another.`);
-                    proceedBtn.innerHTML = originalText;
-                    proceedBtn.disabled = false;
-                    return;
+                // Logic: If editing AND name is same as old name, skip check. 
+                // Otherwise, check uniqueness.
+                let shouldCheck = true;
+                if (isEditing && currentEntryData && teamName === currentEntryData.teamName) {
+                    shouldCheck = false;
+                }
+
+                if (shouldCheck) {
+                    const isUnique = await checkTeamNameUnique(teamName);
+                    if (!isUnique) {
+                        showModal("Dark Mark Detected", `The house name "${teamName}" is already taken. Please choose another.`);
+                        proceedBtn.innerHTML = originalText;
+                        proceedBtn.disabled = false;
+                        return;
+                    }
                 }
 
                 // If all good, proceed
@@ -595,14 +664,17 @@
             if (!currentUser) return;
 
             const fileInput = document.getElementById('paymentScreenshot');
-            if (fileInput.files.length === 0) {
-                showModal("Evidence Required", "Please upload the payment screenshot.");
-                return;
+            const file = fileInput.files[0];
+
+            // Validation: File required only if NOT editing OR if editing but no old file (rare case)
+            if (!isEditing && !file) {
+                 showModal("Evidence Required", "Please upload the payment screenshot.");
+                 return;
             }
 
             const submitBtn = regForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = "Processing...";
+            submitBtn.innerHTML = isEditing ? "Updating..." : "Processing...";
             submitBtn.disabled = true;
 
             try {
@@ -637,17 +709,42 @@
                     };
                 }
 
-                // 1. Upload
-                submitBtn.innerHTML = "Uploading Proof...";
-                const file = fileInput.files[0];
-                const cleanName = teamData.teamName.replace(/[^a-zA-Z0-9]/g, '_');
-                const fileName = `${cleanName}_${Date.now()}.png`;
-                teamData.screenshotUrl = await uploadImageToGitHub(file, fileName);
+                // 1. Upload Logic
+                // If user selected a new file, upload it.
+                // If editing and no new file, keep old URL.
+                if (file) {
+                    submitBtn.innerHTML = "Uploading Proof...";
+                    const cleanName = teamData.teamName.replace(/[^a-zA-Z0-9]/g, '_');
+                    const fileName = `${cleanName}_${Date.now()}.png`;
+                    teamData.screenshotUrl = await uploadImageToGitHub(file, fileName);
+                } else if (isEditing && currentEntryData && currentEntryData.screenshotUrl) {
+                    teamData.screenshotUrl = currentEntryData.screenshotUrl;
+                } else {
+                    // Fallback (shouldn't reach here due to validation)
+                    teamData.screenshotUrl = ""; 
+                }
 
                 // 2. Save DB
                 submitBtn.innerHTML = "Sealing Pact...";
-                const newRegRef = push(ref(db, 'registrations'));
-                await set(newRegRef, teamData);
+                
+                if (isEditing && currentEntryKey) {
+                    // UPDATE existing
+                    await update(ref(db, 'registrations/' + currentEntryKey), teamData);
+                    showModal("Success", "Your parchment has been amended.");
+                } else {
+                    // CREATE new
+                    const newRegRef = push(ref(db, 'registrations'));
+                    await set(newRegRef, teamData);
+                }
+                
+                // Reset state
+                isEditing = false;
+                submitBtnText.innerText = "Confirm Registration";
+                uploadOptionalTag.classList.add('hidden');
+                document.getElementById('paymentScreenshot').required = true;
+                
+                // Switch view handled by onValue listener or manually
+                switchView('dashboard-view');
 
             } catch (error) {
                 console.error(error);
