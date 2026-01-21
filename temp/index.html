@@ -3,95 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE RIFT | Stranger Things Treasure Hunt</title>
+    <title>THE DEATHLY HALLOWS | Hogwarts Treasure Hunt</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDKs (Updated for Realtime Database) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"></script>
 
     <style>
         :root {
-            --stranger-red: #ff0000;
-            --dark-bg: #0a0a0a;
-            --neon-glow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ff0000;
+            --magic-gold: #c5a059;
+            --magic-blue: #74c7d5; /* Patronus color */
+            --dark-bg: #050508;
+            --parchment: #f0e6d2;
+            --dementor-black: #000000;
+            --glow-patronus: 0 0 15px #74c7d5, 0 0 30px #74c7d5, 0 0 50px #ffffff;
         }
 
         body {
             background-color: var(--dark-bg);
-            color: #dcdcdc;
-            font-family: 'Share Tech Mono', monospace;
+            color: #b0b0b0;
+            font-family: 'Crimson Text', serif;
             overflow-x: hidden;
+            cursor: none; /* Hide default cursor for Wand effect */
         }
 
         /* The Title Font styling */
         .title-font {
-            font-family: 'Libre Baskerville', serif;
-            color: transparent;
-            -webkit-text-stroke: 2px var(--stranger-red);
-            text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
-            letter-spacing: -2px;
+            font-family: 'Cinzel', serif;
+            color: #e0e0e0;
+            letter-spacing: 2px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            background: linear-gradient(to bottom, #cfc7b8, #8a7e66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        .title-font-filled {
-            font-family: 'Libre Baskerville', serif;
-            color: var(--stranger-red);
-            text-shadow: var(--neon-glow);
+        .title-sub {
+            font-family: 'Cinzel', serif;
+            color: var(--magic-blue);
+            text-shadow: 0 0 10px rgba(116, 199, 213, 0.5);
         }
 
-        /* CRT Scanline Effect */
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0,0,0,0.1) 50%,
-                rgba(0,0,0,0.1)
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 50;
-        }
-
-        .flicker {
-            animation: flicker 4s infinite;
-        }
-
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% {
-                opacity: 1;
-                text-shadow: var(--neon-glow);
-            }
-            20%, 24%, 55% {
-                opacity: 0.5;
-                text-shadow: none;
-            }
-        }
-
-        /* Upside Down Atmosphere */
+        /* Atmosphere */
         #canvas-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
             pointer-events: none;
-            background: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
+            background: radial-gradient(circle at center, #111118 0%, #000000 100%);
         }
 
-        /* Rolling Mist/Fog */
+        /* Rolling Dementor Fog */
         .fog-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -103,14 +72,17 @@
             position: absolute;
             height: 100vh;
             width: 300vw;
+            /* Icy blue filter for Dementor cold */
             background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjMiLz48L3N2Zz4=');
             background-size: cover;
-            opacity: 0.15;
+            opacity: 0.1;
+            filter: sepia(1) hue-rotate(180deg) saturate(1.5); /* Blue tint */
             animation: fogFlow 60s linear infinite;
         }
         .fog-img-2 {
             animation: fogFlow 40s linear infinite reverse;
-            opacity: 0.1;
+            opacity: 0.05;
+            filter: sepia(1) hue-rotate(180deg) saturate(2);
         }
 
         @keyframes fogFlow {
@@ -118,103 +90,142 @@
             100% { transform: translate3d(-200vw, 0, 0); }
         }
 
-        /* Demogorgon Silhouette */
-        .monster-wrapper {
+        /* The Dementor */
+        .dementor-wrapper {
             position: fixed;
-            bottom: -50px;
-            right: -50px;
-            width: 500px;
-            height: 600px;
-            z-index: 1; /* Behind content, in front of bg */
+            top: 10%;
+            right: -10%; /* Start off screen */
+            width: 300px;
+            height: 500px;
+            z-index: 2;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.1s ease-in-out;
-            filter: blur(1px) drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            opacity: 0.8;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.9));
+            animation: floatDementor 20s ease-in-out infinite;
         }
 
-        /* Vines Styles - Updated for All-over effect */
+        @keyframes floatDementor {
+            0% { transform: translate(0, 0) rotate(5deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: translate(-40vw, 50px) rotate(-5deg); }
+            90% { opacity: 0.8; }
+            100% { transform: translate(-120vw, 0) rotate(5deg); opacity: 0; }
+        }
+        
+        /* Cloth ripple effect */
+        .cloak-piece {
+            transform-origin: top center;
+            animation: clothWave 3s ease-in-out infinite alternate;
+        }
+        @keyframes clothWave {
+            0% { transform: rotate(-2deg); }
+            100% { transform: rotate(2deg); }
+        }
+
+        /* Devil's Snare (Re-styled vines) */
         .vine-base {
             position: fixed;
             width: 300px;
             height: 300px;
-            z-index: 40; /* Behind flashlight (z-45) but above bg */
+            z-index: 40;
             pointer-events: none;
             background-repeat: no-repeat;
-            filter: drop-shadow(0 0 5px #000);
+            filter: brightness(0.2) sepia(1) hue-rotate(70deg) saturate(0.5) drop-shadow(0 0 5px #000); /* Dark green/black */
+            opacity: 0.6;
         }
 
-        /* Specific static corners (kept for framing) */
-        .vine-tl { top: -50px; left: -50px; transform: rotate(135deg); opacity: 0.9; }
-        .vine-tr { top: -50px; right: -50px; transform: rotate(-135deg); opacity: 0.9; }
-        .vine-bl { bottom: -50px; left: -50px; transform: rotate(45deg); opacity: 0.9; }
-        .vine-br { bottom: -50px; right: -50px; transform: rotate(-45deg); opacity: 0.9; }
-
-        /* The vine SVG shape (inline data URI for single file) */
+        /* Vine Shape SVG */
         .vine-shape {
-            /* Lighter colors for better visibility in the dark */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 100C50 100 60 60 30 50C0 40 20 10 20 10' stroke='%23632222' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 100C50 100 40 70 70 60C100 50 80 10 80 10' stroke='%234a1515' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M55 90C55 90 85 85 90 50' stroke='%23380808' stroke-width='4'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 100C50 100 60 60 30 50C0 40 20 10 20 10' stroke='%233a4a3a' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 100C50 100 40 70 70 60C100 50 80 10 80 10' stroke='%232a3a2a' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M55 90C55 90 85 85 90 50' stroke='%231a2a1a' stroke-width='4'/%3E%3C/svg%3E");
             background-size: contain;
         }
 
+        /* Input Fields */
         .input-field {
-            background: rgba(20, 0, 0, 0.6);
-            border: 1px solid #4a0000;
-            color: #ffcccc;
+            background: rgba(10, 15, 20, 0.7);
+            border: 1px solid #2f3e46;
+            color: #e0e0e0;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1rem;
             transition: all 0.3s ease;
         }
         .input-field:focus {
             outline: none;
-            border-color: #ff0000;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            border-color: var(--magic-blue);
+            box-shadow: 0 0 10px rgba(116, 199, 213, 0.2);
         }
 
-        .btn-rift {
-            background: transparent;
-            border: 2px solid var(--stranger-red);
-            color: var(--stranger-red);
+        /* Buttons */
+        .btn-magic {
+            background: linear-gradient(45deg, #0f1c25, #1a2a35);
+            border: 1px solid var(--magic-gold);
+            color: var(--magic-gold);
+            font-family: 'Cinzel', serif;
             text-transform: uppercase;
             letter-spacing: 2px;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: all 0.5s;
         }
 
-        .btn-rift:hover {
-            background: var(--stranger-red);
-            color: black;
-            box-shadow: var(--neon-glow);
+        .btn-magic:hover {
+            background: linear-gradient(45deg, #1a2a35, #2c3e50);
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.3);
+            text-shadow: 0 0 5px var(--magic-gold);
         }
 
         /* Loader */
         .loader {
-            border: 4px solid rgba(255, 0, 0, 0.1);
-            border-left-color: #ff0000;
+            border: 3px solid rgba(116, 199, 213, 0.1);
+            border-left-color: var(--magic-blue);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+            width: 40px;
+            height: 40px;
+            animation: spin 1.5s linear infinite;
+            filter: drop-shadow(0 0 5px var(--magic-blue));
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Flashlight effect */
-        .flashlight {
+        /* Lumos Wand Effect (Replaces Flashlight) */
+        .lumos-cursor {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle 300px at var(--x, 50%) var(--y, 50%), transparent 10%, rgba(0,0,0,0.95) 45%);
-            z-index: 45;
+            top: 0; left: 0;
+            width: 300px; height: 300px;
             pointer-events: none;
-            mix-blend-mode: multiply;
+            z-index: 100;
+            background: radial-gradient(circle closest-side, rgba(255,255,255,0.8) 0%, rgba(116,199,213,0.4) 20%, transparent 70%);
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+            opacity: 0.6;
+            transition: opacity 0.2s;
         }
+        
+        /* Wand Tip Spark */
+        .wand-tip {
+            position: fixed;
+            width: 8px; height: 8px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 101;
+            box-shadow: 0 0 10px #fff, 0 0 20px var(--magic-blue), 0 0 40px var(--magic-blue);
+            transform: translate(-50%, -50%);
+        }
+
+        /* Content Container */
+        .glass-panel {
+            background: rgba(5, 5, 8, 0.65);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(116, 199, 213, 0.1);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center">
 
     <!-- Backgrounds & Effects -->
-    <div class="scanlines"></div>
-    <div id="canvas-container"><canvas id="spores"></canvas></div>
+    <div id="canvas-container"><canvas id="soul-wisps"></canvas></div>
     
     <!-- Mist Layers -->
     <div class="fog-container">
@@ -222,94 +233,108 @@
         <div class="fog-img-2"></div>
     </div>
 
-    <!-- Creeping Vines (Static Corners) -->
-    <div class="vine-base vine-shape vine-tl"></div>
-    <div class="vine-base vine-shape vine-tr"></div>
-    <div class="vine-base vine-shape vine-bl"></div>
-    <div class="vine-base vine-shape vine-br"></div>
+    <!-- Devil's Snare (Static Corners) -->
+    <div class="vine-base vine-shape" style="top: -50px; left: -50px; transform: rotate(135deg);"></div>
+    <div class="vine-base vine-shape" style="top: -50px; right: -50px; transform: rotate(-135deg);"></div>
+    <div class="vine-base vine-shape" style="bottom: -50px; left: -50px; transform: rotate(45deg);"></div>
+    <div class="vine-base vine-shape" style="bottom: -50px; right: -50px; transform: rotate(-45deg);"></div>
     
-    <!-- Dynamic Vines Container (For JS generated vines) -->
+    <!-- Dynamic Devil's Snare Container -->
     <div id="dynamic-vines"></div>
 
-    <!-- The Monster (Hidden by default, revealed by flicker) -->
-    <div id="demogorgon" class="monster-wrapper">
-        <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
-            <!-- Dark Silhouette Body -->
-            <path d="M70,300 L60,200 C50,150 40,140 30,120 C20,100 10,80 30,60 C40,50 60,80 70,100 C80,120 90,120 100,100 C110,80 130,50 140,60 C160,80 150,100 140,120 C130,140 120,150 110,200 L100,300 Z" fill="#050000" stroke="none"/>
-            <!-- Head Petals (The Flower) -->
-            <path d="M85,100 Q60,60 50,20 Q70,40 85,60 Z" fill="#1a0000" />
-            <path d="M115,100 Q140,60 150,20 Q130,40 115,60 Z" fill="#1a0000" />
-            <path d="M100,100 Q100,40 100,10 Q110,40 110,60 Z" fill="#2b0000" />
-            <path d="M85,100 Q40,110 10,100 Q50,120 75,110 Z" fill="#1a0000" />
-            <path d="M115,100 Q160,110 190,100 Q150,120 125,110 Z" fill="#1a0000" />
-            <!-- Teeth hints -->
-            <circle cx="100" cy="90" r="10" fill="#330000" />
+    <!-- The Dementor (Floating Animation) -->
+    <div id="dementor" class="dementor-wrapper">
+        <svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="blurFilter">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+                </filter>
+            </defs>
+            <!-- Cloak Body -->
+            <path class="cloak-piece" d="M100,50 Q140,50 150,100 Q170,200 160,350 Q130,380 100,340 Q70,380 40,350 Q30,200 50,100 Q60,50 100,50 Z" fill="#0a0a0a" opacity="0.9" />
+            
+            <!-- Tattered Ends -->
+            <path d="M40,350 L30,400 L50,360 L60,390 L80,350" fill="#0a0a0a" opacity="0.8" />
+            <path d="M160,350 L170,400 L150,360 L140,390 L120,350" fill="#0a0a0a" opacity="0.8" />
+            
+            <!-- Hood/Head -->
+            <path d="M100,30 Q130,30 135,70 Q130,90 100,85 Q70,90 65,70 Q70,30 100,30 Z" fill="#000" />
+            <!-- The "Mouth" Void -->
+            <ellipse cx="100" cy="75" rx="10" ry="15" fill="#1a1a1a" filter="url(#blurFilter)" />
+            
+            <!-- Skeletal Hand -->
+            <path d="M150,150 L170,140 L165,160" stroke="#333" stroke-width="2" fill="none"/>
         </svg>
     </div>
 
-    <div class="flashlight" id="flashlight"></div>
+    <!-- Lumos Effect -->
+    <div class="lumos-cursor" id="lumos-glow"></div>
+    <div class="wand-tip" id="wand-tip"></div>
 
     <!-- Main Container -->
     <main class="relative z-50 w-full max-w-4xl p-6 mx-auto">
         
         <!-- Header / Logo -->
         <header class="text-center mb-12 animate-fade-in-down">
-            <h2 class="text-red-600 tracking-widest text-sm uppercase mb-2 flicker">Welcome to Hawkin's Ultimate Challenge</h2>
+            <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">Ministry of Magic • Department of Mysteries</h2>
             <div class="relative inline-block">
-                <h1 class="text-6xl md:text-8xl font-bold uppercase title-font mb-4">
-                    The Rift
+                <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-4">
+                    The Dark Mark
                 </h1>
-                <!-- Top border line styled like the show's intro -->
-                <div class="h-1 w-full bg-red-600 shadow-[0_0_10px_#ff0000] mb-8"></div>
+                <!-- Separator -->
+                <div class="flex items-center justify-center gap-4 mb-8">
+                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent to-[#c5a059]"></div>
+                    <span class="text-[#c5a059] text-xl">⚡</span>
+                    <div class="h-[1px] w-24 bg-gradient-to-l from-transparent to-[#c5a059]"></div>
+                </div>
             </div>
-            <p class="text-gray-400 max-w-lg mx-auto text-lg leading-relaxed">
-                The gate has opened. Strange signals are coming from the Upside Down. 
-                Assemble your party, solve the riddles, and close the rift before it's too late.
+            <p class="text-gray-400 max-w-lg mx-auto text-lg leading-relaxed font-serif italic">
+                "Happiness can be found, even in the darkest of times, if one only remembers to turn on the light."
             </p>
         </header>
 
         <!-- Dynamic Content Area -->
-        <div id="app-content" class="bg-black/60 backdrop-blur-sm border border-red-900/30 p-8 rounded-lg shadow-2xl relative overflow-hidden mb-12">
+        <div id="app-content" class="glass-panel p-10 rounded-sm relative overflow-hidden mb-12">
             
             <!-- Loading State -->
             <div id="loading-screen" class="flex flex-col items-center justify-center py-12">
-                <div class="loader mb-4"></div>
-                <p class="text-red-500 animate-pulse">Establishing Connection to the Upside Down...</p>
+                <div class="loader mb-6"></div>
+                <p class="text-cyan-100 animate-pulse font-serif tracking-widest">Consulting the Sorting Hat...</p>
             </div>
 
             <!-- Registration Form -->
             <div id="registration-view" class="hidden">
-                <h3 class="text-2xl text-red-500 mb-6 font-bold border-b border-red-900/50 pb-2">Party Registration</h3>
+                <h3 class="text-2xl text-[#c5a059] mb-8 text-center font-bold border-b border-[#c5a059]/30 pb-4 font-serif uppercase tracking-widest">W.O.M.B.A.T. Registration</h3>
                 <form id="reg-form" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Party Name</label>
-                            <input type="text" id="teamName" required class="w-full p-3 rounded input-field" placeholder="e.g. The Hellfire Club">
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name</label>
+                            <input type="text" id="teamName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Dumbledore's Army">
                         </div>
                         <div>
-                            <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Captain's Callsign</label>
-                            <input type="text" id="captainName" required class="w-full p-3 rounded input-field" placeholder="e.g. Dungeon Master">
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Head of House (Captain)</label>
+                            <input type="text" id="captainName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Hermione Granger">
                         </div>
                     </div>
                     
                     <div>
-                        <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Contact Frequency (Email)</label>
-                        <input type="email" id="email" required class="w-full p-3 rounded input-field" placeholder="will@byers.com">
+                        <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Owl Post (Email)</label>
+                        <input type="email" id="email" required class="w-full p-3 rounded-sm input-field" placeholder="wizard@hogwarts.edu">
                     </div>
 
                     <div>
-                        <label class="block text-red-400 text-sm mb-2 uppercase tracking-wider">Party Size (Max 3)</label>
-                        <select id="teamSize" class="w-full p-3 rounded input-field">
-                            <option value="1">Solo (1)</option>
-                            <option value="2">Duo (2)</option>
-                            <option value="3">Trio (3)</option>
+                        <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Party Size (Max 3)</label>
+                        <select id="teamSize" class="w-full p-3 rounded-sm input-field">
+                            <option value="1">Solo Wizard (1)</option>
+                            <option value="2">Dynamic Duo (2)</option>
+                            <option value="3">Golden Trio (3)</option>
                         </select>
                     </div>
 
-                    <div class="pt-4">
-                        <button type="submit" class="w-full py-4 text-xl font-bold btn-rift group">
-                            <span class="group-hover:hidden">Enter The Rift</span>
-                            <span class="hidden group-hover:block">Run!</span>
+                    <div class="pt-6">
+                        <button type="submit" class="w-full py-4 text-xl font-bold btn-magic group rounded-sm">
+                            <span class="group-hover:hidden">Enter the Forbidden Forest</span>
+                            <span class="hidden group-hover:block">Expecto Patronum!</span>
                         </button>
                     </div>
                 </form>
@@ -318,26 +343,26 @@
             <!-- Dashboard / Game Start -->
             <div id="dashboard-view" class="hidden text-center">
                 <div class="mb-8">
-                    <h3 class="text-3xl text-red-500 font-bold mb-2">Welcome, <span id="user-team-name" class="text-white">Traveler</span></h3>
-                    <p class="text-gray-400">Status: <span class="text-green-500">Registered</span> | ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span></p>
+                    <h3 class="text-3xl text-[#c5a059] font-serif mb-2">Welcome, <span id="user-team-name" class="text-white">Student</span></h3>
+                    <p class="text-gray-400 font-serif italic">Status: <span class="text-green-400">Enrolled</span> | ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span></p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div class="bg-red-900/10 border border-red-900/50 p-4 rounded">
-                        <h4 class="text-red-400 uppercase text-xs mb-2">Current Objective</h4>
-                        <p class="text-lg font-bold">Await Further Instructions</p>
+                    <div class="bg-black/40 border border-[#c5a059]/20 p-4 rounded-sm">
+                        <h4 class="text-gray-500 uppercase text-xs tracking-widest mb-2">Current Quest</h4>
+                        <p class="text-lg text-white font-serif">Await the Headmaster's Speech</p>
                     </div>
-                    <div class="bg-red-900/10 border border-red-900/50 p-4 rounded">
-                        <h4 class="text-red-400 uppercase text-xs mb-2">Time To Rift Opening</h4>
-                        <p id="countdown" class="text-lg font-bold font-mono text-red-500">00:00:00</p>
+                    <div class="bg-black/40 border border-[#c5a059]/20 p-4 rounded-sm">
+                        <h4 class="text-gray-500 uppercase text-xs tracking-widest mb-2">Time Until Curfew</h4>
+                        <p id="countdown" class="text-2xl font-serif text-[#c5a059]">00:00:00</p>
                     </div>
                 </div>
 
-                <div class="border-t border-red-900/30 pt-8">
-                    <p class="mb-4 text-sm text-gray-500">The first clue will manifest here when the hunt begins.</p>
-                    <div class="p-6 bg-black border border-dashed border-red-800 rounded opacity-50 relative">
-                        <p class="text-red-800 font-mono text-xs uppercase animate-pulse">Signal Weak... Reconnecting...</p>
-                        <div class="mt-4 text-4xl text-red-900">? ? ?</div>
+                <div class="border-t border-[#c5a059]/20 pt-8">
+                    <p class="mb-4 text-sm text-gray-500 italic">The Marauder's Map will reveal the first clue shortly.</p>
+                    <div class="p-8 bg-[#0a0a0a] border border-dashed border-[#c5a059]/40 rounded-sm relative">
+                        <p class="text-[#c5a059] font-mono text-xs uppercase animate-pulse">Mischief Managed...</p>
+                        <div class="mt-4 text-4xl text-[#333]">? ? ?</div>
                     </div>
                 </div>
             </div>
@@ -348,85 +373,85 @@
         <div id="classified-dossier" class="max-w-4xl mx-auto space-y-8 animate-fade-in-up mb-12">
             
             <!-- Section Header -->
-            <div class="text-center border-b border-red-900/50 pb-4">
-                <h3 class="text-2xl font-bold text-red-600 uppercase tracking-widest title-font-filled">Classified Dossier</h3>
-                <p class="text-gray-500 text-xs font-mono mt-1">EYES ONLY // LEVEL 4 CLEARANCE</p>
+            <div class="text-center border-b border-[#c5a059]/30 pb-4">
+                <h3 class="text-2xl font-bold text-[#c5a059] uppercase tracking-widest font-serif">Tournament Rules</h3>
+                <p class="text-gray-600 text-xs font-serif mt-1">PER ORDER OF DOLORES UMBRIDGE</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <!-- Card 1: Protocols (Rules) -->
-                <div class="bg-black/80 border border-red-900/40 p-6 rounded hover:border-red-600 transition-colors duration-300">
-                    <h4 class="text-xl text-red-500 font-bold mb-4 uppercase flex items-center gap-2">
-                        <span class="text-2xl">⚠</span> Protocols
+                <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300">
+                    <h4 class="text-xl text-gray-300 font-serif mb-4 uppercase flex items-center gap-2">
+                        <span class="text-[#c5a059]">📜</span> Decrees
                     </h4>
-                    <ul class="text-sm text-gray-400 space-y-3 font-mono list-disc pl-4">
-                        <li><strong class="text-gray-300">Fair Play:</strong> No psychic powers or AI solvers allowed. Integrity is paramount.</li>
-                        <li><strong class="text-gray-300">The Clock:</strong> The gate closes precisely at the designated hour. No extensions.</li>
-                        <li><strong class="text-gray-300">Safety:</strong> Do not enter restricted zones. The Upside Down is dangerous enough.</li>
-                        <li><strong class="text-gray-300">Admin Word:</strong> Decisions made by the SCIROX Gamemakers are final.</li>
+                    <ul class="text-sm text-gray-400 space-y-3 font-serif list-disc pl-4">
+                        <li><strong class="text-gray-300">No Muggles:</strong> Magic use only. No AI engines or external help.</li>
+                        <li><strong class="text-gray-300">Time-Turners:</strong> Strictly forbidden. When time is up, it is up.</li>
+                        <li><strong class="text-gray-300">Forbidden Forest:</strong> Stay within the designated castle grounds.</li>
+                        <li><strong class="text-gray-300">Prefects:</strong> The word of the organizers is final law.</li>
                     </ul>
                 </div>
 
                 <!-- Card 2: Stages (Rounds) -->
-                <div class="bg-black/80 border border-red-900/40 p-6 rounded hover:border-red-600 transition-colors duration-300">
-                    <h4 class="text-xl text-red-500 font-bold mb-4 uppercase flex items-center gap-2">
-                        <span class="text-2xl">⎋</span> Stages
+                <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300">
+                    <h4 class="text-xl text-gray-300 font-serif mb-4 uppercase flex items-center gap-2">
+                        <span class="text-[#c5a059]">🏆</span> Triwizard Tasks
                     </h4>
-                    <div class="space-y-4 text-sm font-mono text-gray-400">
-                        <div class="border-l-2 border-red-800 pl-3">
-                            <p class="text-red-400 font-bold text-xs uppercase">Round 01</p>
-                            <p class="text-white">The Vanishing</p>
-                            <p class="text-xs mt-1">Cipher breaking & logic puzzles to locate the entrance.</p>
+                    <div class="space-y-4 text-sm font-serif text-gray-400">
+                        <div class="border-l-2 border-[#c5a059] pl-3">
+                            <p class="text-[#c5a059] font-bold text-xs uppercase">Task 01</p>
+                            <p class="text-white">Ancient Runes</p>
+                            <p class="text-xs mt-1">Decipher the riddles to find the portkey.</p>
                         </div>
-                        <div class="border-l-2 border-red-800 pl-3">
-                            <p class="text-red-400 font-bold text-xs uppercase">Round 02</p>
-                            <p class="text-white">The Upside Down</p>
-                            <p class="text-xs mt-1">Physical treasure hunt across the venue perimeter.</p>
+                        <div class="border-l-2 border-[#c5a059] pl-3">
+                            <p class="text-[#c5a059] font-bold text-xs uppercase">Task 02</p>
+                            <p class="text-white">The Hunt</p>
+                            <p class="text-xs mt-1">Physical search for Horcruxes hidden in the venue.</p>
                         </div>
-                        <div class="border-l-2 border-red-800 pl-3">
-                            <p class="text-red-400 font-bold text-xs uppercase">Final Round</p>
-                            <p class="text-white">Closing The Gate</p>
-                            <p class="text-xs mt-1">The ultimate showdown for the top surviving parties.</p>
+                        <div class="border-l-2 border-[#c5a059] pl-3">
+                            <p class="text-[#c5a059] font-bold text-xs uppercase">Final Task</p>
+                            <p class="text-white">The Maze</p>
+                            <p class="text-xs mt-1">The final duel for the House Cup.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card 3: Agency (Organizers) -->
-                <div class="bg-black/80 border border-red-900/40 p-6 rounded hover:border-red-600 transition-colors duration-300 flex flex-col justify-between">
+                <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300 flex flex-col justify-between">
                     <div>
-                        <h4 class="text-xl text-red-500 font-bold mb-4 uppercase flex items-center gap-2">
-                            <span class="text-2xl">☢</span> Agency
+                        <h4 class="text-xl text-gray-300 font-serif mb-4 uppercase flex items-center gap-2">
+                            <span class="text-[#c5a059]">⚖️</span> Ministry
                         </h4>
-                        <p class="text-sm text-gray-400 font-mono leading-relaxed mb-4">
-                            This operation is strictly monitored and authorized by the <strong class="text-white">SCIROX</strong> Science Club. 
+                        <p class="text-sm text-gray-400 font-serif leading-relaxed mb-4">
+                            This event is authorized by the <strong class="text-white">SCIROX</strong> Club of Witchcraft and Wizardry. 
                         </p>
-                        <p class="text-xs text-gray-600 font-mono">
-                            Any anomalies should be reported to SCIROX officers immediately.
+                        <p class="text-xs text-gray-600 font-serif italic">
+                            Report all Dark Mark sightings immediately.
                         </p>
                     </div>
-                    <div class="mt-6 text-center pt-6 border-t border-dashed border-red-900/30">
-                        <span class="text-3xl font-black tracking-tighter text-red-700 block title-font-filled" style="text-shadow: none; -webkit-text-stroke: 1px red;">SCIROX</span>
-                        <span class="text-[10px] uppercase tracking-[0.3em] text-red-900">Official Organizer</span>
+                    <div class="mt-6 text-center pt-6 border-t border-dashed border-[#c5a059]/30">
+                        <span class="text-2xl font-bold tracking-widest text-[#c5a059] block font-serif">SCIROX</span>
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-gray-500">Headmasters</span>
                     </div>
                 </div>
 
             </div>
         </div>
 
-        <footer class="mt-12 text-center text-gray-600 text-xs">
-            <p>&copy; 2026 SCIROX x Hawkins National Laboratory. All rights reserved.</p>
-            <p class="mt-2">Warning: Participation may induce nosebleeds.</p>
+        <footer class="mt-12 text-center text-gray-700 text-xs font-serif">
+            <p>&copy; 2026 SCIROX x Ministry of Magic. All rights reserved.</p>
+            <p class="mt-2">Draco Dormiens Nunquam Titillandus.</p>
         </footer>
 
     </main>
 
     <!-- Modal for Messages -->
-    <div id="modal" class="fixed inset-0 bg-black/90 z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-gray-900 border-2 border-red-600 p-8 max-w-md w-full text-center rounded shadow-[0_0_50px_rgba(255,0,0,0.5)]">
-            <h3 id="modal-title" class="text-2xl text-red-500 font-bold mb-4 font-serif">Message from the Upside Down</h3>
-            <p id="modal-message" class="text-gray-300 mb-8">Something went wrong.</p>
-            <button onclick="closeModal()" class="px-6 py-2 btn-rift w-full">Close</button>
+    <div id="modal" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-[#111] border border-[#c5a059] p-8 max-w-md w-full text-center rounded-sm shadow-[0_0_30px_rgba(197,160,89,0.2)]">
+            <h3 id="modal-title" class="text-2xl text-[#c5a059] font-bold mb-4 font-serif">Message from Dumbledore</h3>
+            <p id="modal-message" class="text-gray-400 mb-8 font-serif">Something went wrong.</p>
+            <button onclick="closeModal()" class="px-6 py-2 btn-magic w-full rounded-sm">Dissendium</button>
         </div>
     </div>
 
@@ -447,7 +472,7 @@
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
 
-        // --- Global Functions (exposed to window for HTML attributes) ---
+        // --- Global Functions ---
         window.closeModal = () => {
             if (modal) modal.classList.add('hidden');
         };
@@ -471,7 +496,6 @@
         // --- Safe Initialization ---
         async function initApp() {
             try {
-                // Initialize Firebase with USER PROVIDED CONFIG
                 const firebaseConfig = {
                     apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
                     authDomain: "iist-fd6e8.firebaseapp.com",
@@ -484,15 +508,10 @@
 
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                db = getDatabase(app); // Realtime Database
+                db = getDatabase(app); 
 
-                // Auth
-                // Since this is a custom config, we'll try anonymous auth directly.
-                // If you have a custom token process for YOUR firebase, you'd insert it here.
-                // For now, we assume Anonymous Auth is enabled in your Firebase Console.
                 await signInAnonymously(auth);
 
-                // Auth Listener
                 onAuthStateChanged(auth, async (user) => {
                     currentUser = user;
                     if (user) {
@@ -500,12 +519,11 @@
                     }
                 });
 
-                // Spawn the infection (vines)
                 spawnVines();
 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                showModal("System Failure", "Could not connect to the Upside Down. (Check Console)");
+                showModal("Owl Post Failed", "Could not connect to the Ministry Network. (Check Console)");
                 if(loadingScreen) loadingScreen.innerHTML = `<p class="text-red-500">Connection Failed.</p>`;
             }
         }
@@ -513,19 +531,16 @@
         const checkRegistration = async (uid) => {
             if (!db) return;
             try {
-                // Realtime DB Query: Look for a child in 'registrations' with 'uid' matching current user
                 const registrationsRef = ref(db, 'registrations');
                 const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
                 
                 onValue(userQuery, (snapshot) => {
                     if (snapshot.exists()) {
-                        // User is registered
-                        const data = Object.values(snapshot.val())[0]; // Get the first match
+                        const data = Object.values(snapshot.val())[0];
                         if(userTeamNameDisplay) userTeamNameDisplay.textContent = data.teamName;
                         if(userIdDisplay) userIdDisplay.textContent = uid;
                         switchView('dashboard-view');
                     } else {
-                        // Not registered
                         switchView('registration-view');
                     }
                 }, (error) => {
@@ -539,13 +554,12 @@
             }
         };
 
-        // Handle Form Submission
         if (regForm) {
             regForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 if (!currentUser || !db) {
-                    showModal("Error", "No secure connection found. Refresh page.");
+                    showModal("Error", "No magic detected. Refresh page.");
                     return;
                 }
 
@@ -556,11 +570,10 @@
 
                 const submitBtn = regForm.querySelector('button');
                 const originalBtnText = submitBtn.innerHTML;
-                submitBtn.innerHTML = "Transmitting...";
+                submitBtn.innerHTML = "Sending Owl...";
                 submitBtn.disabled = true;
 
                 try {
-                    // Push to Realtime Database
                     const newRegRef = push(ref(db, 'registrations'));
                     await set(newRegRef, {
                         uid: currentUser.uid,
@@ -571,11 +584,9 @@
                         timestamp: new Date().toISOString()
                     });
                     
-                    // onValue listener in checkRegistration will handle the UI switch
-                    
                 } catch (error) {
                     console.error("Registration failed:", error);
-                    showModal("Transmission Failed", "The Demogorgon intercepted your request. Try again.");
+                    showModal("Spell Failed", "The Dementors intercepted your request. Try again.");
                     submitBtn.innerHTML = originalBtnText;
                     submitBtn.disabled = false;
                 }
@@ -584,8 +595,8 @@
 
         // --- Visual Effects Logic ---
         
-        // 1. Spores / Dust Particles
-        const canvas = document.getElementById('spores');
+        // 1. Soul Wisps (Replaces Spores)
+        const canvas = document.getElementById('soul-wisps');
         if (canvas) {
             const ctx = canvas.getContext('2d');
             let width, height;
@@ -604,11 +615,11 @@
                 }
                 reset() {
                     this.x = Math.random() * width;
-                    this.y = Math.random() * height;
-                    this.vx = (Math.random() - 0.5) * 0.5;
-                    this.vy = (Math.random() - 0.5) * 0.5;
-                    this.size = Math.random() * 3 + 1; 
-                    this.alpha = Math.random() * 0.4 + 0.1;
+                    this.y = height + Math.random() * 100; // Start from bottom
+                    this.vx = (Math.random() - 0.5) * 1;
+                    this.vy = (Math.random() * -1) - 0.5; // Float up
+                    this.size = Math.random() * 2 + 0.5; 
+                    this.alpha = Math.random() * 0.5 + 0.1;
                     this.life = Math.random() * 200 + 100;
                 }
                 update() {
@@ -616,30 +627,34 @@
                     this.y += this.vy;
                     this.life--;
                     
-                    this.vx += (Math.random() - 0.5) * 0.02;
-                    this.vy += (Math.random() - 0.5) * 0.02;
+                    // Wisp movement
+                    this.vx += (Math.random() - 0.5) * 0.05;
 
-                    if (this.life <= 0 || this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                    if (this.life <= 0 || this.y < -50) {
                         this.reset();
                     }
                 }
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(180, 190, 200, ${this.alpha})`;
+                    // Icy blue color
+                    ctx.fillStyle = `rgba(174, 216, 230, ${this.alpha})`;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "rgba(116, 199, 213, 0.8)";
                     ctx.fill();
+                    ctx.shadowBlur = 0;
                 }
             }
 
             function initParticles() {
                 particles = [];
-                for (let i = 0; i < 150; i++) {
+                for (let i = 0; i < 100; i++) {
                     particles.push(new Particle());
                 }
             }
 
             function animateParticles() {
-                if (!width || !height) return requestAnimationFrame(animateParticles); // wait for resize
+                if (!width || !height) return requestAnimationFrame(animateParticles);
                 ctx.clearRect(0, 0, width, height);
                 particles.forEach(p => {
                     p.update();
@@ -649,36 +664,28 @@
             }
 
             window.addEventListener('resize', resize);
-            resize(); // Init size
+            resize();
             initParticles();
             animateParticles();
         }
 
-        // 2. Flashlight & Monster Reveal Effect
-        const flashlight = document.getElementById('flashlight');
-        const monster = document.getElementById('demogorgon');
+        // 2. Lumos Wand Effect
+        const lumosGlow = document.getElementById('lumos-glow');
+        const wandTip = document.getElementById('wand-tip');
         
-        if (flashlight) {
+        if (lumosGlow && wandTip) {
             document.addEventListener('mousemove', (e) => {
-                const x = (e.clientX / window.innerWidth) * 100;
-                const y = (e.clientY / window.innerHeight) * 100;
-                flashlight.style.setProperty('--x', `${x}%`);
-                flashlight.style.setProperty('--y', `${y}%`);
-            });
-        }
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                // Tip follows strictly
+                wandTip.style.left = x + 'px';
+                wandTip.style.top = y + 'px';
 
-        if (monster) {
-            function flickeringLights() {
-                const randomTime = Math.random() * 5000 + 2000; 
-                setTimeout(() => {
-                    monster.style.opacity = Math.random() * 0.6; 
-                    setTimeout(() => {
-                        monster.style.opacity = 0;
-                    }, 200); 
-                    flickeringLights();
-                }, randomTime);
-            }
-            flickeringLights();
+                // Glow follows with slight lag/smoothness (CSS transition handles opacity)
+                lumosGlow.style.left = x + 'px';
+                lumosGlow.style.top = y + 'px';
+            });
         }
 
         // 3. Simple Countdown
@@ -696,14 +703,12 @@
         }
         startCountdown();
 
-        // 4. Dynamic Vines
+        // 4. Dynamic Devil's Snare
         function spawnVines() {
             const container = document.getElementById('dynamic-vines');
             if (!container) return;
-
-            const vineCount = 25; // Increased count
+            const vineCount = 15; 
             
-            // Helper to create vine
             const addVine = (x, y, r, s, op) => {
                 const el = document.createElement('div');
                 el.className = 'vine-base vine-shape';
@@ -714,35 +719,15 @@
                 container.appendChild(el);
             };
 
-            // Edges (Fill the gaps for "all around" effect)
-            // Top
-            addVine('20%', '-100px', 150, 0.8, 0.85);
-            addVine('50%', '-100px', 180, 0.8, 0.85);
-            addVine('80%', '-100px', 210, 0.8, 0.85);
-            // Bottom
-            addVine('20%', 'calc(100% - 200px)', 30, 0.8, 0.85);
-            addVine('50%', 'calc(100% - 200px)', 0, 0.8, 0.85);
-            addVine('80%', 'calc(100% - 200px)', -30, 0.8, 0.85);
-            // Left
-            addVine('-100px', '20%', 120, 0.8, 0.85);
-            addVine('-100px', '50%', 90, 0.8, 0.85);
-            addVine('-100px', '80%', 60, 0.8, 0.85);
-            // Right
-            addVine('calc(100% - 200px)', '20%', -120, 0.8, 0.85);
-            addVine('calc(100% - 200px)', '50%', -90, 0.8, 0.85);
-            addVine('calc(100% - 200px)', '80%', -60, 0.8, 0.85);
-
-            // Random Scatter inside
             for(let i=0; i<vineCount; i++) {
                 const x = Math.random() * 100 + '%';
                 const y = Math.random() * 100 + '%';
                 const r = Math.random() * 360;
-                const s = Math.random() * 0.5 + 0.5;
-                addVine(x, y, r, s, 0.7);
+                const s = Math.random() * 0.4 + 0.3;
+                addVine(x, y, r, s, 0.4);
             }
         }
 
-        // Start App with Safety
         initApp();
 
     </script>
