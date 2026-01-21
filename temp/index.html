@@ -93,23 +93,24 @@
         /* The Dementor */
         .dementor-wrapper {
             position: fixed;
-            top: 10%;
-            right: -10%; /* Start off screen */
+            top: 15%;
+            right: 5%; /* Adjusted to start inside screen */
             width: 300px;
             height: 500px;
             z-index: 2;
             pointer-events: none;
-            opacity: 0.8;
+            opacity: 0.9;
             filter: drop-shadow(0 0 20px rgba(0,0,0,0.9));
-            animation: floatDementor 20s ease-in-out infinite;
+            /* Changed to alternate to keep it patrolling inside */
+            animation: floatDementor 25s ease-in-out infinite alternate;
         }
 
         @keyframes floatDementor {
-            0% { transform: translate(0, 0) rotate(5deg); opacity: 0; }
-            10% { opacity: 0.8; }
-            50% { transform: translate(-40vw, 50px) rotate(-5deg); }
-            90% { opacity: 0.8; }
-            100% { transform: translate(-120vw, 0) rotate(5deg); opacity: 0; }
+            0% { transform: translate(0, 0) rotate(5deg); }
+            25% { transform: translate(-20vw, 40px) rotate(0deg); }
+            50% { transform: translate(-50vw, -20px) rotate(-5deg); }
+            75% { transform: translate(-30vw, 60px) rotate(0deg); }
+            100% { transform: translate(-60vw, 0) rotate(5deg); }
         }
         
         /* Cloth ripple effect */
@@ -244,27 +245,9 @@
 
     <!-- The Dementor (Floating Animation) -->
     <div id="dementor" class="dementor-wrapper">
-        <svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <filter id="blurFilter">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-                </filter>
-            </defs>
-            <!-- Cloak Body -->
-            <path class="cloak-piece" d="M100,50 Q140,50 150,100 Q170,200 160,350 Q130,380 100,340 Q70,380 40,350 Q30,200 50,100 Q60,50 100,50 Z" fill="#0a0a0a" opacity="0.9" />
-            
-            <!-- Tattered Ends -->
-            <path d="M40,350 L30,400 L50,360 L60,390 L80,350" fill="#0a0a0a" opacity="0.8" />
-            <path d="M160,350 L170,400 L150,360 L140,390 L120,350" fill="#0a0a0a" opacity="0.8" />
-            
-            <!-- Hood/Head -->
-            <path d="M100,30 Q130,30 135,70 Q130,90 100,85 Q70,90 65,70 Q70,30 100,30 Z" fill="#000" />
-            <!-- The "Mouth" Void -->
-            <ellipse cx="100" cy="75" rx="10" ry="15" fill="#1a1a1a" filter="url(#blurFilter)" />
-            
-            <!-- Skeletal Hand -->
-            <path d="M150,150 L170,140 L165,160" stroke="#333" stroke-width="2" fill="none"/>
-        </svg>
+        <!-- Replaced SVG with user's demon.png image -->
+        <!-- Added brightness filter to blend it into the dark theme -->
+        <img src="demon.png" alt="Dementor" class="w-full h-full object-contain drop-shadow-2xl filter brightness-75 opacity-90">
     </div>
 
     <!-- Lumos Effect -->
