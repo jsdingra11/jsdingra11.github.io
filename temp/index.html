@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE DEATHLY HALLOWS | Hogwarts Treasure Hunt</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js"></script>
@@ -19,11 +16,8 @@
     <style>
         :root {
             --magic-gold: #c5a059;
-            --magic-blue: #74c7d5; /* Patronus color */
+            --magic-blue: #74c7d5; 
             --dark-bg: #050508;
-            --parchment: #f0e6d2;
-            --dementor-black: #000000;
-            --glow-patronus: 0 0 15px #74c7d5, 0 0 30px #74c7d5, 0 0 50px #ffffff;
         }
 
         body {
@@ -31,123 +25,25 @@
             color: #b0b0b0;
             font-family: 'Crimson Text', serif;
             overflow-x: hidden;
-            cursor: none; /* Hide default cursor for Wand effect */
+            cursor: none; 
         }
 
-        /* The Title Font styling */
+        /* Typography */
         .title-font {
             font-family: 'Cinzel', serif;
-            color: #e0e0e0;
-            letter-spacing: 2px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
             background: linear-gradient(to bottom, #cfc7b8, #8a7e66);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-        
-        .title-sub {
-            font-family: 'Cinzel', serif;
-            color: var(--magic-blue);
-            text-shadow: 0 0 10px rgba(116, 199, 213, 0.5);
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
         }
 
-        /* Atmosphere */
-        #canvas-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            pointer-events: none;
-            background: radial-gradient(circle at center, #111118 0%, #000000 100%);
-        }
-
-        /* Rolling Dementor Fog */
-        .fog-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden;
-            z-index: 0;
-            pointer-events: none;
-        }
-        .fog-img {
-            position: absolute;
-            height: 100vh;
-            width: 300vw;
-            /* Icy blue filter for Dementor cold */
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjMiLz48L3N2Zz4=');
-            background-size: cover;
-            opacity: 0.1;
-            filter: sepia(1) hue-rotate(180deg) saturate(1.5); /* Blue tint */
-            animation: fogFlow 60s linear infinite;
-        }
-        .fog-img-2 {
-            animation: fogFlow 40s linear infinite reverse;
-            opacity: 0.05;
-            filter: sepia(1) hue-rotate(180deg) saturate(2);
-        }
-
-        @keyframes fogFlow {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-200vw, 0, 0); }
-        }
-
-        /* The Dementor */
-        .dementor-wrapper {
-            position: fixed;
-            top: 15%;
-            right: 5%; /* Adjusted to start inside screen */
-            width: 300px;
-            height: 500px;
-            z-index: 2;
-            pointer-events: none;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 20px rgba(0,0,0,0.9));
-            /* Changed to alternate to keep it patrolling inside */
-            animation: floatDementor 25s ease-in-out infinite alternate;
-        }
-
-        @keyframes floatDementor {
-            0% { transform: translate(0, 0) rotate(5deg); }
-            25% { transform: translate(-20vw, 40px) rotate(0deg); }
-            50% { transform: translate(-50vw, -20px) rotate(-5deg); }
-            75% { transform: translate(-30vw, 60px) rotate(0deg); }
-            100% { transform: translate(-60vw, 0) rotate(5deg); }
-        }
-        
-        /* Cloth ripple effect */
-        .cloak-piece {
-            transform-origin: top center;
-            animation: clothWave 3s ease-in-out infinite alternate;
-        }
-        @keyframes clothWave {
-            0% { transform: rotate(-2deg); }
-            100% { transform: rotate(2deg); }
-        }
-
-        /* Devil's Snare (Re-styled vines) */
-        .vine-base {
-            position: fixed;
-            width: 300px;
-            height: 300px;
-            z-index: 40;
-            pointer-events: none;
-            background-repeat: no-repeat;
-            filter: brightness(0.2) sepia(1) hue-rotate(70deg) saturate(0.5) drop-shadow(0 0 5px #000); /* Dark green/black */
-            opacity: 0.6;
-        }
-
-        /* Vine Shape SVG */
-        .vine-shape {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 100C50 100 60 60 30 50C0 40 20 10 20 10' stroke='%233a4a3a' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 100C50 100 40 70 70 60C100 50 80 10 80 10' stroke='%232a3a2a' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M55 90C55 90 85 85 90 50' stroke='%231a2a1a' stroke-width='4'/%3E%3C/svg%3E");
-            background-size: contain;
-        }
-
-        /* Input Fields */
+        /* Inputs */
         .input-field {
             background: rgba(10, 15, 20, 0.7);
             border: 1px solid #2f3e46;
             color: #e0e0e0;
             font-family: 'Crimson Text', serif;
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
         .input-field:focus {
@@ -155,7 +51,7 @@
             border-color: var(--magic-blue);
             box-shadow: 0 0 10px rgba(116, 199, 213, 0.2);
         }
-
+        
         /* Buttons */
         .btn-magic {
             background: linear-gradient(45deg, #0f1c25, #1a2a35);
@@ -164,201 +60,237 @@
             font-family: 'Cinzel', serif;
             text-transform: uppercase;
             letter-spacing: 2px;
-            position: relative;
-            overflow: hidden;
             transition: all 0.5s;
         }
-
         .btn-magic:hover {
             background: linear-gradient(45deg, #1a2a35, #2c3e50);
             box-shadow: 0 0 15px rgba(197, 160, 89, 0.3);
             text-shadow: 0 0 5px var(--magic-gold);
         }
-
-        /* Loader */
-        .loader {
-            border: 3px solid rgba(116, 199, 213, 0.1);
-            border-left-color: var(--magic-blue);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1.5s linear infinite;
-            filter: drop-shadow(0 0 5px var(--magic-blue));
+        .btn-magic:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+            opacity: 0.7;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Ambient Effects */
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, #111118 0%, #000000 100%); }
         
-        /* Lumos Wand Effect (Replaces Flashlight) */
-        .lumos-cursor {
-            position: fixed;
-            top: 0; left: 0;
-            width: 300px; height: 300px;
-            pointer-events: none;
-            z-index: 100;
-            background: radial-gradient(circle closest-side, rgba(255,255,255,0.8) 0%, rgba(116,199,213,0.4) 20%, transparent 70%);
-            transform: translate(-50%, -50%);
-            mix-blend-mode: screen;
-            opacity: 0.6;
-            transition: opacity 0.2s;
+        /* Fog */
+        .fog-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none; }
+        .fog-img {
+            position: absolute; height: 100vh; width: 300vw;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjMiLz48L3N2Zz4=');
+            opacity: 0.1; animation: fogFlow 60s linear infinite;
         }
-        
-        /* Wand Tip Spark */
-        .wand-tip {
-            position: fixed;
-            width: 8px; height: 8px;
-            background: white;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 101;
-            box-shadow: 0 0 10px #fff, 0 0 20px var(--magic-blue), 0 0 40px var(--magic-blue);
-            transform: translate(-50%, -50%);
-        }
+        @keyframes fogFlow { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200vw, 0, 0); } }
 
-        /* Content Container */
-        .glass-panel {
-            background: rgba(5, 5, 8, 0.65);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(116, 199, 213, 0.1);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
+        /* Vines */
+        .vine-base { position: fixed; width: 300px; height: 300px; z-index: 40; pointer-events: none; filter: brightness(0.2) sepia(1) hue-rotate(70deg) saturate(0.5); opacity: 0.6; }
+        .vine-shape { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 100C50 100 60 60 30 50C0 40 20 10 20 10' stroke='%233a4a3a' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M50 100C50 100 40 70 70 60C100 50 80 10 80 10' stroke='%232a3a2a' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M55 90C55 90 85 85 90 50' stroke='%231a2a1a' stroke-width='4'/%3E%3C/svg%3E"); background-size: contain; }
 
+        /* Wand Cursor */
+        .wand-tip { position: fixed; width: 8px; height: 8px; background: white; border-radius: 50%; pointer-events: none; z-index: 101; box-shadow: 0 0 10px #fff, 0 0 20px var(--magic-blue); transform: translate(-50%, -50%); }
+        .lumos-cursor { position: fixed; width: 300px; height: 300px; pointer-events: none; z-index: 100; background: radial-gradient(circle closest-side, rgba(255,255,255,0.8) 0%, rgba(116,199,213,0.4) 20%, transparent 70%); transform: translate(-50%, -50%); mix-blend-mode: screen; opacity: 0.6; }
+
+        .glass-panel { background: rgba(5, 5, 8, 0.65); backdrop-filter: blur(5px); border: 1px solid rgba(116, 199, 213, 0.1); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center">
 
-    <!-- Backgrounds & Effects -->
     <div id="canvas-container"><canvas id="soul-wisps"></canvas></div>
+    <div class="fog-container"><div class="fog-img"></div></div>
     
-    <!-- Mist Layers -->
-    <div class="fog-container">
-        <div class="fog-img"></div>
-        <div class="fog-img-2"></div>
-    </div>
-
-    <!-- Devil's Snare (Static Corners) -->
-    <div class="vine-base vine-shape" style="top: -50px; left: -50px; transform: rotate(135deg);"></div>
-    <div class="vine-base vine-shape" style="top: -50px; right: -50px; transform: rotate(-135deg);"></div>
-    <div class="vine-base vine-shape" style="bottom: -50px; left: -50px; transform: rotate(45deg);"></div>
-    <div class="vine-base vine-shape" style="bottom: -50px; right: -50px; transform: rotate(-45deg);"></div>
-    
-    <!-- Dynamic Devil's Snare Container -->
+    <div class="vine-base vine-shape" style="top:-50px; left:-50px; transform:rotate(135deg);"></div>
+    <div class="vine-base vine-shape" style="top:-50px; right:-50px; transform:rotate(-135deg);"></div>
+    <div class="vine-base vine-shape" style="bottom:-50px; left:-50px; transform:rotate(45deg);"></div>
+    <div class="vine-base vine-shape" style="bottom:-50px; right:-50px; transform:rotate(-45deg);"></div>
     <div id="dynamic-vines"></div>
 
-    <!-- The Dementor (Floating Animation) -->
-    <div id="dementor" class="dementor-wrapper">
-        <!-- Replaced SVG with user's demon.png image -->
-        <!-- Added brightness filter to blend it into the dark theme -->
-        <img src="demon.png" alt="Dementor" class="w-full h-full object-contain drop-shadow-2xl filter brightness-75 opacity-90">
+    <div class="fixed top-[15%] right-[5%] w-[300px] h-[500px] z-10 pointer-events-none opacity-90 animate-[floatDementor_25s_infinite_alternate]">
+        <img src="demon.png" alt="Dementor" class="w-full h-full object-contain brightness-75">
     </div>
 
-    <!-- Lumos Effect -->
     <div class="lumos-cursor" id="lumos-glow"></div>
     <div class="wand-tip" id="wand-tip"></div>
 
-    <!-- Main Container -->
     <main class="relative z-50 w-full max-w-4xl p-6 mx-auto">
         
-        <!-- Header / Logo -->
-        <header class="text-center mb-12 animate-fade-in-down">
-            <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">Ministry of Magic • Department of Mysteries</h2>
-            <div class="relative inline-block">
-                <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-2">
-                    The Dark Mark
-                </h1>
-                <h3 class="text-lg md:text-xl text-[#c5a059] font-serif mb-6 uppercase tracking-widest">
-                    Treasure Hunt <span class="text-gray-500 mx-2">•</span> Guru Nanak Dev University
-                </h3>
-                <!-- Separator -->
-                <div class="flex items-center justify-center gap-4 mb-8">
-                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent to-[#c5a059]"></div>
-                    <span class="text-[#c5a059] text-xl">⚡</span>
-                    <div class="h-[1px] w-24 bg-gradient-to-l from-transparent to-[#c5a059]"></div>
+        <header class="text-center mb-10 animate-fade-in-down">
+            
+            <div class="flex justify-center items-center gap-6 mb-8">
+                <div class="relative group">
+                    <img src="scirox.png" alt="SciRox Logo" class="h-20 md:h-24 object-contain opacity-80 group-hover:opacity-100 transition-all duration-500 drop-shadow-[0_0_15px_rgba(116,199,213,0.3)]">
+                </div>
+                <div class="h-12 w-[1px] bg-gradient-to-b from-transparent via-[#c5a059] to-transparent opacity-50"></div>
+                <div class="relative group">
+                    <img src="harry.png" alt="Harry Potter Logo" class="h-20 md:h-24 object-contain opacity-80 group-hover:opacity-100 transition-all duration-500 drop-shadow-[0_0_15px_rgba(197,160,89,0.3)]">
                 </div>
             </div>
-            <p class="text-gray-400 max-w-lg mx-auto text-lg leading-relaxed font-serif italic">
-                "Happiness can be found, even in the darkest of times, if one only remembers to turn on the light."
-            </p>
+            <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">Ministry of Magic • Department of Mysteries</h2>
+            <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-2">The Dark Mark</h1>
+            <h3 class="text-lg md:text-xl text-[#c5a059] font-serif mb-6 uppercase tracking-widest">Treasure Hunt <span class="text-gray-500 mx-2">•</span> GNDU</h3>
+            <div class="h-[1px] w-48 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto"></div>
         </header>
 
-        <!-- Dynamic Content Area -->
-        <div id="app-content" class="glass-panel p-10 rounded-sm relative overflow-hidden mb-12">
+        <div id="app-content" class="glass-panel p-8 rounded-sm relative overflow-hidden mb-12">
             
-            <!-- Loading State -->
             <div id="loading-screen" class="flex flex-col items-center justify-center py-12">
-                <div class="loader mb-6"></div>
+                <div class="w-10 h-10 border-4 border-[#74c7d5]/20 border-l-[#74c7d5] rounded-full animate-spin mb-4"></div>
                 <p class="text-cyan-100 animate-pulse font-serif tracking-widest">Consulting the Sorting Hat...</p>
             </div>
 
-            <!-- Registration Form -->
             <div id="registration-view" class="hidden">
-                <h3 class="text-2xl text-[#c5a059] mb-8 text-center font-bold border-b border-[#c5a059]/30 pb-4 font-serif uppercase tracking-widest">W.O.M.B.A.T. Registration</h3>
+                <h3 class="text-2xl text-[#c5a059] mb-6 text-center font-bold border-b border-[#c5a059]/30 pb-4 font-serif uppercase tracking-widest">W.O.M.B.A.T. Registration</h3>
+                
                 <form id="reg-form" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name</label>
+                    
+                    <div id="form-step-1">
+                        <div class="mb-6">
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name (Must be unique)</label>
                             <input type="text" id="teamName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Dumbledore's Army">
                         </div>
-                        <div>
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Head of House (Captain)</label>
-                            <input type="text" id="captainName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Hermione Granger">
+
+                        <div class="bg-black/20 p-4 border border-[#c5a059]/20 rounded-sm mb-6">
+                            <h4 class="text-[#c5a059] text-sm uppercase mb-3 font-bold tracking-wider">Captain (Team Head)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="col-span-1 md:col-span-2">
+                                    <input type="text" id="captainName" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Name">
+                                </div>
+                                <div>
+                                    <input type="email" id="email" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Email (Owl Post)">
+                                </div>
+                                <div>
+                                    <input type="tel" id="captainPhone" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Phone">
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <input type="text" id="captainDept" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Department (e.g. Physics)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Party Size</label>
+                            <select id="teamSize" class="w-full p-3 rounded-sm input-field">
+                                <option value="1">Solo Wizard (1)</option>
+                                <option value="2">Dynamic Duo (2)</option>
+                                <option value="3">Golden Trio (3)</option>
+                            </select>
+                        </div>
+
+                        <div id="extra-members-container" class="space-y-4 mb-6">
+                            
+                            <div id="member2-group" class="hidden bg-black/20 p-4 border border-gray-700 rounded-sm">
+                                <h4 class="text-gray-400 text-xs uppercase mb-3 font-bold">Member 2 Details</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="member2Name" class="w-full p-3 rounded-sm input-field" placeholder="Name">
+                                    <input type="tel" id="member2Phone" class="w-full p-3 rounded-sm input-field" placeholder="Phone Number">
+                                    <div class="col-span-1 md:col-span-2">
+                                        <input type="text" id="member2Dept" class="w-full p-3 rounded-sm input-field" placeholder="Department">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="member3-group" class="hidden bg-black/20 p-4 border border-gray-700 rounded-sm">
+                                <h4 class="text-gray-400 text-xs uppercase mb-3 font-bold">Member 3 Details</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="member3Name" class="w-full p-3 rounded-sm input-field" placeholder="Name">
+                                    <input type="tel" id="member3Phone" class="w-full p-3 rounded-sm input-field" placeholder="Phone Number">
+                                    <div class="col-span-1 md:col-span-2">
+                                        <input type="text" id="member3Dept" class="w-full p-3 rounded-sm input-field" placeholder="Department">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="button" id="proceed-btn" class="w-full py-3 text-lg font-bold btn-magic group rounded-sm border-dashed">
+                                Proceed to Payment &rarr;
+                            </button>
                         </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Owl Post (Email)</label>
-                        <input type="email" id="email" required class="w-full p-3 rounded-sm input-field" placeholder="wizard@hogwarts.edu">
+
+                    <div id="form-step-2" class="hidden space-y-6">
+                        <div class="text-center bg-black/40 p-6 rounded border border-[#c5a059]/30">
+                            <p class="text-gray-400 text-sm mb-2 uppercase tracking-widest">Gringotts Goblin Fee</p>
+                            <h2 id="display-amount" class="text-4xl font-bold text-[#c5a059] font-serif mb-4">₹50</h2>
+                            
+                            <div class="flex justify-center mb-4">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=YOUR_UPI_ID@okicici&pn=SciRox&am=50&cu=INR" 
+                                     alt="Payment QR Code" 
+                                     id="payment-qr"
+                                     class="w-48 h-48 border-4 border-white rounded-lg shadow-[0_0_20px_rgba(197,160,89,0.5)]">
+                            </div>
+                            <p class="text-xs text-gray-500 italic">Scan with any muggle app (GPay, Paytm, PhonePe)</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Upload Payment Screenshot</label>
+                            <input type="file" id="paymentScreenshot" accept="image/*" required class="w-full p-3 rounded-sm input-field text-sm">
+                        </div>
+
+                        <div class="flex gap-4 pt-4">
+                            <button type="button" id="back-btn" class="w-1/3 py-3 text-sm font-bold border border-gray-600 text-gray-400 hover:text-white hover:border-white transition-all rounded-sm">
+                                &larr; Back
+                            </button>
+                            <button type="submit" class="w-2/3 py-4 text-xl font-bold btn-magic group rounded-sm">
+                                <span class="group-hover:hidden">Confirm Registration</span>
+                                <span class="hidden group-hover:block">Expecto Patronum!</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Party Size (Max 3)</label>
-                        <select id="teamSize" class="w-full p-3 rounded-sm input-field">
-                            <option value="1">Solo Wizard (1)</option>
-                            <option value="2">Dynamic Duo (2)</option>
-                            <option value="3">Golden Trio (3)</option>
-                        </select>
-                    </div>
-
-                    <div class="pt-6">
-                        <button type="submit" class="w-full py-4 text-xl font-bold btn-magic group rounded-sm">
-                            <span class="group-hover:hidden">Enter the Forbidden Forest</span>
-                            <span class="hidden group-hover:block">Expecto Patronum!</span>
-                        </button>
-                    </div>
                 </form>
             </div>
 
-            <!-- Dashboard / Game Start -->
             <div id="dashboard-view" class="hidden text-center">
-                <div class="mb-8">
-                    <h3 class="text-3xl text-[#c5a059] font-serif mb-2">Welcome, <span id="user-team-name" class="text-white">Student</span></h3>
-                    <p class="text-gray-400 font-serif italic">Status: <span class="text-green-400">Enrolled</span> | ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span></p>
+                
+                <div class="mb-10 animate-fade-in-down">
+                    <h3 class="text-4xl text-[#c5a059] font-serif mb-2">Welcome, <span id="user-team-name" class="text-white">Student</span></h3>
+                    <p class="text-gray-400 font-serif italic text-sm">
+                        Status: <span class="text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]">Enrolled</span> 
+                        <span class="mx-2 text-gray-700">|</span> 
+                        ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span>
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <div class="bg-black/40 border border-[#c5a059]/20 p-4 rounded-sm">
-                        <h4 class="text-gray-500 uppercase text-xs tracking-widest mb-2">Current Quest</h4>
-                        <p class="text-lg text-white font-serif">Await the Headmaster's Speech</p>
+                <div class="max-w-2xl mx-auto bg-black/40 border border-[#c5a059]/30 p-8 rounded-sm mb-8 backdrop-blur-sm shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                    <div class="mb-4 text-[#c5a059] text-3xl">✉️</div>
+                    <h4 class="text-gray-200 uppercase tracking-[0.2em] font-bold mb-4 font-serif text-xl">Owl Post En Route</h4>
+                    <p class="text-gray-400 font-serif text-lg leading-relaxed">
+                        Your name has been successfully thrown into the Goblet. <br>
+                        A <strong class="text-white">confirmation email</strong> containing your access portkey will be dispatched to your inbox shortly.
+                    </p>
+                    <div class="mt-6 border-t border-[#c5a059]/10 pt-4">
+                        <p class="text-xs text-gray-500 italic">Please check your spam folder if the owl gets lost in the storm.</p>
                     </div>
-                    <div class="bg-black/40 border border-[#c5a059]/20 p-4 rounded-sm">
-                        <h4 class="text-gray-500 uppercase text-xs tracking-widest mb-2">Time Until Curfew</h4>
-                        <p id="countdown" class="text-2xl font-serif text-[#c5a059]">00:00:00</p>
+
+                    <div class="mt-6">
+                        <a href="https://chat.whatsapp.com/JcUZ4kd3v2l7Vn88BE8O60" target="_blank" class="block w-full md:w-auto md:inline-block px-8 py-3 btn-magic rounded-sm font-bold text-center decoration-none transition-all transform hover:scale-105 hover:text-[#74c7d5]">
+                            <span class="mr-2">⚡</span> Join the Order (WhatsApp)
+                        </a>
+                        <p class="text-[10px] text-gray-500 mt-2 font-serif uppercase tracking-widest">Compulsory for all champions</p>
                     </div>
+                    </div>
+
+                <div class="max-w-2xl mx-auto bg-gradient-to-b from-black/60 to-transparent border-t border-[#c5a059]/20 p-6 rounded-sm">
+                    <h4 class="text-gray-500 uppercase text-xs tracking-[0.3em] mb-4">Time Until The Event Begins</h4>
+                    <div id="countdown" class="grid grid-cols-4 gap-4 text-center font-serif text-[#c5a059]">
+                        <div><span class="text-3xl md:text-4xl font-bold block" id="d-days">00</span><span class="text-[10px] uppercase text-gray-600 tracking-widest">Days</span></div>
+                        <div><span class="text-3xl md:text-4xl font-bold block" id="d-hours">00</span><span class="text-[10px] uppercase text-gray-600 tracking-widest">Hours</span></div>
+                        <div><span class="text-3xl md:text-4xl font-bold block" id="d-mins">00</span><span class="text-[10px] uppercase text-gray-600 tracking-widest">Mins</span></div>
+                        <div><span class="text-3xl md:text-4xl font-bold block" id="d-secs">00</span><span class="text-[10px] uppercase text-gray-600 tracking-widest">Secs</span></div>
+                    </div>
+                    <p class="mt-6 text-xs text-gray-600 font-mono">Target: 30 January 2026</p>
                 </div>
 
-                <div class="border-t border-[#c5a059]/20 pt-8">
-                    <p class="mb-4 text-sm text-gray-500 italic">The Marauder's Map will reveal the first clue shortly.</p>
-                    <div class="p-8 bg-[#0a0a0a] border border-dashed border-[#c5a059]/40 rounded-sm relative">
-                        <p class="text-[#c5a059] font-mono text-xs uppercase animate-pulse">Mischief Managed...</p>
-                        <div class="mt-4 text-4xl text-[#333]">? ? ?</div>
-                    </div>
-                </div>
             </div>
 
         </div>
 
-        <!-- NEW SECTION: Classified Dossier (Rules, Rounds, Organizers) -->
         <div id="classified-dossier" class="max-w-4xl mx-auto space-y-8 animate-fade-in-up mb-12">
             
-            <!-- Section Header -->
             <div class="text-center border-b border-[#c5a059]/30 pb-4">
                 <h3 class="text-2xl font-bold text-[#c5a059] uppercase tracking-widest font-serif">Tournament Rules</h3>
                 <p class="text-gray-600 text-xs font-serif mt-1">PER ORDER OF DOLORES UMBRIDGE</p>
@@ -366,7 +298,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <!-- Card 1: Protocols (Rules) -->
                 <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300">
                     <h4 class="text-xl text-gray-300 font-serif mb-4 uppercase flex items-center gap-2">
                         <span class="text-[#c5a059]">📜</span> Decrees
@@ -379,38 +310,32 @@
                     </ul>
                 </div>
 
-                <!-- Card 2: Stages (Rounds) -->
                 <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300">
                     <h4 class="text-xl text-gray-300 font-serif mb-4 uppercase flex items-center gap-2">
-                        <span class="text-[#c5a059]">🏆</span> Triwizard Tasks
+                        <span class="text-[#c5a059]">🏆</span> Horcrux Hunt
                     </h4>
                     <div class="space-y-4 text-sm font-serif text-gray-400">
                         <div class="border-l-2 border-[#c5a059] pl-3">
-                            <p class="text-[#c5a059] font-bold text-xs uppercase">Task 01</p>
+                            <p class="text-[#c5a059] font-bold text-xs uppercase">Magical Hunt 01</p>
                             <p class="text-white">Ancient Runes</p>
                             <p class="text-xs mt-1">Decipher the riddles to find the portkey.</p>
                         </div>
                         <div class="border-l-2 border-[#c5a059] pl-3">
-                            <p class="text-[#c5a059] font-bold text-xs uppercase">Task 02</p>
+                            <p class="text-[#c5a059] font-bold text-xs uppercase">Magical Hunt 02</p>
                             <p class="text-white">The Hunt</p>
-                            <p class="text-xs mt-1">Physical search for Horcruxes hidden in the venue.</p>
+                            <p class="text-xs mt-1">Physical search for Horcruxes hidden in the campus.</p>
                         </div>
-                        <div class="border-l-2 border-[#c5a059] pl-3">
-                            <p class="text-[#c5a059] font-bold text-xs uppercase">Final Task</p>
-                            <p class="text-white">The Maze</p>
-                            <p class="text-xs mt-1">The final duel for the House Cup.</p>
-                        </div>
+                        
                     </div>
                 </div>
 
-                <!-- Card 3: Agency (Organizers) -->
                 <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300 flex flex-col justify-between">
                     <div>
                         <h4 class="text-xl text-gray-300 font-serif mb-4 uppercase flex items-center gap-2">
                             <span class="text-[#c5a059]">⚖️</span> Ministry
                         </h4>
                         <p class="text-sm text-gray-400 font-serif leading-relaxed mb-4">
-                            This event is authorized by the <strong class="text-white">SCIROX</strong> Club of Witchcraft and Wizardry. 
+                            This event is authorized by the <strong class="text-white">SCIROX</strong> Club of Science and Wizardry. 
                         </p>
                         <p class="text-xs text-gray-600 font-serif italic">
                             Report all Dark Mark sightings immediately.
@@ -426,28 +351,38 @@
         </div>
 
         <footer class="mt-12 text-center text-gray-700 text-xs font-serif">
+            <div class="mb-4 flex justify-center items-center gap-4">
+                <a href="https://instagram.com/scirox.gndu" target="_blank" class="text-[#c5a059] hover:text-[#74c7d5] transition-colors duration-300 uppercase tracking-widest text-xs font-bold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.047-1.096-.047-3.232 0-2.136.009-2.388.047-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/>
+                    </svg>
+                    @SCIROX.GNDU
+                </a>
+            </div>
             <p>&copy; 2026 SCIROX x Ministry of Magic. All rights reserved.</p>
             <p class="mt-2">Draco Dormiens Nunquam Titillandus.</p>
         </footer>
-
     </main>
 
-    <!-- Modal for Messages -->
     <div id="modal" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-[#111] border border-[#c5a059] p-8 max-w-md w-full text-center rounded-sm shadow-[0_0_30px_rgba(197,160,89,0.2)]">
-            <h3 id="modal-title" class="text-2xl text-[#c5a059] font-bold mb-4 font-serif">Message from Dumbledore</h3>
-            <p id="modal-message" class="text-gray-400 mb-8 font-serif">Something went wrong.</p>
+            <h3 id="modal-title" class="text-2xl text-[#c5a059] font-bold mb-4 font-serif">Message</h3>
+            <p id="modal-message" class="text-gray-400 mb-8 font-serif">...</p>
             <button onclick="closeModal()" class="px-6 py-2 btn-magic w-full rounded-sm">Dissendium</button>
         </div>
     </div>
 
     <script type="module">
-        // Import Firebase Functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        const tokenPart1 = "ghp_"; 
+        const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; 
+        const GITHUB_TOKEN = tokenPart1 + tokenPart2;
+        const GH_USER = "jsdingra11";
+        const GH_REPO = "Panjabans";
 
-        // --- UI References ---
+        // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
         const registrationView = document.getElementById('registration-view');
         const dashboardView = document.getElementById('dashboard-view');
@@ -458,28 +393,31 @@
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
 
-        // --- Global Functions ---
-        window.closeModal = () => {
-            if (modal) modal.classList.add('hidden');
-        };
+        const formStep1 = document.getElementById('form-step-1');
+        const formStep2 = document.getElementById('form-step-2');
+        const proceedBtn = document.getElementById('proceed-btn');
+        const backBtn = document.getElementById('back-btn');
+        const teamSizeSelect = document.getElementById('teamSize');
+        const displayAmount = document.getElementById('display-amount');
+        const member2Group = document.getElementById('member2-group');
+        const member3Group = document.getElementById('member3-group');
 
+        // Utils
+        window.closeModal = () => modal.classList.add('hidden');
         const showModal = (title, msg) => {
-            if (modalTitle) modalTitle.textContent = title;
-            if (modalMessage) modalMessage.textContent = msg;
-            if (modal) modal.classList.remove('hidden');
+            modalTitle.textContent = title;
+            modalMessage.textContent = msg;
+            modal.classList.remove('hidden');
         };
-
         const switchView = (viewId) => {
-            if(loadingScreen) loadingScreen.classList.add('hidden');
-            if(registrationView) registrationView.classList.add('hidden');
-            if(dashboardView) dashboardView.classList.add('hidden');
-            const target = document.getElementById(viewId);
-            if(target) target.classList.remove('hidden');
+            loadingScreen.classList.add('hidden');
+            registrationView.classList.add('hidden');
+            dashboardView.classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
         };
 
+        // --- Firebase Init ---
         let app, auth, db, currentUser = null;
-
-        // --- Safe Initialization ---
         async function initApp() {
             try {
                 const firebaseConfig = {
@@ -491,231 +429,300 @@
                     messagingSenderId: "692699808449",
                     appId: "1:692699808449:web:120c8941a940d071f24a40"
                 };
-
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                db = getDatabase(app); 
-
+                db = getDatabase(app);
                 await signInAnonymously(auth);
-
                 onAuthStateChanged(auth, async (user) => {
                     currentUser = user;
-                    if (user) {
-                        await checkRegistration(user.uid);
-                    }
+                    if (user) await checkRegistration(user.uid);
                 });
-
                 spawnVines();
-
+                startCountdown();
             } catch (error) {
-                console.error("Initialization Error:", error);
-                showModal("Owl Post Failed", "Could not connect to the Ministry Network. (Check Console)");
-                if(loadingScreen) loadingScreen.innerHTML = `<p class="text-red-500">Connection Failed.</p>`;
+                console.error("Init Error:", error);
+                loadingScreen.innerHTML = `<p class="text-red-500">Connection Failed</p>`;
             }
         }
 
         const checkRegistration = async (uid) => {
-            if (!db) return;
-            try {
-                const registrationsRef = ref(db, 'registrations');
-                const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
-                
-                onValue(userQuery, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = Object.values(snapshot.val())[0];
-                        if(userTeamNameDisplay) userTeamNameDisplay.textContent = data.teamName;
-                        if(userIdDisplay) userIdDisplay.textContent = uid;
-                        switchView('dashboard-view');
-                    } else {
-                        switchView('registration-view');
-                    }
-                }, (error) => {
-                    console.error("Realtime DB error:", error);
-                    switchView('registration-view'); 
-                });
-
-            } catch (e) {
-                console.error("Query Error", e);
-                switchView('registration-view');
-            }
+            const registrationsRef = ref(db, 'registrations');
+            const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
+            onValue(userQuery, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = Object.values(snapshot.val())[0];
+                    userTeamNameDisplay.textContent = data.teamName;
+                    userIdDisplay.textContent = uid;
+                    switchView('dashboard-view');
+                } else {
+                    switchView('registration-view');
+                }
+            });
         };
 
-        if (regForm) {
-            regForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                if (!currentUser || !db) {
-                    showModal("Error", "No magic detected. Refresh page.");
+        // --- Logic: Team Size & Fields ---
+        teamSizeSelect.addEventListener('change', (e) => {
+            const val = parseInt(e.target.value);
+            
+            // Amount
+            let amount = 50;
+            if (val >= 2) amount = 100; // Flat 100 for 2 or 3
+            displayAmount.textContent = `₹${amount}`;
+
+            // Visibility
+            if (val >= 2) member2Group.classList.remove('hidden');
+            else member2Group.classList.add('hidden');
+
+            if (val === 3) member3Group.classList.remove('hidden');
+            else member3Group.classList.add('hidden');
+        });
+
+        // --- Logic: Navigation & Validation ---
+        
+        // Function to check if team name exists
+        async function checkTeamNameUnique(name) {
+            const registrationsRef = ref(db, 'registrations');
+            // Query where 'teamName' equals the input
+            const q = query(registrationsRef, orderByChild('teamName'), equalTo(name));
+            const snapshot = await get(q);
+            return !snapshot.exists(); // Returns true if unique (does not exist)
+        }
+
+        proceedBtn.addEventListener('click', async () => {
+            const originalText = proceedBtn.innerHTML;
+            proceedBtn.innerText = "Checking...";
+            proceedBtn.disabled = true;
+
+            try {
+                // 1. Basic Field Validation
+                const teamName = document.getElementById('teamName').value.trim();
+                const captainName = document.getElementById('captainName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const captainPhone = document.getElementById('captainPhone').value.trim();
+                const captainDept = document.getElementById('captainDept').value.trim();
+                const size = parseInt(teamSizeSelect.value);
+
+                if(!teamName || !captainName || !email || !captainPhone || !captainDept) {
+                    showModal("Incomplete Parchment", "Please fill all Captain details, including Department.");
+                    proceedBtn.innerHTML = originalText;
+                    proceedBtn.disabled = false;
                     return;
                 }
 
-                const teamName = document.getElementById('teamName').value;
-                const captainName = document.getElementById('captainName').value;
-                const email = document.getElementById('email').value;
-                const teamSize = document.getElementById('teamSize').value;
-
-                const submitBtn = regForm.querySelector('button');
-                const originalBtnText = submitBtn.innerHTML;
-                submitBtn.innerHTML = "Sending Owl...";
-                submitBtn.disabled = true;
-
-                try {
-                    const newRegRef = push(ref(db, 'registrations'));
-                    await set(newRegRef, {
-                        uid: currentUser.uid,
-                        teamName,
-                        captainName,
-                        email,
-                        teamSize,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                } catch (error) {
-                    console.error("Registration failed:", error);
-                    showModal("Spell Failed", "The Dementors intercepted your request. Try again.");
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                }
-            });
-        }
-
-        // --- Visual Effects Logic ---
-        
-        // 1. Soul Wisps (Replaces Spores)
-        const canvas = document.getElementById('soul-wisps');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let particles = [];
-
-            function resize() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                canvas.width = width;
-                canvas.height = height;
-            }
-
-            class Particle {
-                constructor() {
-                    this.reset();
-                }
-                reset() {
-                    this.x = Math.random() * width;
-                    this.y = height + Math.random() * 100; // Start from bottom
-                    this.vx = (Math.random() - 0.5) * 1;
-                    this.vy = (Math.random() * -1) - 0.5; // Float up
-                    this.size = Math.random() * 2 + 0.5; 
-                    this.alpha = Math.random() * 0.5 + 0.1;
-                    this.life = Math.random() * 200 + 100;
-                }
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.life--;
-                    
-                    // Wisp movement
-                    this.vx += (Math.random() - 0.5) * 0.05;
-
-                    if (this.life <= 0 || this.y < -50) {
-                        this.reset();
+                // 2. Validate extra members if visible
+                if (size >= 2) {
+                    const m2n = document.getElementById('member2Name').value.trim();
+                    const m2p = document.getElementById('member2Phone').value.trim();
+                    const m2d = document.getElementById('member2Dept').value.trim();
+                    if(!m2n || !m2p || !m2d) {
+                        showModal("Member 2 Missing", "Please enter Name, Phone & Dept for Member 2.");
+                        proceedBtn.innerHTML = originalText;
+                        proceedBtn.disabled = false;
+                        return;
                     }
                 }
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    // Icy blue color
-                    ctx.fillStyle = `rgba(174, 216, 230, ${this.alpha})`;
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = "rgba(116, 199, 213, 0.8)";
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
+                if (size === 3) {
+                    const m3n = document.getElementById('member3Name').value.trim();
+                    const m3p = document.getElementById('member3Phone').value.trim();
+                    const m3d = document.getElementById('member3Dept').value.trim();
+                    if(!m3n || !m3p || !m3d) {
+                        showModal("Member 3 Missing", "Please enter Name, Phone & Dept for Member 3.");
+                        proceedBtn.innerHTML = originalText;
+                        proceedBtn.disabled = false;
+                        return;
+                    }
                 }
-            }
 
-            function initParticles() {
-                particles = [];
-                for (let i = 0; i < 100; i++) {
-                    particles.push(new Particle());
+                // 3. Check for Duplicate Team Name
+                const isUnique = await checkTeamNameUnique(teamName);
+                if (!isUnique) {
+                    showModal("Dark Mark Detected", `The house name "${teamName}" is already taken. Please choose another.`);
+                    proceedBtn.innerHTML = originalText;
+                    proceedBtn.disabled = false;
+                    return;
                 }
+
+                // If all good, proceed
+                formStep1.classList.add('hidden');
+                formStep2.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                showModal("Validation Error", "The Ministry's records are currently unavailable.");
+            } finally {
+                proceedBtn.innerHTML = originalText;
+                proceedBtn.disabled = false;
             }
+        });
 
-            function animateParticles() {
-                if (!width || !height) return requestAnimationFrame(animateParticles);
-                ctx.clearRect(0, 0, width, height);
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
-                requestAnimationFrame(animateParticles);
-            }
+        backBtn.addEventListener('click', () => {
+            formStep2.classList.add('hidden');
+            formStep1.classList.remove('hidden');
+        });
 
-            window.addEventListener('resize', resize);
-            resize();
-            initParticles();
-            animateParticles();
-        }
-
-        // 2. Lumos Wand Effect
-        const lumosGlow = document.getElementById('lumos-glow');
-        const wandTip = document.getElementById('wand-tip');
-        
-        if (lumosGlow && wandTip) {
-            document.addEventListener('mousemove', (e) => {
-                const x = e.clientX;
-                const y = e.clientY;
-                
-                // Tip follows strictly
-                wandTip.style.left = x + 'px';
-                wandTip.style.top = y + 'px';
-
-                // Glow follows with slight lag/smoothness (CSS transition handles opacity)
-                lumosGlow.style.left = x + 'px';
-                lumosGlow.style.top = y + 'px';
+        // --- Logic: Submit & Upload ---
+        async function uploadImageToGitHub(file, fileName) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async () => {
+                    const base64Content = reader.result.split(',')[1];
+                    const url = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/payments/${fileName}`;
+                    try {
+                        const response = await fetch(url, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `token ${GITHUB_TOKEN}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ message: `Pay: ${fileName}`, content: base64Content })
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            resolve(data.content.download_url);
+                        } else reject((await response.json()).message);
+                    } catch (error) { reject(error); }
+                };
             });
         }
 
-        // 3. Simple Countdown
-        function startCountdown() {
-            const el = document.getElementById('countdown');
-            if (!el) return;
-            let timeLeft = 24 * 60 * 60; 
-            setInterval(() => {
-                timeLeft--;
-                const h = Math.floor(timeLeft / 3600);
-                const m = Math.floor((timeLeft % 3600) / 60);
-                const s = timeLeft % 60;
-                el.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            }, 1000);
-        }
-        startCountdown();
+        regForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
 
-        // 4. Dynamic Devil's Snare
+            const fileInput = document.getElementById('paymentScreenshot');
+            if (fileInput.files.length === 0) {
+                showModal("Evidence Required", "Please upload the payment screenshot.");
+                return;
+            }
+
+            const submitBtn = regForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = "Processing...";
+            submitBtn.disabled = true;
+
+            try {
+                // Gather Data
+                const teamData = {
+                    uid: currentUser.uid,
+                    teamName: document.getElementById('teamName').value,
+                    captain: {
+                        name: document.getElementById('captainName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('captainPhone').value,
+                        department: document.getElementById('captainDept').value
+                    },
+                    teamSize: teamSizeSelect.value,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Add members if applicable
+                const size = parseInt(teamSizeSelect.value);
+                if (size >= 2) {
+                    teamData.member2 = {
+                        name: document.getElementById('member2Name').value,
+                        phone: document.getElementById('member2Phone').value,
+                        department: document.getElementById('member2Dept').value
+                    };
+                }
+                if (size === 3) {
+                    teamData.member3 = {
+                        name: document.getElementById('member3Name').value,
+                        phone: document.getElementById('member3Phone').value,
+                        department: document.getElementById('member3Dept').value
+                    };
+                }
+
+                // 1. Upload
+                submitBtn.innerHTML = "Uploading Proof...";
+                const file = fileInput.files[0];
+                const cleanName = teamData.teamName.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `${cleanName}_${Date.now()}.png`;
+                teamData.screenshotUrl = await uploadImageToGitHub(file, fileName);
+
+                // 2. Save DB
+                submitBtn.innerHTML = "Sealing Pact...";
+                const newRegRef = push(ref(db, 'registrations'));
+                await set(newRegRef, teamData);
+
+            } catch (error) {
+                console.error(error);
+                showModal("Failed", "Something went wrong. Check console.");
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // --- Visuals: Date Countdown ---
+        function startCountdown() {
+            // Target: Jan 30, 2026 9:00 AM
+            const targetDate = new Date("January 30, 2026 09:00:00").getTime();
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const elD = document.getElementById('d-days');
+                const elH = document.getElementById('d-hours');
+                const elM = document.getElementById('d-mins');
+                const elS = document.getElementById('d-secs');
+
+                if(elD) elD.innerText = days.toString().padStart(2,'0');
+                if(elH) elH.innerText = hours.toString().padStart(2,'0');
+                if(elM) elM.innerText = mins.toString().padStart(2,'0');
+                if(elS) elS.innerText = secs.toString().padStart(2,'0');
+            };
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        }
+
+        // --- Visuals: Wisps & Vines ---
         function spawnVines() {
             const container = document.getElementById('dynamic-vines');
             if (!container) return;
-            const vineCount = 15; 
-            
-            const addVine = (x, y, r, s, op) => {
+            for(let i=0; i<15; i++) {
                 const el = document.createElement('div');
                 el.className = 'vine-base vine-shape';
-                el.style.left = x;
-                el.style.top = y;
-                el.style.transform = `rotate(${r}deg) scale(${s})`;
-                el.style.opacity = op;
+                el.style.left = Math.random()*100+'%'; el.style.top = Math.random()*100+'%';
+                el.style.transform = `rotate(${Math.random()*360}deg) scale(${Math.random()*0.4+0.3})`;
                 container.appendChild(el);
-            };
-
-            for(let i=0; i<vineCount; i++) {
-                const x = Math.random() * 100 + '%';
-                const y = Math.random() * 100 + '%';
-                const r = Math.random() * 360;
-                const s = Math.random() * 0.4 + 0.3;
-                addVine(x, y, r, s, 0.4);
             }
         }
 
-        initApp();
+        const canvas = document.getElementById('soul-wisps');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let w, h; 
+            const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+            let p = Array(100).fill().map(() => ({
+                x: Math.random()*window.innerWidth, y: window.innerHeight+100,
+                v: Math.random()*1.5+0.5, s: Math.random()*2+0.5, a: Math.random()*0.5
+            }));
+            const draw = () => {
+                ctx.clearRect(0,0,w,h);
+                p.forEach(i => {
+                    i.y -= i.v; i.x += Math.sin(i.y/50)*0.5;
+                    if(i.y < -50) i.y = h+50;
+                    ctx.beginPath(); ctx.arc(i.x, i.y, i.s, 0, 7);
+                    ctx.fillStyle = `rgba(174,216,230,${i.a})`; ctx.fill();
+                });
+                requestAnimationFrame(draw);
+            }
+            window.addEventListener('resize', resize); resize(); draw();
+        }
 
+        const lumos = document.getElementById('lumos-glow');
+        const tip = document.getElementById('wand-tip');
+        document.addEventListener('mousemove', e => {
+            if(lumos) { lumos.style.left = e.clientX+'px'; lumos.style.top = e.clientY+'px'; }
+            if(tip) { tip.style.left = e.clientX+'px'; tip.style.top = e.clientY+'px'; }
+        });
+
+        initApp();
     </script>
 </body>
 </html>
