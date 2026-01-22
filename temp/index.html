@@ -495,12 +495,14 @@
         teamSizeSelect.addEventListener('change', (e) => {
             const val = parseInt(e.target.value);
             
-            // Amount
-            let amount = 50;
-            if (val >= 2) amount = 100; // Flat 100 for 2 or 3
+            // Amount Update: 50 * number of members
+            // 1 Member = 50
+            // 2 Members = 100
+            // 3 Members = 150
+            let amount = 50 * val; 
             displayAmount.textContent = `₹${amount}`;
 
-            // Visibility
+            // Visibility Logic (Unchanged)
             if (val >= 2) member2Group.classList.remove('hidden');
             else member2Group.classList.add('hidden');
 
