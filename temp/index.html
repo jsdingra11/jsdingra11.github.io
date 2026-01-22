@@ -130,6 +130,8 @@
             <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">SciRox - Science Club | Department of Mysteries</h2>
             <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-2">The Dark Mark</h1>
             <h3 class="text-lg md:text-xl text-[#c5a059] font-serif mb-6 uppercase tracking-widest">Treasure Hunt <span class="text-gray-500 mx-2">|</span> GNDU</h3>
+            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 28th January 2026</p>
+            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">EVENT DATE: 30th January 2026</p>
             <div class="h-[1px] w-48 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto"></div>
         </header>
 
@@ -141,13 +143,16 @@
             </div>
 
             <div id="registration-view" class="hidden">
-                <h3 class="text-2xl text-[#c5a059] mb-6 text-center font-bold border-b border-[#c5a059]/30 pb-4 font-serif uppercase tracking-widest">W.O.M.B.A.T. Registration</h3>
+                <div class="text-center border-b border-[#c5a059]/30 pb-4 mb-6">
+                    <h3 class="text-2xl text-[#c5a059] font-bold font-serif uppercase tracking-widest">W.O.M.B.A.T. Registration</h3>
+                    <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 28 January 2026</p>
+                </div>
                 
-                <form id="reg-form" class="space-y-6">
+<form id="reg-form" class="space-y-6" novalidate>
                     
                     <div id="form-step-1">
                         <div class="mb-6">
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name (Must be unique)</label>
+                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name</label>
                             <input type="text" id="teamName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Dumbledore's Army">
                         </div>
 
@@ -254,7 +259,6 @@
                         <span class="mx-2 text-gray-700">|</span> 
                         ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span>
                     </p>
-                    <!-- Resubmit / Edit Option -->
                     <button id="edit-entry-btn" class="mt-4 text-xs text-[#c5a059] underline hover:text-white transition-colors uppercase tracking-widest opacity-80 hover:opacity-100">
                         <span class="mr-1">✎</span> Mistake in your parchment? Edit Entry
                     </button>
@@ -545,13 +549,7 @@
 
         // --- Logic: Navigation & Validation ---
         
-        // Function to check if team name exists
-        async function checkTeamNameUnique(name) {
-            const registrationsRef = ref(db, 'registrations');
-            const q = query(registrationsRef, orderByChild('teamName'), equalTo(name));
-            const snapshot = await get(q);
-            return !snapshot.exists(); 
-        }
+        // Removed checkTeamNameUnique function as per request
 
         proceedBtn.addEventListener('click', async () => {
             const originalText = proceedBtn.innerHTML;
@@ -598,23 +596,7 @@
                     }
                 }
 
-                // 3. Check for Duplicate Team Name
-                // Logic: If editing AND name is same as old name, skip check. 
-                // Otherwise, check uniqueness.
-                let shouldCheck = true;
-                if (isEditing && currentEntryData && teamName === currentEntryData.teamName) {
-                    shouldCheck = false;
-                }
-
-                if (shouldCheck) {
-                    const isUnique = await checkTeamNameUnique(teamName);
-                    if (!isUnique) {
-                        showModal("Dark Mark Detected", `The house name "${teamName}" is already taken. Please choose another.`);
-                        proceedBtn.innerHTML = originalText;
-                        proceedBtn.disabled = false;
-                        return;
-                    }
-                }
+                // 3. Removed Duplicate Team Name Check logic here.
 
                 // If all good, proceed
                 formStep1.classList.add('hidden');
