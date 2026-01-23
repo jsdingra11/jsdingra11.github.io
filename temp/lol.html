@@ -228,6 +228,34 @@
             box-shadow: 0 0 15px var(--magic-gold);
         }
 
+        /* NOTIFICATION TOAST POPUP STYLE */
+        #notification-toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: rgba(20, 20, 35, 0.95);
+            color: var(--magic-gold);
+            text-align: center;
+            border: 1px solid var(--magic-gold);
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1.1rem;
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+        }
+
+        #notification-toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+
         /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotateX(0deg); }
@@ -239,18 +267,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        /* Interactive Elements */
-        .cursor-trail {
-            position: absolute;
-            pointer-events: none;
-            width: 10px;
-            height: 10px;
-            background: white;
-            border-radius: 50%;
-            mix-blend-mode: screen;
-            transition: transform 0.1s;
         }
 
         /* Specific Highlights */
@@ -280,7 +296,8 @@
 
     <canvas id="cosmos-canvas"></canvas>
 
-    <!-- Gatekeeper Card -->
+    <div id="notification-toast">Password is of three letters</div>
+
     <div class="riddle-card" id="gatekeeper-card">
         <h1>Restricted Access</h1>
         <span class="identity">Identify Yourself</span>
@@ -294,7 +311,6 @@
         </div>
     </div>
 
-    <!-- Main Message Card (Hidden Initially) -->
     <div class="riddle-card" id="main-content" style="display: none; opacity: 0;">
         <h1>Hello team,</h1>
         <span class="identity">Einstein here.</span>
@@ -319,8 +335,24 @@
         const gatekeeper = document.getElementById('gatekeeper-card');
         const mainContent = document.getElementById('main-content');
 
+        function showNotification() {
+            const toast = document.getElementById("notification-toast");
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         function checkCode() {
-            const code = passcodeInput.value.trim().toLowerCase();
+            const rawValue = passcodeInput.value.trim();
+            const code = rawValue.toLowerCase();
+            
+            // NEW CHECK: If it contains any number (digit 0-9)
+            // /\d/ is a regex that looks for any digit
+            if (/\d/.test(rawValue)) {
+                showNotification();
+                // Clear input (optional, feels cleaner)
+                passcodeInput.value = '';
+                return; // Stop here, do not proceed
+            }
             
             if (code === 'lol') {
                 // Success: Fade out gatekeeper, Fade in main content
@@ -397,9 +429,6 @@
                 this.x += this.speedX;
                 this.y += this.speedY;
                 this.life--;
-                
-                // Mouse interaction - simple repulsion/attraction can be added here
-                // For now, just gentle floating
                 
                 if (this.life <= 0 || this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
                     this.reset();
