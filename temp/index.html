@@ -25,7 +25,7 @@
             color: #b0b0b0;
             font-family: 'Crimson Text', serif;
             overflow-x: hidden;
-            cursor: none; 
+            /* cursor: none; */ /* Cursor hidden for immersive effect, uncomment if desired */
         }
 
         /* Typography */
@@ -72,6 +72,11 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+        /* Scrollbar for Modal */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1c25; }
+        ::-webkit-scrollbar-thumb { background: #c5a059; border-radius: 4px; }
 
         /* Ambient Effects */
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, #111118 0%, #000000 100%); }
@@ -148,7 +153,7 @@
                     <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 28 January 2026</p>
                 </div>
                 
-<form id="reg-form" class="space-y-6" novalidate>
+                <form id="reg-form" class="space-y-6" novalidate>
                     
                     <div id="form-step-1">
                         <div class="mb-6">
@@ -304,11 +309,22 @@
 
         <div id="classified-dossier" class="max-w-4xl mx-auto space-y-8 animate-fade-in-up mb-12">
             
-            <div class="text-center border-b border-[#c5a059]/30 pb-4">
+            <div class="text-center pb-4">
                 <h3 class="text-2xl font-bold text-[#c5a059] uppercase tracking-widest font-serif">Tournament Rules</h3>
                 <p class="text-gray-600 text-xs font-serif mt-1">PER ORDER OF DOLORES UMBRIDGE</p>
             </div>
 
+            <div class="flex justify-center mb-8">
+                
+                <button onclick="openPdfModal()" class="group relative w-full md:w-auto min-w-[250px] px-8 py-4 bg-black/60 border border-[#c5a059] text-[#c5a059] font-cinzel font-bold text-center uppercase tracking-widest transition-all duration-500 hover:bg-[#c5a059] hover:text-black shadow-[0_0_15px_rgba(197,160,89,0.2)] hover:shadow-[0_0_30px_rgba(197,160,89,0.6)] cursor-pointer">
+                    <span class="flex items-center justify-center gap-3">
+                        <span class="text-xl">📜</span> 
+                        <span>View Rules</span>
+                    </span>
+                    <div class="absolute inset-0 border border-[#c5a059] opacity-0 scale-95 group-hover:scale-110 group-hover:opacity-100 transition-all duration-500 pointer-events-none"></div>
+                </button>
+
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <div class="bg-black/60 border border-[#c5a059]/20 p-6 rounded-sm hover:border-[#c5a059] transition-colors duration-300">
@@ -386,6 +402,34 @@
         </div>
     </div>
 
+    <div id="pdf-modal" class="fixed inset-0 bg-black/95 z-[70] hidden flex flex-col items-center justify-center p-4 md:p-10 backdrop-blur-sm">
+        <div class="relative w-full max-w-5xl h-full flex flex-col bg-[#0a0a0e] border border-[#c5a059] shadow-[0_0_50px_rgba(197,160,89,0.2)] rounded-sm overflow-hidden">
+            
+            <div class="flex justify-between items-center p-4 border-b border-[#c5a059]/30 bg-black/40">
+                <h3 class="text-[#c5a059] font-cinzel font-bold text-xl tracking-widest uppercase">
+                    <span class="mr-2">📜</span> Official Decree
+                </h3>
+                <button onclick="closePdfModal()" class="text-gray-400 hover:text-white text-2xl font-bold px-2">&times;</button>
+            </div>
+
+            <div class="flex-grow w-full h-full relative bg-gray-900">
+                <iframe src="brochure.pdf#toolbar=0" class="w-full h-full border-none" id="pdf-frame">
+                    <p class="text-center text-gray-400 mt-20 p-4">
+                        Your magical looking glass (browser) cannot display this scroll.<br><br>
+                        <a href="brochure.pdf" download class="text-[#c5a059] underline">Click here to download it directly.</a>
+                    </p>
+                </iframe>
+            </div>
+
+            <div class="p-4 border-t border-[#c5a059]/30 bg-black/40 text-center">
+                <a href="brochure.pdf" download="TheDarkMark_Rules.pdf" class="inline-block px-8 py-3 btn-magic rounded-sm font-bold text-center decoration-none transition-all hover:text-[#74c7d5]">
+                    <span class="mr-2">⚡</span> Download Parchment
+                </a>
+                <button onclick="closePdfModal()" class="ml-4 text-xs text-gray-500 hover:text-white underline uppercase tracking-widest">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -407,6 +451,8 @@
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
 
+        const pdfModal = document.getElementById('pdf-modal');
+
         const formStep1 = document.getElementById('form-step-1');
         const formStep2 = document.getElementById('form-step-2');
         const proceedBtn = document.getElementById('proceed-btn');
@@ -422,6 +468,9 @@
 
         // Utils
         window.closeModal = () => modal.classList.add('hidden');
+        window.openPdfModal = () => pdfModal.classList.remove('hidden');
+        window.closePdfModal = () => pdfModal.classList.add('hidden');
+
         const showModal = (title, msg) => {
             modalTitle.textContent = title;
             modalMessage.textContent = msg;
