@@ -25,7 +25,6 @@
             color: #b0b0b0;
             font-family: 'Crimson Text', serif;
             overflow-x: hidden;
-            /* cursor: none; */ /* Cursor hidden for immersive effect, uncomment if desired */
         }
 
         /* Typography */
@@ -164,7 +163,6 @@
                             <input type="text" id="teamName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Dumbledore's Army">
                         </div>
 
-                        <!-- REFERRAL SYSTEM ADDED HERE -->
                         <div class="mb-6 p-4 border border-[#c5a059]/20 bg-black/30 rounded-sm">
                             <label class="block text-[#c5a059] text-xs mb-2 uppercase tracking-widest flex items-center gap-2">
                                 <span class="text-lg">⚡</span> Referral Code (Existing Team Name)
@@ -177,8 +175,6 @@
                             </div>
                             <p id="referralMsg" class="text-xs mt-2 italic h-4"></p>
                         </div>
-                        <!-- END REFERRAL SYSTEM -->
-
                         <div class="bg-black/20 p-4 border border-[#c5a059]/20 rounded-sm mb-6">
                             <h4 class="text-[#c5a059] text-sm uppercase mb-3 font-bold tracking-wider">Captain (Team Head)</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -283,7 +279,6 @@
                         ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span>
                     </p>
                     
-                    <!-- POINTS DISPLAY -->
                     <div class="mt-4 inline-block bg-[#111] border border-[#c5a059] px-6 py-2 rounded-full shadow-[0_0_15px_rgba(197,160,89,0.3)]">
                         <span class="text-gray-400 uppercase text-xs tracking-widest mr-2">Referral Points</span>
                         <span id="user-points-display" class="text-[#c5a059] font-bold text-xl">0</span>
@@ -553,20 +548,38 @@
 
         const checkRegistration = async (uid) => {
             const registrationsRef = ref(db, 'registrations');
-            const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
-            onValue(userQuery, (snapshot) => {
+            // This query requires indexOn in rules, BUT since we filter by UID which is usually indexed or low volume, it might work.
+            // If this fails, we can use the same technique as referral check.
+            // However, usually for current user it's safer. Let's assume this works or switch to client side filtering too.
+            // For safety, I will switch this to Client Side filtering too, just in case.
+            
+            // OLD METHOD (Might fail without rules):
+            // const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
+            // onValue(userQuery, ...);
+
+            // NEW METHOD (Works without Rules):
+            onValue(registrationsRef, (snapshot) => {
+                let userEntry = null;
+                let userKey = null;
+
                 if (snapshot.exists()) {
-                    // Capture the key and data for editing later
-                    const keys = Object.keys(snapshot.val());
-                    currentEntryKey = keys[0];
-                    currentEntryData = snapshot.val()[currentEntryKey];
+                    snapshot.forEach(child => {
+                        const val = child.val();
+                        if (val.uid === uid) {
+                            userEntry = val;
+                            userKey = child.key;
+                        }
+                    });
+                }
+
+                if (userEntry) {
+                    currentEntryKey = userKey;
+                    currentEntryData = userEntry;
 
                     userTeamNameDisplay.textContent = currentEntryData.teamName;
                     userIdDisplay.textContent = uid;
                     userPointsDisplay.textContent = currentEntryData.referralPoints || 0;
                     
-                    // If we are currently editing and submitting, don't force switch
-                    // But usually, after submit we want to show dashboard
                     if (!isEditing) switchView('dashboard-view');
                 } else {
                     currentEntryKey = null;
@@ -581,13 +594,10 @@
             const val = parseInt(e.target.value);
             
             // Amount Update: 50 * number of members
-            // 1 Member = 50
-            // 2 Members = 100
-            // 3 Members = 150
             let amount = 50 * val; 
             displayAmount.textContent = `₹${amount}`;
 
-            // Visibility Logic (Unchanged)
+            // Visibility Logic
             if (val >= 2) member2Group.classList.remove('hidden');
             else member2Group.classList.add('hidden');
 
@@ -595,7 +605,7 @@
             else member3Group.classList.add('hidden');
         });
 
-        // --- Logic: Referral Check ---
+        // --- Logic: Referral Check (UPDATED: Client-Side Filter) ---
         checkRefBtn.addEventListener('click', async () => {
             const code = referralInput.value.trim();
             if (!code) {
@@ -608,24 +618,31 @@
             checkRefBtn.disabled = true;
 
             try {
-                // Query DB to find team with this name
+                // Fetch ALL registrations to filter locally (Bypasses Rule Restrictions)
                 const registrationsRef = ref(db, 'registrations');
-                const teamQuery = query(registrationsRef, orderByChild('teamName'), equalTo(code));
-                
-                const snapshot = await get(teamQuery);
+                const snapshot = await get(registrationsRef);
+
+                let foundKey = null;
+                let foundName = null;
+
                 if (snapshot.exists()) {
-                    const keys = Object.keys(snapshot.val());
-                    const refKey = keys[0]; // The key of the team referring
-                    const refData = snapshot.val()[refKey];
-                    
-                    // Prevent self-referral (conceptually if they try to refer their own new name, though hard to do here)
-                    // Mainly handled by the fact that their new name isn't in DB yet.
-                    
-                    validatedReferralKey = refKey;
-                    validatedReferralName = refData.teamName;
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        // Case-sensitive check
+                        if (data.teamName && data.teamName === code) {
+                            foundKey = childSnapshot.key;
+                            foundName = data.teamName;
+                            return true; // Break loop
+                        }
+                    });
+                }
+
+                if (foundKey) {
+                    validatedReferralKey = foundKey;
+                    validatedReferralName = foundName;
                     
                     referralMsg.className = 'text-xs mt-2 italic h-4 referral-success';
-                    referralMsg.textContent = `Referral Valid! Team "${refData.teamName}" found. (+1 Point Each)`;
+                    referralMsg.textContent = `Referral Valid! Team "${foundName}" found. (+1 Point Each)`;
                     referralInput.classList.add('border-green-500');
                 } else {
                     validatedReferralKey = null;
@@ -669,7 +686,7 @@
                 document.getElementById('member3Dept').value = currentEntryData.member3.department || '';
             }
             
-            // Disable Referral during edit to avoid point exploitation
+            // Disable Referral during edit
             referralInput.disabled = true;
             checkRefBtn.disabled = true;
             referralInput.value = "Referral locked during edit";
@@ -829,12 +846,11 @@
                 }
 
                 // Points Logic: 
-                // If new registration AND validated referral exists
                 if (!isEditing && validatedReferralKey) {
                     teamData.referralPoints = 1; // Bonus for new user
-                    teamData.referredBy = validatedReferralName; // Track who referred them
+                    teamData.referredBy = validatedReferralName; 
                 } else if (isEditing && currentEntryData.referralPoints) {
-                    teamData.referralPoints = currentEntryData.referralPoints; // Keep old points
+                    teamData.referralPoints = currentEntryData.referralPoints; 
                 } else {
                     teamData.referralPoints = 0;
                 }
@@ -872,7 +888,6 @@
                             });
                         } catch (err) {
                             console.error("Failed to give referral points to referrer", err);
-                            // Non-blocking error
                         }
                     }
                 }
@@ -885,8 +900,9 @@
                 uploadOptionalTag.classList.add('hidden');
                 document.getElementById('paymentScreenshot').required = true;
                 
-                // Switch view handled by onValue listener or manually
-                switchView('dashboard-view');
+                // Switch view is handled by checkRegistration listener
+                // But we can force it just in case listener is slow
+                // switchView('dashboard-view');
 
             } catch (error) {
                 console.error(error);
