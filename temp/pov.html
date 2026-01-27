@@ -17,12 +17,13 @@
             --danger-red: #ef4444;
             --success-green: #10b981;
             --warning-yellow: #f59e0b;
+            --royal-purple: #a855f7; /* New Purple Variable */
         }
 
         body {
             background-color: var(--dark-bg);
             color: #b0b0b0;
-            font-family: 'Inter', sans-serif; /* Default to clean font */
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             cursor: default;
         }
@@ -61,29 +62,26 @@
             background: linear-gradient(45deg, #1a2a35, #2c3e50);
             box-shadow: 0 0 10px rgba(197, 160, 89, 0.2);
         }
-        .btn-danger {
-            border: 1px solid var(--danger-red);
-            color: var(--danger-red);
+        
+        /* Filter Tabs */
+        .tab-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            transition: all 0.3s;
         }
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.1);
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+        .tab-btn.active {
+            background: rgba(197, 160, 89, 0.1);
+            border-color: var(--magic-gold);
+            color: var(--magic-gold);
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.1);
         }
-        .btn-success {
-            border: 1px solid var(--success-green);
-            color: var(--success-green);
-        }
-        .btn-success:hover {
-            background: rgba(16, 185, 129, 0.1);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
-        }
-        .btn-warning {
-            border: 1px solid var(--warning-yellow);
-            color: var(--warning-yellow);
-        }
-        .btn-warning:hover {
-            background: rgba(245, 158, 11, 0.1);
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+        /* Active state for Referral Tab (Purple override) */
+        #tab-referrals.active {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--royal-purple);
+            color: var(--royal-purple);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
         }
 
         /* Ambient Effects */
@@ -161,23 +159,33 @@
                 </div>
             </div>
 
-            <div class="mb-6">
-                <div class="relative max-w-md">
+            <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
+                
+                <div class="flex gap-2">
+                    <button id="tab-all" class="tab-btn active px-6 py-3 rounded-sm font-magic uppercase text-xs tracking-widest font-bold">
+                        All Scrolls
+                    </button>
+                    <button id="tab-referrals" class="tab-btn px-6 py-3 rounded-sm font-magic uppercase text-xs tracking-widest font-bold flex items-center gap-2"> Referral Network
+                    </button>
+                </div>
+
+                <div class="relative w-full md:w-96">
                     <input type="text" id="search-input" placeholder="Search by Team, Captain, or Email..." 
-                        class="w-full p-4 pl-12 rounded-sm bg-black/40 border border-[#c5a059]/30 text-white font-data focus:outline-none focus:border-[#c5a059] focus:ring-1 focus:ring-[#c5a059] placeholder-gray-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#c5a059] text-lg">🔍</span>
+                        class="w-full p-3 pl-10 rounded-sm bg-black/40 border border-[#c5a059]/30 text-white font-data text-sm focus:outline-none focus:border-[#c5a059] focus:ring-1 focus:ring-[#c5a059] placeholder-gray-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#c5a059]">🔍</span>
                 </div>
             </div>
 
-            <div class="glass-panel rounded-sm overflow-hidden">
+            <div class="glass-panel rounded-sm overflow-hidden min-h-[400px]">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-400">
-                        <thead class="bg-black/80 text-[#c5a059] uppercase text-[10px] tracking-widest font-magic border-b border-[#c5a059]/30 whitespace-nowrap">
+                        <thead class="bg-black/80 text-[#c5a059] uppercase text-[10px] tracking-widest font-magic border-b border-[#c5a059]/30 whitespace-nowrap sticky top-0 bg-[#050508] z-20">
                             <tr>
                                 <th class="px-4 py-4 text-center w-16">Status</th>
                                 <th class="px-4 py-4 font-bold">Date</th>
                                 <th class="px-4 py-4 font-bold text-lg">Team Name</th>
-                                <th class="px-4 py-4 font-bold text-center text-[#c5a059]">Ref. Points</th> <th class="px-4 py-4 font-bold">Captain Name</th>
+                                <th class="px-4 py-4 font-bold text-center text-[#c5a059]">Ref. Points</th>
+                                <th class="px-4 py-4 font-bold">Captain Name</th>
                                 <th class="px-4 py-4 font-bold">Dept</th>
                                 <th class="px-4 py-4 font-bold text-center">Contact (Captain)</th>
                                 <th class="px-4 py-4 font-bold">Party Members</th>
@@ -212,7 +220,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getDatabase, ref, get, remove, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        // --- Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyB4eoofAdY4DrW-VKvfGJl5aNv2hoCTn4c",
             authDomain: "iist-fd6e8.firebaseapp.com",
@@ -223,25 +230,26 @@
             appId: "1:692699808449:web:120c8941a940d071f24a40"
         };
 
-        // --- Globals ---
         let app, auth, db;
         let deleteTargetKey = null;
-        let allRegistrations = {}; // Store raw data for search filtering
+        let allRegistrations = {}; 
+        let currentFilter = 'all';
 
-        // --- DOM Elements ---
+        // DOM
         const loadingScreen = document.getElementById('loading-screen');
         const adminLoginView = document.getElementById('admin-login-view');
         const adminDashboardView = document.getElementById('admin-dashboard-view');
-        
         const adminPassInput = document.getElementById('admin-pass');
         const adminLoginBtn = document.getElementById('admin-login-btn');
         const refreshBtn = document.getElementById('refresh-btn');
         const searchInput = document.getElementById('search-input'); 
-        
         const tableBody = document.getElementById('admin-table-body');
         const statTeams = document.getElementById('stat-teams');
         const statWizards = document.getElementById('stat-wizards');
         const statRevenue = document.getElementById('stat-revenue');
+        
+        const tabAll = document.getElementById('tab-all');
+        const tabReferrals = document.getElementById('tab-referrals');
 
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
@@ -249,16 +257,12 @@
         const modalConfirmBtn = document.getElementById('modal-confirm');
         const modalCancelBtn = document.getElementById('modal-cancel');
 
-        // --- Initialization ---
         async function initApp() {
             try {
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getDatabase(app);
-                
-                // Silent auth to ensure DB access
                 await signInAnonymously(auth);
-                
                 loadingScreen.classList.add('hidden');
             } catch (error) {
                 console.error("Init Failed", error);
@@ -266,14 +270,12 @@
             }
         }
 
-        // --- View Management ---
         function switchView(view) {
             adminLoginView.classList.add('hidden');
             adminDashboardView.classList.add('hidden');
             view.classList.remove('hidden');
         }
 
-        // --- Auth Logic ---
         adminLoginBtn.addEventListener('click', async () => {
             const pass = adminPassInput.value.trim().toLowerCase();
             if(pass === 'alohomora' || pass === 'admin') {
@@ -286,7 +288,6 @@
                     switchView(adminDashboardView);
                 } catch (e) {
                     showModal("Error", "Failed to retrieve archives. Check internet connection.");
-                    console.error(e);
                     adminLoginBtn.innerText = originalText;
                     adminLoginBtn.disabled = false;
                 }
@@ -296,32 +297,35 @@
             }
         });
 
-        // --- Data Logic ---
+        // --- Tabs ---
+        tabAll.addEventListener('click', () => {
+            currentFilter = 'all';
+            tabAll.classList.add('active');
+            tabReferrals.classList.remove('active');
+            renderTable(allRegistrations);
+        });
+
+        tabReferrals.addEventListener('click', () => {
+            currentFilter = 'referrals';
+            tabReferrals.classList.add('active');
+            tabAll.classList.remove('active');
+            renderTable(allRegistrations);
+        });
+
         refreshBtn.addEventListener('click', async () => {
             refreshBtn.innerHTML = '<span class="animate-spin">↻</span> Fetching...';
             await loadData();
             refreshBtn.innerHTML = '<span class="text-xl">↻</span> Refresh Data';
         });
 
-        // --- Search Logic ---
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = Object.entries(allRegistrations).filter(([key, entry]) => {
-                const tName = (entry.teamName || "").toLowerCase();
-                const cName = (entry.captain?.name || "").toLowerCase();
-                const cEmail = (entry.captain?.email || "").toLowerCase();
-                
-                return tName.includes(term) || cName.includes(term) || cEmail.includes(term);
-            });
-            
-            const filteredObj = Object.fromEntries(filtered);
-            renderTable(filteredObj);
+        searchInput.addEventListener('input', () => {
+            renderTable(allRegistrations);
         });
 
         async function loadData() {
             const snapshot = await get(ref(db, 'registrations'));
             if(snapshot.exists()) {
-                allRegistrations = snapshot.val(); // Cache full dataset
+                allRegistrations = snapshot.val();
                 renderTable(allRegistrations);
             } else {
                 allRegistrations = {};
@@ -329,184 +333,155 @@
             }
         }
 
-        function renderTable(data) {
+        function renderTable(dataObj) {
             tableBody.innerHTML = '';
             let tTeams = 0, tWizards = 0, tRevenue = 0;
 
-            const entries = Object.entries(data).reverse(); // Newest first
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            // 1. Convert Object to Array
+            let entries = Object.entries(dataObj).map(([key, val]) => ({ key, ...val }));
 
-            if (entries.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-600 italic font-book">No records found.</td></tr>`;
-                // Zero stats if empty
-                statTeams.innerText = 0;
-                statWizards.innerText = 0;
-                statRevenue.innerText = `₹0`;
-                return;
-            }
-
-            entries.forEach(([key, entry]) => {
-                // --- 1. Ghost Filter: Skip malformed entries ---
-                if (!entry || typeof entry !== 'object') return;
-                if (!entry.teamName || !entry.captain || !entry.captain.name) return;
-
-                // --- Stats Calculation ---
+            // 2. Filter & Calculate Stats
+            // Note: Stats are calculated on valid entries regardless of tabs/search to show total count
+            const validEntries = entries.filter(entry => entry.teamName && entry.captain && entry.captain.name);
+            
+            validEntries.forEach(entry => {
                 tTeams++;
                 const size = parseInt(entry.teamSize || 1);
                 tWizards += size;
                 tRevenue += (size * 50);
-
-                // --- Referral Logic ---
-                const refPoints = entry.referralPoints || 0;
-                const refBy = entry.referredBy ? `via ${entry.referredBy}` : '';
-
-                // --- Row Styles based on Status ---
-                let rowClasses = "hover:bg-white/5 transition-colors group";
-                let statusBadge = "";
-                let actionButtons = "";
-
-                // Determine Styles & Actions
-                if (entry.status === 'accepted') {
-                    rowClasses = "bg-green-900/10 hover:bg-green-900/20";
-                    statusBadge = `<div class="w-2 h-2 rounded-full bg-green-500 mx-auto shadow-[0_0_10px_#10b981]" title="Accepted"></div>`;
-                    
-                    actionButtons = `
-                        <div class="flex flex-col gap-2 items-end">
-                             <button onclick="composeAcceptEmail('${entry.captain.email}', '${entry.teamName.replace(/'/g, "\\'")}', '${entry.captain.name.replace(/'/g, "\\'")}')" 
-                                    class="bg-green-600/20 text-green-400 border border-green-600/50 hover:bg-green-600/40 px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider w-full text-center font-magic">
-                                Send Mail ✉️
-                            </button>
-                            <div class="flex gap-2">
-                                <button onclick="setStatus('${key}', null)" class="text-gray-500 hover:text-white text-lg" title="Undo Decision">↺</button>
-                                <button onclick="triggerDelete('${key}')" class="text-red-500 hover:text-red-400 text-lg" title="Delete">🗑</button>
-                            </div>
-                        </div>
-                    `;
-                } else if (entry.status === 'rejected') {
-                    rowClasses = "bg-red-900/10 hover:bg-red-900/20";
-                    statusBadge = `<div class="w-2 h-2 rounded-full bg-red-500 mx-auto shadow-[0_0_10px_#ef4444]" title="Rejected"></div>`;
-                    
-                    actionButtons = `
-                        <div class="flex flex-col gap-2 items-end">
-                             <button onclick="composeRejectEmail('${entry.captain.email}', '${entry.teamName.replace(/'/g, "\\'")}', '${entry.captain.name.replace(/'/g, "\\'")}')" 
-                                    class="bg-red-600/20 text-red-400 border border-red-600/50 hover:bg-red-600/40 px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider w-full text-center font-magic">
-                                Send Mail ✉️
-                            </button>
-                            <div class="flex gap-2">
-                                <button onclick="setStatus('${key}', null)" class="text-gray-500 hover:text-white text-lg" title="Undo Decision">↺</button>
-                                <button onclick="triggerDelete('${key}')" class="text-red-500 hover:text-red-400 text-lg" title="Delete">🗑</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Pending
-                    statusBadge = `<div class="w-2 h-2 rounded-full bg-yellow-500 mx-auto animate-pulse" title="Pending"></div>`;
-                    actionButtons = `
-                        <div class="flex justify-end gap-2">
-                            <button onclick="setStatus('${key}', 'accepted')" 
-                                    class="btn-success px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider hover:bg-green-500/10 font-magic">
-                                Accept
-                            </button>
-                            <button onclick="setStatus('${key}', 'rejected')" 
-                                    class="btn-warning px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider hover:bg-yellow-500/10 font-magic">
-                                Reject
-                            </button>
-                            <button onclick="triggerDelete('${key}')" 
-                                    class="btn-danger px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider hover:bg-red-500/10 font-magic">
-                                Delete
-                            </button>
-                        </div>
-                    `;
-                }
-
-                // --- Row Construction ---
-                const row = document.createElement('tr');
-                row.className = rowClasses;
-                
-                // --- MEMBERS HTML GENERATION ---
-                let membersHtml = '';
-                
-                const getMemData = (mem) => {
-                    if (!mem) return null;
-                    return {
-                        name: mem.name || null,
-                        dept: mem.department || mem.dept || 'Unknown Dept',
-                        phone: mem.phone || mem.contact || 'No Phone'
-                    };
-                };
-
-                const m2 = getMemData(entry.member2);
-                const m3 = getMemData(entry.member3);
-
-                if (m2 && m2.name) {
-                    membersHtml += `
-                        <div class="mb-4 pb-2 border-b border-gray-800/50 last:border-0 last:mb-0 last:pb-0">
-                            <div class="text-gray-300 font-bold text-sm font-data">${m2.name}</div>
-                            <div class="flex flex-col mt-1">
-                                <span class="text-[11px] text-gray-500 italic mb-1 font-data">${m2.dept}</span>
-                                <span class="text-[#c5a059] font-data font-semibold text-base tracking-wide">📞 ${m2.phone}</span>
-                            </div>
-                        </div>`;
-                }
-                
-                if (m3 && m3.name) {
-                    membersHtml += `
-                        <div class="mb-2 pb-2 border-b border-gray-800/50 last:border-0 last:mb-0 last:pb-0">
-                            <div class="text-gray-300 font-bold text-sm font-data">${m3.name}</div>
-                            <div class="flex flex-col mt-1">
-                                <span class="text-[11px] text-gray-500 italic mb-1 font-data">${m3.dept}</span>
-                                <span class="text-[#c5a059] font-data font-semibold text-base tracking-wide">📞 ${m3.phone}</span>
-                            </div>
-                        </div>`;
-                }
-
-                if(membersHtml === '') membersHtml = '<span class="text-gray-700 text-xs italic font-data">Solo Mission</span>';
-
-                row.innerHTML = `
-                    <td class="px-4 py-4 align-middle text-center border-l-4 ${entry.status === 'accepted' ? 'border-l-green-500' : entry.status === 'rejected' ? 'border-l-red-500' : 'border-l-transparent'}">
-                        ${statusBadge}
-                    </td>
-                    <td class="px-4 py-4 align-middle">
-                        <div class="text-xs text-gray-500 font-data">${new Date(entry.timestamp || Date.now()).toLocaleDateString()}</div>
-                        <div class="text-[10px] text-gray-600 font-data">${new Date(entry.timestamp || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    </td>
-                    <td class="px-4 py-4 align-middle">
-                        <div class="text-[#c5a059] font-bold text-lg font-magic tracking-wide drop-shadow-md">${entry.teamName}</div>
-                    </td>
-                    <td class="px-4 py-4 align-middle text-center">
-                        <div class="text-xl font-bold font-magic ${refPoints > 0 ? 'text-[#c5a059] drop-shadow-[0_0_5px_rgba(197,160,89,0.5)]' : 'text-gray-700'}">
-                            ${refPoints}
-                        </div>
-                        <div class="text-[9px] text-gray-500">${refBy}</div>
-                    </td>
-                    <td class="px-4 py-4 align-middle text-gray-300">
-                        <div class="text-base font-bold font-data text-white">${entry.captain.name}</div>
-                        <div class="text-xs text-[#74c7d5] hover:underline cursor-pointer mt-1 font-data font-medium" title="${entry.captain.email}" onclick="window.location.href='mailto:${entry.captain.email}'">
-                            ✉ ${entry.captain.email}
-                        </div>
-                    </td>
-                    <td class="px-4 py-4 align-middle text-sm italic text-gray-400 font-data">
-                        ${entry.captain.department || 'Unknown'}
-                    </td>
-                    <td class="px-4 py-4 align-middle text-center">
-                         <div class="text-lg text-[#c5a059] font-data font-bold whitespace-nowrap tracking-wide">📞 ${entry.captain.phone}</div>
-                    </td>
-                    <td class="px-4 py-4 align-middle min-w-[200px]">
-                        ${membersHtml}
-                    </td>
-                    <td class="px-4 py-4 align-middle text-center">
-                        ${entry.screenshotUrl ? 
-                            `<a href="${entry.screenshotUrl}" target="_blank" class="inline-block p-1 border border-gray-700 rounded hover:border-[#c5a059] hover:bg-[#c5a059]/10 transition" title="View Parchment">
-                                <span class="text-xl">📄</span>
-                            </a>` : 
-                            `<span class="text-gray-700 text-lg" title="Missing">-</span>`
-                        }
-                    </td>
-                    <td class="px-4 py-4 align-middle text-right min-w-[150px]">
-                        ${actionButtons}
-                    </td>
-                `;
-                tableBody.appendChild(row);
             });
+
+            // 3. Search & Tab Filter
+            let filteredEntries = validEntries.filter(entry => {
+                const tName = (entry.teamName || "").toLowerCase();
+                const cName = (entry.captain.name || "").toLowerCase();
+                const cEmail = (entry.captain.email || "").toLowerCase();
+                const matchesSearch = tName.includes(searchTerm) || cName.includes(searchTerm) || cEmail.includes(searchTerm);
+                
+                const hasPoints = (entry.referralPoints || 0) > 0;
+                const wasReferred = !!entry.referredBy;
+                const isReferralRelated = hasPoints || wasReferred;
+
+                if (!matchesSearch) return false;
+                if (currentFilter === 'referrals' && !isReferralRelated) return false;
+                
+                return true;
+            });
+
+            // 4. Sorting Logic
+            if (currentFilter === 'referrals') {
+                // SORT: Highest Points First, then Newest Date
+                filteredEntries.sort((a, b) => {
+                    const ptsA = a.referralPoints || 0;
+                    const ptsB = b.referralPoints || 0;
+                    if (ptsB !== ptsA) return ptsB - ptsA; // Descending Points
+                    return new Date(b.timestamp || 0) - new Date(a.timestamp || 0); // Descending Date
+                });
+            } else {
+                // SORT: Newest Date First (Default)
+                filteredEntries.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            }
+
+            // 5. Render
+            if (filteredEntries.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-600 italic">No parchments found in this section.</td></tr>`;
+            } else {
+                filteredEntries.forEach(entry => {
+                    const key = entry.key;
+                    const refPoints = entry.referralPoints || 0;
+                    const refBy = entry.referredBy ? `via ${entry.referredBy}` : '';
+                    const hasPoints = refPoints > 0;
+
+                    // Row Styling
+                    let rowClasses = "hover:bg-white/5 transition-colors group border-b border-[#c5a059]/10";
+                    
+                    // Priority Color: PURPLE for points > 0
+                    if (hasPoints) {
+                        rowClasses += " bg-purple-900/20 border-l-4 border-l-purple-500";
+                    } 
+                    // Secondary Color: Status
+                    else if (entry.status === 'accepted') {
+                        rowClasses += " bg-green-900/10 border-l-4 border-l-green-500";
+                    } else if (entry.status === 'rejected') {
+                        rowClasses += " bg-red-900/10 border-l-4 border-l-red-500";
+                    } else {
+                        rowClasses += " border-l-4 border-l-transparent";
+                    }
+
+                    // Status Badge
+                    let statusBadge;
+                    if (entry.status === 'accepted') statusBadge = `<div class="w-2 h-2 rounded-full bg-green-500 mx-auto shadow-[0_0_10px_#10b981]" title="Accepted"></div>`;
+                    else if (entry.status === 'rejected') statusBadge = `<div class="w-2 h-2 rounded-full bg-red-500 mx-auto shadow-[0_0_10px_#ef4444]" title="Rejected"></div>`;
+                    else statusBadge = `<div class="w-2 h-2 rounded-full bg-yellow-500 mx-auto animate-pulse" title="Pending"></div>`;
+
+                    // Actions
+                    let actionButtons;
+                    if (entry.status === 'accepted' || entry.status === 'rejected') {
+                        const colorClass = entry.status === 'accepted' ? 'green' : 'red';
+                        actionButtons = `
+                            <div class="flex flex-col gap-2 items-end">
+                                <button onclick="composeEmail('${entry.captain.email}', '${entry.teamName.replace(/'/g, "\\'")}', '${entry.captain.name.replace(/'/g, "\\'")}', '${entry.status}')" 
+                                        class="bg-${colorClass}-600/20 text-${colorClass}-400 border border-${colorClass}-600/50 hover:bg-${colorClass}-600/40 px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider w-full text-center font-magic">
+                                    Send Mail ✉️
+                                </button>
+                                <div class="flex gap-2">
+                                    <button onclick="setStatus('${key}', null)" class="text-gray-500 hover:text-white text-lg" title="Undo Decision">↺</button>
+                                    <button onclick="triggerDelete('${key}')" class="text-red-500 hover:text-red-400 text-lg" title="Delete">🗑</button>
+                                </div>
+                            </div>`;
+                    } else {
+                        actionButtons = `
+                            <div class="flex justify-end gap-2">
+                                <button onclick="setStatus('${key}', 'accepted')" class="text-green-400 hover:bg-green-500/20 px-2 py-1 rounded text-lg" title="Accept">✓</button>
+                                <button onclick="setStatus('${key}', 'rejected')" class="text-yellow-400 hover:bg-yellow-500/20 px-2 py-1 rounded text-lg" title="Reject">✕</button>
+                                <button onclick="triggerDelete('${key}')" class="text-red-500 hover:bg-red-500/20 px-2 py-1 rounded text-lg" title="Delete">🗑</button>
+                            </div>`;
+                    }
+
+                    // Members
+                    let membersHtml = '';
+                    const getMemData = (mem) => mem ? { name: mem.name, dept: mem.department || mem.dept || 'Unknown', phone: mem.phone || 'No Phone' } : null;
+                    const m2 = getMemData(entry.member2);
+                    const m3 = getMemData(entry.member3);
+                    if (m2 && m2.name) membersHtml += `<div class="mb-2 pb-1 border-b border-gray-700/30"><div class="text-gray-300 font-bold text-xs">${m2.name}</div><div class="text-[10px] text-gray-500">${m2.dept} | ${m2.phone}</div></div>`;
+                    if (m3 && m3.name) membersHtml += `<div class="mb-1"><div class="text-gray-300 font-bold text-xs">${m3.name}</div><div class="text-[10px] text-gray-500">${m3.dept} | ${m3.phone}</div></div>`;
+                    if(membersHtml === '') membersHtml = '<span class="text-gray-700 text-xs italic">Solo</span>';
+
+                    // HTML Construction
+                    const row = document.createElement('tr');
+                    row.className = rowClasses;
+                    row.innerHTML = `
+                        <td class="px-4 py-4 align-middle text-center">${statusBadge}</td>
+                        <td class="px-4 py-4 align-middle">
+                            <div class="text-xs text-gray-500 font-data">${new Date(entry.timestamp || Date.now()).toLocaleDateString()}</div>
+                            <div class="text-[10px] text-gray-600 font-data">${new Date(entry.timestamp || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        </td>
+                        <td class="px-4 py-4 align-middle">
+                            <div class="text-[#c5a059] font-bold text-lg font-magic tracking-wide drop-shadow-md">${entry.teamName}</div>
+                        </td>
+                        <td class="px-4 py-4 align-middle text-center">
+                            <div class="text-xl font-bold font-magic ${refPoints > 0 ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]' : 'text-gray-700'}">
+                                ${refPoints}
+                            </div>
+                            <div class="text-[9px] text-gray-500">${refBy}</div>
+                        </td>
+                        <td class="px-4 py-4 align-middle text-gray-300">
+                            <div class="text-base font-bold font-data text-white">${entry.captain.name}</div>
+                            <div class="text-xs text-[#74c7d5] hover:underline cursor-pointer mt-1" onclick="window.location.href='mailto:${entry.captain.email}'">✉ ${entry.captain.email}</div>
+                        </td>
+                        <td class="px-4 py-4 align-middle text-sm italic text-gray-400 font-data">${entry.captain.department || 'Unknown'}</td>
+                        <td class="px-4 py-4 align-middle text-center text-[#c5a059] font-bold font-data">${entry.captain.phone}</td>
+                        <td class="px-4 py-4 align-middle min-w-[200px]">${membersHtml}</td>
+                        <td class="px-4 py-4 align-middle text-center">
+                            ${entry.screenshotUrl ? `<a href="${entry.screenshotUrl}" target="_blank" class="inline-block p-1 border border-gray-700 rounded hover:border-[#c5a059] text-xl">📄</a>` : `<span class="text-gray-700">-</span>`}
+                        </td>
+                        <td class="px-4 py-4 align-middle text-right min-w-[150px]">${actionButtons}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
 
             // Update UI Stats
             statTeams.innerText = tTeams;
@@ -514,77 +489,38 @@
             statRevenue.innerText = `₹${tRevenue}`;
         }
 
-        // --- Actions ---
-        
-        // 1. Set Status (DB Update)
+        // --- Helper Actions ---
         window.setStatus = async (key, status) => {
-             try {
-                await update(ref(db, `registrations/${key}`), { status: status });
-                // Reload data to reflect changes
-                await loadData();
-            } catch(e) {
-                console.error(e);
-                showModal("Error", "The spell fizzled. Status not updated.");
-            }
+             try { await update(ref(db, `registrations/${key}`), { status: status }); await loadData(); } catch(e) { console.error(e); showModal("Error", "Update failed."); }
         };
 
-        // 2. Compose Accept Email
-        window.composeAcceptEmail = (email, team, captain) => {
-            const subject = `Owl Post: Acceptance to Hogwarts Treasure Hunt`;
-            const body = `Dear ${captain},\n\nWe are pleased to inform you that your team, "${team}", has been officially accepted for the Hogwarts Treasure Hunt.\n\n⚡ IMPORTANT: You must join the official Order of the Phoenix (WhatsApp Group) to receive your Portkey location: https://chat.whatsapp.com/JcUZ4kd3v2l7Vn88BE8O60\n\nKeep your wand ready.\n\nRegards,\nTech Head J.S. Dingra\nSciRox - Science Club`;
-            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.open(mailtoLink, '_blank');
+        window.composeEmail = (email, team, captain, type) => {
+            const isAccept = type === 'accepted';
+            const subject = isAccept ? `Owl Post: Acceptance to Hogwarts Treasure Hunt` : `Owl Post: Application Status`;
+            const body = isAccept 
+                ? `Dear ${captain},\n\nWe are pleased to inform you that your team, "${team}", has been accepted.\n\n Join the WhatsApp Group: https://chat.whatsapp.com/JcUZ4kd3v2l7Vn88BE8O60\n\nRegards,\nSciRox`
+                : `Dear ${captain},\n\nRegarding your application for "${team}". Unfortunately, we cannot accept your registration at this time due to verification issues.\n\nRegards,\nSciRox`;
+            window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
         };
 
-        // 3. Compose Reject Email
-        window.composeRejectEmail = (email, team, captain) => {
-            const subject = `Owl Post: Application Status for Hogwarts Treasure Hunt`;
-            const body = `Dear ${captain},\n\nWe have reviewed your application for the team "${team}".\n\nUnfortunately, we cannot accept your registration at this time due to issues with the verification process (e.g. invalid payment screenshot).\n\nPlease reply to this owl or contact the organizers if you believe this is a mistake.\n\nRegards,\nTech Head J.S. Dingra\nSciRox - Science Club`;
-            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.open(mailtoLink, '_blank');
-        };
-
-        // 4. Delete (Expel)
         window.triggerDelete = (key) => {
             deleteTargetKey = key;
-            showModal(
-                "Expel Student?", 
-                "This action is irreversible (Avada Kedavra). The record will be permanently destroyed.", 
-                true // showCancel
-            );
+            showModal("Expel Student?", "This is irreversible.", true);
         };
 
         async function confirmDelete() {
             if(!deleteTargetKey) return;
-            try {
-                await remove(ref(db, `registrations/${deleteTargetKey}`));
-                // Remove row locally or reload
-                await loadData();
-                showModal("Success", "The record has been vanished.");
-            } catch(e) {
-                console.error(e);
-                showModal("Error", "The spell backfired. Could not delete.");
-            }
+            try { await remove(ref(db, `registrations/${deleteTargetKey}`)); await loadData(); showModal("Success", "Vanished."); } 
+            catch(e) { showModal("Error", "Failed."); }
             deleteTargetKey = null;
         }
 
-
-        // --- Modal System ---
         window.closeModal = () => modal.classList.add('hidden');
         window.showModal = (title, msg, showCancel = false) => {
-            modalTitle.textContent = title;
-            modalMessage.textContent = msg;
-            
-            if(showCancel) {
-                modalCancelBtn.classList.remove('hidden');
-                modalConfirmBtn.textContent = "Confirm Expulsion";
-                modalConfirmBtn.onclick = () => { closeModal(); confirmDelete(); };
-            } else {
-                modalCancelBtn.classList.add('hidden');
-                modalConfirmBtn.textContent = "Dissendium";
-                modalConfirmBtn.onclick = closeModal;
-            }
-            
+            modalTitle.textContent = title; modalMessage.textContent = msg;
+            modalCancelBtn.classList.toggle('hidden', !showCancel);
+            modalConfirmBtn.textContent = showCancel ? "Confirm" : "Dissendium";
+            modalConfirmBtn.onclick = showCancel ? () => { closeModal(); confirmDelete(); } : closeModal;
             modal.classList.remove('hidden');
         };
 
