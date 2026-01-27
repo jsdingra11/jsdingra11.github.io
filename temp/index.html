@@ -548,16 +548,8 @@
 
         const checkRegistration = async (uid) => {
             const registrationsRef = ref(db, 'registrations');
-            // This query requires indexOn in rules, BUT since we filter by UID which is usually indexed or low volume, it might work.
-            // If this fails, we can use the same technique as referral check.
-            // However, usually for current user it's safer. Let's assume this works or switch to client side filtering too.
-            // For safety, I will switch this to Client Side filtering too, just in case.
             
-            // OLD METHOD (Might fail without rules):
-            // const userQuery = query(registrationsRef, orderByChild('uid'), equalTo(uid));
-            // onValue(userQuery, ...);
-
-            // NEW METHOD (Works without Rules):
+            // Client Side filtering for User ID as well for safety
             onValue(registrationsRef, (snapshot) => {
                 let userEntry = null;
                 let userKey = null;
@@ -605,7 +597,7 @@
             else member3Group.classList.add('hidden');
         });
 
-        // --- Logic: Referral Check (UPDATED: Client-Side Filter) ---
+        // --- Logic: Referral Check (UPDATED: Client-Side Filter + CASE INSENSITIVE) ---
         checkRefBtn.addEventListener('click', async () => {
             const code = referralInput.value.trim();
             if (!code) {
@@ -618,7 +610,7 @@
             checkRefBtn.disabled = true;
 
             try {
-                // Fetch ALL registrations to filter locally (Bypasses Rule Restrictions)
+                // Fetch ALL registrations to filter locally
                 const registrationsRef = ref(db, 'registrations');
                 const snapshot = await get(registrationsRef);
 
@@ -628,10 +620,10 @@
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        // Case-sensitive check
-                        if (data.teamName && data.teamName === code) {
+                        // Case-INSENSITIVE check
+                        if (data.teamName && data.teamName.trim().toLowerCase() === code.toLowerCase()) {
                             foundKey = childSnapshot.key;
-                            foundName = data.teamName;
+                            foundName = data.teamName; // We use the real Name from DB, not the user's typed casing
                             return true; // Break loop
                         }
                     });
@@ -648,7 +640,7 @@
                     validatedReferralKey = null;
                     validatedReferralName = null;
                     referralMsg.className = 'text-xs mt-2 italic h-4 referral-error';
-                    referralMsg.textContent = "Team not found. Check spelling (Case Sensitive).";
+                    referralMsg.textContent = "Team not found. Check spelling.";
                     referralInput.classList.remove('border-green-500');
                 }
             } catch (err) {
