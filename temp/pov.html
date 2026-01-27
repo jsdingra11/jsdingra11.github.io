@@ -177,7 +177,7 @@
                                 <th class="px-4 py-4 text-center w-16">Status</th>
                                 <th class="px-4 py-4 font-bold">Date</th>
                                 <th class="px-4 py-4 font-bold text-lg">Team Name</th>
-                                <th class="px-4 py-4 font-bold">Captain Name</th>
+                                <th class="px-4 py-4 font-bold text-center text-[#c5a059]">Ref. Points</th> <th class="px-4 py-4 font-bold">Captain Name</th>
                                 <th class="px-4 py-4 font-bold">Dept</th>
                                 <th class="px-4 py-4 font-bold text-center">Contact (Captain)</th>
                                 <th class="px-4 py-4 font-bold">Party Members</th>
@@ -353,11 +353,11 @@
                 tTeams++;
                 const size = parseInt(entry.teamSize || 1);
                 tWizards += size;
-                
-                // UPDATED REVENUE LOGIC:
-                // 3 members = 150, 2 members = 100, 1 member = 50.
-                // This simplifies to: size * 50
                 tRevenue += (size * 50);
+
+                // --- Referral Logic ---
+                const refPoints = entry.referralPoints || 0;
+                const refBy = entry.referredBy ? `via ${entry.referredBy}` : '';
 
                 // --- Row Styles based on Status ---
                 let rowClasses = "hover:bg-white/5 transition-colors group";
@@ -471,6 +471,12 @@
                     </td>
                     <td class="px-4 py-4 align-middle">
                         <div class="text-[#c5a059] font-bold text-lg font-magic tracking-wide drop-shadow-md">${entry.teamName}</div>
+                    </td>
+                    <td class="px-4 py-4 align-middle text-center">
+                        <div class="text-xl font-bold font-magic ${refPoints > 0 ? 'text-[#c5a059] drop-shadow-[0_0_5px_rgba(197,160,89,0.5)]' : 'text-gray-700'}">
+                            ${refPoints}
+                        </div>
+                        <div class="text-[9px] text-gray-500">${refBy}</div>
                     </td>
                     <td class="px-4 py-4 align-middle text-gray-300">
                         <div class="text-base font-bold font-data text-white">${entry.captain.name}</div>
