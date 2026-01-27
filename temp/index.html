@@ -99,6 +99,9 @@
         .lumos-cursor { position: fixed; width: 300px; height: 300px; pointer-events: none; z-index: 100; background: radial-gradient(circle closest-side, rgba(255,255,255,0.8) 0%, rgba(116,199,213,0.4) 20%, transparent 70%); transform: translate(-50%, -50%); mix-blend-mode: screen; opacity: 0.6; }
 
         .glass-panel { background: rgba(5, 5, 8, 0.65); backdrop-filter: blur(5px); border: 1px solid rgba(116, 199, 213, 0.1); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        
+        .referral-success { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5); }
+        .referral-error { color: #f87171; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center">
@@ -135,7 +138,7 @@
             <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">SciRox - Science Club | Department of Mysteries</h2>
             <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-2">The Dark Mark</h1>
             <h3 class="text-lg md:text-xl text-[#c5a059] font-serif mb-6 uppercase tracking-widest">Treasure Hunt <span class="text-gray-500 mx-2">|</span> GNDU</h3>
-            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 28th January 2026</p>
+            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 29th January 2026</p>
             <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">EVENT DATE: 30th January 2026</p>
             <div class="h-[1px] w-48 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto"></div>
         </header>
@@ -160,6 +163,21 @@
                             <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name</label>
                             <input type="text" id="teamName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Dumbledore's Army">
                         </div>
+
+                        <!-- REFERRAL SYSTEM ADDED HERE -->
+                        <div class="mb-6 p-4 border border-[#c5a059]/20 bg-black/30 rounded-sm">
+                            <label class="block text-[#c5a059] text-xs mb-2 uppercase tracking-widest flex items-center gap-2">
+                                <span class="text-lg">⚡</span> Referral Code (Existing Team Name)
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" id="referralCode" class="w-full p-3 rounded-sm input-field" placeholder="Enter Team Name of friend">
+                                <button type="button" id="checkRefBtn" class="px-4 py-2 bg-[#1a2a35] border border-[#c5a059] text-[#c5a059] font-cinzel text-xs uppercase hover:bg-[#c5a059] hover:text-black transition-all">
+                                    Check
+                                </button>
+                            </div>
+                            <p id="referralMsg" class="text-xs mt-2 italic h-4"></p>
+                        </div>
+                        <!-- END REFERRAL SYSTEM -->
 
                         <div class="bg-black/20 p-4 border border-[#c5a059]/20 rounded-sm mb-6">
                             <h4 class="text-[#c5a059] text-sm uppercase mb-3 font-bold tracking-wider">Captain (Team Head)</h4>
@@ -264,7 +282,14 @@
                         <span class="mx-2 text-gray-700">|</span> 
                         ID: <span id="user-id-display" class="font-mono text-xs text-gray-600"></span>
                     </p>
-                    <button id="edit-entry-btn" class="mt-4 text-xs text-[#c5a059] underline hover:text-white transition-colors uppercase tracking-widest opacity-80 hover:opacity-100">
+                    
+                    <!-- POINTS DISPLAY -->
+                    <div class="mt-4 inline-block bg-[#111] border border-[#c5a059] px-6 py-2 rounded-full shadow-[0_0_15px_rgba(197,160,89,0.3)]">
+                        <span class="text-gray-400 uppercase text-xs tracking-widest mr-2">Referral Points</span>
+                        <span id="user-points-display" class="text-[#c5a059] font-bold text-xl">0</span>
+                    </div>
+
+                    <button id="edit-entry-btn" class="block mx-auto mt-4 text-xs text-[#c5a059] underline hover:text-white transition-colors uppercase tracking-widest opacity-80 hover:opacity-100">
                         <span class="mr-1">✎</span> Mistake in your parchment? Edit Entry
                     </button>
                 </div>
@@ -433,7 +458,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo, get, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo, get, update, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         const tokenPart1 = "ghp_"; 
         const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; 
         const GITHUB_TOKEN = tokenPart1 + tokenPart2;
@@ -447,6 +472,7 @@
         const regForm = document.getElementById('reg-form');
         const userTeamNameDisplay = document.getElementById('user-team-name');
         const userIdDisplay = document.getElementById('user-id-display');
+        const userPointsDisplay = document.getElementById('user-points-display');
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
@@ -465,6 +491,11 @@
         const finalSubmitBtn = document.getElementById('final-submit-btn');
         const submitBtnText = document.getElementById('submit-btn-text');
         const uploadOptionalTag = document.getElementById('upload-optional-tag');
+
+        // Referral Elements
+        const checkRefBtn = document.getElementById('checkRefBtn');
+        const referralInput = document.getElementById('referralCode');
+        const referralMsg = document.getElementById('referralMsg');
 
         // Utils
         window.closeModal = () => modal.classList.add('hidden');
@@ -488,6 +519,10 @@
         let currentEntryKey = null;
         let currentEntryData = null;
         let isEditing = false;
+        
+        // Referral State
+        let validatedReferralKey = null; // Key of the team that referred us
+        let validatedReferralName = null;
 
         async function initApp() {
             try {
@@ -528,6 +563,7 @@
 
                     userTeamNameDisplay.textContent = currentEntryData.teamName;
                     userIdDisplay.textContent = uid;
+                    userPointsDisplay.textContent = currentEntryData.referralPoints || 0;
                     
                     // If we are currently editing and submitting, don't force switch
                     // But usually, after submit we want to show dashboard
@@ -559,6 +595,54 @@
             else member3Group.classList.add('hidden');
         });
 
+        // --- Logic: Referral Check ---
+        checkRefBtn.addEventListener('click', async () => {
+            const code = referralInput.value.trim();
+            if (!code) {
+                referralMsg.className = 'text-xs mt-2 italic h-4 referral-error';
+                referralMsg.textContent = "Please enter a team name.";
+                return;
+            }
+
+            checkRefBtn.textContent = "...";
+            checkRefBtn.disabled = true;
+
+            try {
+                // Query DB to find team with this name
+                const registrationsRef = ref(db, 'registrations');
+                const teamQuery = query(registrationsRef, orderByChild('teamName'), equalTo(code));
+                
+                const snapshot = await get(teamQuery);
+                if (snapshot.exists()) {
+                    const keys = Object.keys(snapshot.val());
+                    const refKey = keys[0]; // The key of the team referring
+                    const refData = snapshot.val()[refKey];
+                    
+                    // Prevent self-referral (conceptually if they try to refer their own new name, though hard to do here)
+                    // Mainly handled by the fact that their new name isn't in DB yet.
+                    
+                    validatedReferralKey = refKey;
+                    validatedReferralName = refData.teamName;
+                    
+                    referralMsg.className = 'text-xs mt-2 italic h-4 referral-success';
+                    referralMsg.textContent = `Referral Valid! Team "${refData.teamName}" found. (+1 Point Each)`;
+                    referralInput.classList.add('border-green-500');
+                } else {
+                    validatedReferralKey = null;
+                    validatedReferralName = null;
+                    referralMsg.className = 'text-xs mt-2 italic h-4 referral-error';
+                    referralMsg.textContent = "Team not found. Check spelling (Case Sensitive).";
+                    referralInput.classList.remove('border-green-500');
+                }
+            } catch (err) {
+                console.error(err);
+                referralMsg.textContent = "Error checking code.";
+            } finally {
+                checkRefBtn.textContent = "Check";
+                checkRefBtn.disabled = false;
+            }
+        });
+
         // --- Logic: Edit Mode ---
         editEntryBtn.addEventListener('click', () => {
             if (!currentEntryData) return;
@@ -584,6 +668,11 @@
                 document.getElementById('member3Phone').value = currentEntryData.member3.phone || '';
                 document.getElementById('member3Dept').value = currentEntryData.member3.department || '';
             }
+            
+            // Disable Referral during edit to avoid point exploitation
+            referralInput.disabled = true;
+            checkRefBtn.disabled = true;
+            referralInput.value = "Referral locked during edit";
 
             // 2. Set State
             isEditing = true;
@@ -600,8 +689,6 @@
 
         // --- Logic: Navigation & Validation ---
         
-        // Removed checkTeamNameUnique function as per request
-
         proceedBtn.addEventListener('click', async () => {
             const originalText = proceedBtn.innerHTML;
             proceedBtn.innerText = "Checking...";
@@ -646,8 +733,6 @@
                         return;
                     }
                 }
-
-                // 3. Removed Duplicate Team Name Check logic here.
 
                 // If all good, proceed
                 formStep1.classList.add('hidden');
@@ -743,9 +828,18 @@
                     };
                 }
 
+                // Points Logic: 
+                // If new registration AND validated referral exists
+                if (!isEditing && validatedReferralKey) {
+                    teamData.referralPoints = 1; // Bonus for new user
+                    teamData.referredBy = validatedReferralName; // Track who referred them
+                } else if (isEditing && currentEntryData.referralPoints) {
+                    teamData.referralPoints = currentEntryData.referralPoints; // Keep old points
+                } else {
+                    teamData.referralPoints = 0;
+                }
+
                 // 1. Upload Logic
-                // If user selected a new file, upload it.
-                // If editing and no new file, keep old URL.
                 if (file) {
                     submitBtn.innerHTML = "Uploading Proof...";
                     const cleanName = teamData.teamName.replace(/[^a-zA-Z0-9]/g, '_');
@@ -754,7 +848,6 @@
                 } else if (isEditing && currentEntryData && currentEntryData.screenshotUrl) {
                     teamData.screenshotUrl = currentEntryData.screenshotUrl;
                 } else {
-                    // Fallback (shouldn't reach here due to validation)
                     teamData.screenshotUrl = ""; 
                 }
 
@@ -769,10 +862,25 @@
                     // CREATE new
                     const newRegRef = push(ref(db, 'registrations'));
                     await set(newRegRef, teamData);
+
+                    // REFERRAL BONUS for the Referrer (Existing Team)
+                    if (validatedReferralKey) {
+                        try {
+                            const referrerPointsRef = ref(db, `registrations/${validatedReferralKey}/referralPoints`);
+                            await runTransaction(referrerPointsRef, (currentPoints) => {
+                                return (currentPoints || 0) + 1;
+                            });
+                        } catch (err) {
+                            console.error("Failed to give referral points to referrer", err);
+                            // Non-blocking error
+                        }
+                    }
                 }
                 
                 // Reset state
                 isEditing = false;
+                validatedReferralKey = null;
+                validatedReferralName = null;
                 submitBtnText.innerText = "Confirm Registration";
                 uploadOptionalTag.classList.add('hidden');
                 document.getElementById('paymentScreenshot').required = true;
