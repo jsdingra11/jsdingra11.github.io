@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SciRox Ministry Archives</title>
-    <!-- Tailwind CSS for rapid styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -41,13 +39,11 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
 
-        /* Task Row Style (mimicking the screenshot rows) */
+        /* Task Row Style */
         .task-row {
             transition: all 0.3s ease;
             background: linear-gradient(90deg, #0a0a0a 0%, #0f0f0f 100%);
             border-bottom: 1px solid #1a1a1a;
-            
-            /* FIX: Changed from transparent to a visible dark color so the 'tab' isn't hiding */
             border-left: 3px solid #1f1f1f; 
         }
         .task-row:hover {
@@ -55,7 +51,7 @@
             border-left-color: #d4af37; /* Gold on hover */
         }
 
-        /* Green Accent Button (from screenshot) */
+        /* Green Accent Button */
         .btn-ministry {
             background-color: rgba(22, 101, 52, 0.1);
             color: #4ade80; /* Bright Green */
@@ -84,26 +80,25 @@
             box-shadow: 0 0 0 1px #d4af37;
         }
 
-        /* Custom Scrollbar - Improved Visibility */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px; /* Slightly wider */
+            width: 8px;
         }
         ::-webkit-scrollbar-track {
             background: #050505; 
         }
         ::-webkit-scrollbar-thumb {
-            background: #333; /* Dark Grey by default */
+            background: #333;
             border-radius: 4px;
             border: 1px solid #000;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #d4af37; /* Gold on hover */
+            background: #d4af37;
         }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
-    <!-- STATIC WARNING SECTION -->
     <div class="bg-[#d4af37] text-black text-[0.65rem] font-bold py-1 z-[60] border-b border-[#b5952f] text-center">
         <div class="uppercase tracking-widest flex gap-4 items-center justify-center">
             <span>
@@ -114,7 +109,6 @@
         </div>
     </div>
 
-    <!-- LOGIN SECTION -->
     <div id="login-section" class="flex-grow flex items-center justify-center p-4 overflow-y-auto">
         <div class="ministry-panel p-10 rounded-sm shadow-2xl max-w-lg w-full text-center border-t-2 border-t-[#d4af37]">
             <div class="mb-8">
@@ -140,7 +134,6 @@
                     <input type="text" id="captainNameInput" placeholder="ENTER CAPTAIN NAME" 
                         class="input-ministry w-full rounded-sm px-4 py-3 text-sm tracking-wide placeholder-gray-700 transition">
                 </div>
-                <!-- NEW: Team Code Input -->
                 <div>
                     <label class="block text-gray-500 text-[0.7rem] font-bold uppercase tracking-wider mb-2">Team Code</label>
                     <input type="text" id="teamCodeInput" placeholder="ENTER ACCESS CODE" 
@@ -155,7 +148,6 @@
         </div>
     </div>
 
-    <!-- EDIT PROFILE MODAL -->
     <div id="edit-modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[60] p-4 backdrop-blur-md">
         <div class="ministry-panel p-6 rounded-sm max-w-sm w-full relative border border-[#333]">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-600 hover:text-white transition">
@@ -179,12 +171,9 @@
         </div>
     </div>
 
-    <!-- DASHBOARD SECTION (Hidden by default) -->
     <div id="dashboard-section" class="hidden flex-col h-screen w-full relative">
         
-        <!-- Header Container (Fixed at top) -->
         <div class="flex-none z-50 bg-[#030303]">
-            <!-- Navbar -->
             <nav class="border-b border-[#1f1f1f] px-6 py-4 flex justify-between items-center shadow-lg bg-[#050505]">
                 <div class="flex items-center gap-4">
                     <div class="bg-[#111] w-10 h-10 rounded flex items-center justify-center border border-[#333] cursor-pointer hover:border-[#d4af37] transition" onclick="openEditModal()">
@@ -206,7 +195,6 @@
                 </button>
             </nav>
 
-            <!-- Stats Bar -->
             <div class="bg-[#080808] border-b border-[#1f1f1f] px-6 py-3 flex gap-8 overflow-x-auto scrollbar-hide">
                 <div class="flex-shrink-0">
                     <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider">Status</span>
@@ -221,11 +209,9 @@
             </div>
         </div>
 
-        <!-- Content (Scrollable Area) -->
         <div class="flex-grow overflow-y-auto bg-[#030303] relative z-0">
             <div class="max-w-6xl mx-auto w-full pb-20 pt-8 px-4">
                 
-                <!-- Part A -->
                 <div class="mb-12">
                     <div class="flex items-center justify-between mb-4 border-b border-[#1f1f1f] pb-2 sticky top-0 bg-[#030303]/95 backdrop-blur-sm z-10 py-2">
                         <h3 class="text-lg font-ministry font-bold text-ministry-gold uppercase tracking-widest flex items-center">
@@ -234,20 +220,17 @@
                         <span class="text-[0.65rem] text-gray-600 uppercase border border-gray-800 px-2 py-1 rounded">Priority: High</span>
                     </div>
                     
-                    <!-- Table Header -->
                     <div class="hidden md:flex px-4 py-2 text-[0.65rem] text-gray-500 uppercase tracking-widest font-bold mb-2">
                         <div class="w-20">ID</div>
                         <div class="flex-1">Description</div>
                         <div class="w-32 text-center">Status</div>
-                        <div class="w-40 text-right">Action</div>
+                        <div class="w-48 text-right">Action</div>
                     </div>
 
                     <div id="partA-container" class="space-y-2">
-                        <!-- Tasks injected via JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- Part B -->
                 <div>
                     <div class="flex items-center justify-between mb-4 border-b border-[#1f1f1f] pb-2 sticky top-0 bg-[#030303]/95 backdrop-blur-sm z-10 py-2">
                         <h3 class="text-lg font-ministry font-bold text-purple-400/80 uppercase tracking-widest flex items-center">
@@ -257,14 +240,12 @@
                     </div>
                     
                     <div id="partB-container" class="space-y-2">
-                        <!-- Tasks injected via JS -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-5 right-5 bg-[#111] text-gray-200 px-6 py-4 rounded-sm shadow-2xl border-l-4 border-[#d4af37] flex items-center gap-4 transition-all duration-300 opacity-0 translate-y-10 z-[70] min-w-[300px]">
         <div id="toastIconContainer">
             <i class="fa-solid fa-info-circle text-[#d4af37] text-xl"></i>
@@ -275,7 +256,6 @@
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC -->
     <script type="module">
         // --- 1. CONFIGURATION ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -345,6 +325,7 @@
         window.saveProfileChanges = saveProfileChanges;
         window.triggerFileInput = triggerFileInput;
         window.handleFileSelect = handleFileSelect;
+        window.cancelSelection = cancelSelection; // NEW
         window.uploadTask = uploadTask;
 
         checkSession();
@@ -451,7 +432,6 @@
 
         function createTaskElement(task) {
             const div = document.createElement('div');
-            // Theme: Dark row similar to the screenshot list items
             div.className = "task-row px-4 py-4 md:py-3 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group";
             div.id = `card-${task.id}`;
 
@@ -473,18 +453,21 @@
                          <span id="status-${task.id}" class="text-[0.65rem] font-bold text-gray-700 uppercase tracking-wider">Pending</span>
                     </div>
                     
-                    <div class="w-full md:w-40 flex justify-end">
+                    <div class="w-full md:w-48 flex justify-end items-center gap-2">
                         <input type="file" id="file-${task.id}" class="hidden" onchange="handleFileSelect('${task.id}', this)">
                         
-                        <!-- Select Button -->
                         <button id="btn-select-${task.id}" onclick="triggerFileInput('${task.id}')" 
                             class="w-full md:w-auto btn-ministry px-4 py-2 rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
                             <span>Select File</span>
                         </button>
                         
-                        <!-- Upload Button -->
+                        <button id="btn-cancel-${task.id}" onclick="cancelSelection('${task.id}')" 
+                            class="hidden btn-ministry w-10 px-0 py-2 rounded-sm border-red-800 text-red-500 hover:bg-red-900/30 flex items-center justify-center">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
                         <button id="btn-upload-${task.id}" onclick="uploadTask('${task.id}')" 
-                            class="hidden w-full md:w-auto btn-ministry px-4 py-2 rounded-sm border-blue-800 text-blue-400 hover:bg-blue-900/30 flex items-center justify-center gap-2">
+                            class="hidden flex-1 md:flex-none btn-ministry px-4 py-2 rounded-sm border-blue-800 text-blue-400 hover:bg-blue-900/30 flex items-center justify-center gap-2">
                             <span>Upload</span>
                         </button>
                     </div>
@@ -509,10 +492,29 @@
 
             const selectBtn = document.getElementById(`btn-select-${taskId}`);
             const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
+            const cancelBtn = document.getElementById(`btn-cancel-${taskId}`); // Get cancel button
             
             selectBtn.classList.add('hidden');
             uploadBtn.classList.remove('hidden');
+            cancelBtn.classList.remove('hidden'); // Show cancel button
+            
             uploadBtn.innerHTML = `<span>Submit (${(file.size/1024/1024).toFixed(1)}MB)</span> <i class="fa-solid fa-arrow-up"></i>`;
+        }
+
+        // NEW FUNCTION: Cancel Selection
+        function cancelSelection(taskId) {
+            const input = document.getElementById(`file-${taskId}`);
+            const selectBtn = document.getElementById(`btn-select-${taskId}`);
+            const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
+            const cancelBtn = document.getElementById(`btn-cancel-${taskId}`);
+
+            // Clear file
+            input.value = "";
+
+            // Toggle buttons
+            selectBtn.classList.remove('hidden');
+            uploadBtn.classList.add('hidden');
+            cancelBtn.classList.add('hidden');
         }
 
         async function uploadTask(taskId) {
@@ -524,11 +526,15 @@
             if (!confirm(`Initialize secure upload for Entry ${taskId}?\nFile: ${file.name}`)) return;
 
             const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
+            const cancelBtn = document.getElementById(`btn-cancel-${taskId}`); // Get cancel button
             const originalContent = uploadBtn.innerHTML;
             
             uploadBtn.disabled = true;
             uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
             uploadBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Encrypting...`;
+            
+            // Hide cancel button during upload
+            cancelBtn.classList.add('hidden');
 
             try {
                 const base64Content = await toBase64(file);
@@ -578,6 +584,9 @@
                 uploadBtn.disabled = false;
                 uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 uploadBtn.innerHTML = originalContent;
+                
+                // Show cancel button again on error so they can fix it
+                cancelBtn.classList.remove('hidden');
             }
         }
 
@@ -620,6 +629,7 @@
             const status = document.getElementById(`status-${taskId}`);
             const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
             const selectBtn = document.getElementById(`btn-select-${taskId}`);
+            const cancelBtn = document.getElementById(`btn-cancel-${taskId}`);
 
             if (card) {
                 card.style.borderLeftColor = '#4ade80'; // Green accent
@@ -630,6 +640,7 @@
 
                 if (uploadBtn) uploadBtn.classList.add('hidden');
                 if (selectBtn) selectBtn.classList.add('hidden');
+                if (cancelBtn) cancelBtn.classList.add('hidden');
                 
                 // Add a "view proof" fake button to match screenshot vibe
                 if (!card.querySelector('.proof-icon')) {
@@ -638,7 +649,7 @@
                     proofDiv.innerHTML = `<button class="text-gray-500 hover:text-white transition"><i class="fa-regular fa-file-lines text-xl"></i></button>`;
                     
                     // Replace the button area with the icon
-                    const actionArea = card.querySelector('.w-full.md\\:w-40');
+                    const actionArea = card.querySelector('.w-full.md\\:w-48');
                     if(actionArea) {
                         actionArea.innerHTML = '';
                         actionArea.appendChild(proofDiv);
