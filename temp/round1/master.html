@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciRox Ministry Archives</title>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Import Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030303; /* Void Black */
+            color: #a3a3a3; /* Muted Silver */
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.9), rgba(5, 5, 5, 1)),
+                url('https://www.transparenttextures.com/patterns/cubes.png');
+        }
+
+        h1, h2, h3, .font-ministry {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.05em;
+        }
+
+        /* Ministry Gold Text */
+        .text-ministry-gold {
+            color: #d4af37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Ministry Panel Style */
+        .ministry-panel {
+            background: #0a0a0a;
+            border: 1px solid #1f1f1f;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Task Row Style (mimicking the screenshot rows) */
+        .task-row {
+            transition: all 0.3s ease;
+            background: linear-gradient(90deg, #0a0a0a 0%, #0f0f0f 100%);
+            border-bottom: 1px solid #1a1a1a;
+            
+            /* FIX: Changed from transparent to a visible dark color so the 'tab' isn't hiding */
+            border-left: 3px solid #1f1f1f; 
+        }
+        .task-row:hover {
+            background: #111;
+            border-left-color: #d4af37; /* Gold on hover */
+        }
+
+        /* Green Accent Button (from screenshot) */
+        .btn-ministry {
+            background-color: rgba(22, 101, 52, 0.1);
+            color: #4ade80; /* Bright Green */
+            border: 1px solid #15803d;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        .btn-ministry:hover {
+            background-color: #15803d;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .input-ministry {
+            background: #050505;
+            border: 1px solid #333;
+            color: #d4af37;
+        }
+        .input-ministry:focus {
+            border-color: #d4af37;
+            outline: none;
+            box-shadow: 0 0 0 1px #d4af37;
+        }
+
+        /* Custom Scrollbar - Improved Visibility */
+        ::-webkit-scrollbar {
+            width: 8px; /* Slightly wider */
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; /* Dark Grey by default */
+            border-radius: 4px;
+            border: 1px solid #000;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37; /* Gold on hover */
+        }
+
+        /* --- NEW ADMIN STYLES --- */
+        /* Glowing Animation for Active Teams */
+        @keyframes goldPulse {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.2); border-color: #555; }
+            50% { box-shadow: 0 0 15px 5px rgba(212, 175, 55, 0.4); border-color: #d4af37; }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); border-color: #555; }
+        }
+        .card-active-glow {
+            animation: goldPulse 2s infinite;
+            border: 1px solid #d4af37 !important;
+            z-index: 10;
+        }
+
+        /* Yellow Highlight for Pending Tasks */
+        .pending-submission-row {
+            background: linear-gradient(90deg, rgba(234, 179, 8, 0.15) 0%, rgba(234, 179, 8, 0.05) 100%) !important;
+            border-left: 3px solid #eab308 !important; /* Yellow Border */
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- STATIC WARNING SECTION -->
+    <div class="bg-[#d4af37] text-black text-[0.65rem] font-bold py-1 z-[60] border-b border-[#b5952f] text-center">
+        <div class="uppercase tracking-widest flex gap-4 items-center justify-center">
+            <span>
+                Made with <a href="https://www.sitee.in" target="_blank" class="underline hover:text-white transition">sitee.in</a>
+            </span>
+            <span>•</span>
+            <span>CAUTION: You will only get one chance to upload the file.</span>
+        </div>
+    </div>
+
+    <!-- LOGIN SECTION -->
+    <div id="login-section" class="flex-grow flex items-center justify-center p-4 overflow-y-auto relative">
+        <div class="ministry-panel p-10 rounded-sm shadow-2xl max-w-lg w-full text-center border-t-2 border-t-[#d4af37]">
+            <div class="mb-8">
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <i class="fa-solid fa-scale-balanced text-4xl text-ministry-gold"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-ministry-gold uppercase tracking-widest">
+                    Ministry Archives
+                </h1>
+                <p class="text-[0.65rem] text-gray-500 uppercase tracking-[0.2em] mt-2">
+                    Confidential • Department of Mysteries
+                </p>
+            </div>
+
+            <div class="space-y-6 text-left mt-10">
+                
+
+                <div class="text-center mt-6">
+                    <button onclick="toggleAdminLogin()" class="text-[2s.6rem] text-gray-700 hover:text-[#d4af37] uppercase tracking-widest underline">Admin Access</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login Modal -->
+        <div id="admin-login-modal" class="absolute inset-0 bg-black/95 hidden items-center justify-center z-50">
+            <div class="ministry-panel p-6 rounded-sm max-w-sm w-full relative border border-red-900/50">
+                <button onclick="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-600 hover:text-white transition">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+                <h2 class="text-xl font-ministry font-bold mb-4 text-red-700 uppercase">Restricted Area</h2>
+                <input type="password" id="adminPassword" placeholder="ADMIN PASSKEY" class="input-ministry w-full rounded-sm px-4 py-2 text-sm mb-4">
+                <button onclick="handleAdminLogin()" class="w-full btn-ministry border-red-800 text-red-500 hover:bg-red-900/30">Authenticate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD SECTION -->
+    <div id="admin-dashboard-section" class="hidden flex-col h-screen w-full relative bg-[#050505]">
+        <!-- Admin Header -->
+        <div class="flex-none bg-[#0a0a0a] border-b border-red-900/30 px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+            <div class="flex items-center gap-4">
+                <div class="bg-red-900/20 w-10 h-10 rounded flex items-center justify-center border border-red-900 text-red-500">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h2 class="font-ministry font-bold text-lg text-[#e5e5e5] leading-none">ADMINISTRATOR</h2>
+                    <p class="text-xs text-red-700 font-medium mt-0.5">Evaluation Portal</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="loadAdminData()" class="text-xs text-[#d4af37] hover:text-white border border-[#d4af37]/30 hover:border-[#d4af37] px-4 py-2 rounded-sm transition uppercase tracking-wider">
+                    <i class="fa-solid fa-sync mr-2"></i> Refresh
+                </button>
+                <button onclick="handleLogout()" class="text-xs text-gray-500 hover:text-white border border-gray-800 hover:border-white px-4 py-2 rounded-sm transition uppercase tracking-wider">
+                    Exit
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="flex-none bg-[#030303] border-b border-[#1f1f1f] px-6">
+            <div class="flex gap-6">
+                <button onclick="switchAdminTab('review')" id="tab-review" class="py-4 text-xs font-bold uppercase tracking-widest border-b-2 border-red-600 text-red-500">Team Monitor</button>
+                <button onclick="switchAdminTab('leaderboard')" id="tab-leaderboard" class="py-4 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-gray-600 hover:text-gray-300">Leaderboard</button>
+            </div>
+        </div>
+
+        <!-- Admin Content -->
+        <div class="flex-grow overflow-y-auto p-4 md:p-8">
+            
+            <!-- REVIEW / TEAM MONITOR VIEW -->
+            <div id="view-review" class="max-w-7xl mx-auto space-y-8">
+                <div id="admin-teams-container" class="space-y-12">
+                    <!-- Team Groups (Sectors) Injected Here -->
+                    <div class="text-center text-gray-600 py-10 italic">Initializing Uplink...</div>
+                </div>
+            </div>
+
+            <!-- TEAM DETAIL VIEW (The "New Tab" / Drill Down) -->
+            <div id="view-team-detail" class="hidden max-w-6xl mx-auto h-full flex flex-col">
+                <div class="flex justify-between items-center mb-6 border-b border-[#333] pb-4">
+                    <div>
+                        <button onclick="closeTeamDetail()" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 mb-2 transition">
+                            <i class="fa-solid fa-arrow-left"></i> Return to Monitor
+                        </button>
+                        <h2 class="text-2xl font-ministry font-bold text-[#d4af37]" id="detail-team-name">Team Name</h2>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest" id="detail-captain-name">Captain Info</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-[0.6rem] text-gray-600 uppercase tracking-widest">Current Score</span>
+                        <span class="text-3xl font-bold text-white font-ministry" id="detail-score">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-[#0a0a0a] rounded-sm border border-[#1f1f1f] overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-400">
+                            <thead class="bg-[#0f0f0f] text-[0.65rem] uppercase text-gray-500 font-bold border-b border-[#1f1f1f]">
+                                <tr>
+                                    <th class="px-6 py-4 w-16 text-center">ID</th>
+                                    <th class="px-6 py-4 min-w-[300px]">Task Description</th>
+                                    <th class="px-6 py-4 text-center w-24">Proof</th>
+                                    <th class="px-6 py-4 text-center w-40">Status</th>
+                                    <th class="px-6 py-4 text-right w-48">Evaluation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-tasks-body" class="divide-y divide-[#1f1f1f]">
+                                <!-- Rows injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEADERBOARD -->
+            <div id="view-leaderboard" class="hidden max-w-4xl mx-auto">
+                <div class="ministry-panel p-6 rounded-sm">
+                    <h3 class="text-xl font-ministry font-bold text-[#d4af37] mb-6 text-center uppercase tracking-[0.2em] border-b border-[#1f1f1f] pb-4">
+                        <i class="fa-solid fa-trophy mr-2"></i> Official Standings
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-400">
+                            <thead class="uppercase tracking-wider text-[0.65rem] text-gray-500 border-b border-[#333]">
+                                <tr>
+                                    <th class="px-4 py-3 font-bold text-center w-16">Rank</th>
+                                    <th class="px-4 py-3 font-bold">Team Code</th>
+                                    <th class="px-4 py-3 font-bold">Team Name</th>
+                                    <th class="px-4 py-3 font-bold">Captain</th>
+                                    <th class="px-4 py-3 font-bold text-right text-[#d4af37]">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-[#1f1f1f]">
+                                <!-- Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- EXISTING USER DASHBOARD SECTION (Hidden by default) -->
+    <div id="dashboard-section" class="hidden flex-col h-screen w-full relative">
+        
+        <!-- Header Container (Fixed at top) -->
+        <div class="flex-none z-50 bg-[#030303]">
+            <!-- Navbar -->
+            <nav class="border-b border-[#1f1f1f] px-6 py-4 flex justify-between items-center shadow-lg bg-[#050505]">
+                <div class="flex items-center gap-4">
+                    <div class="bg-[#111] w-10 h-10 rounded flex items-center justify-center border border-[#333] cursor-pointer hover:border-[#d4af37] transition" onclick="openEditModal()">
+                        <span class="font-ministry font-bold text-lg text-ministry-gold" id="teamAvatar">M</span>
+                    </div>
+                    <div>
+                        <div class="flex flex-col">
+                            <span class="text-[0.65rem] text-gray-500 uppercase tracking-widest">Authenticated User</span>
+                            <div class="flex items-center gap-2">
+                                <h2 class="font-ministry font-bold text-lg text-[#e5e5e5] leading-none" id="displayTeamName">TEAM NAME</h2>
+                                <i class="fa-solid fa-pen text-[0.6rem] text-[#333] hover:text-[#d4af37] cursor-pointer transition" onclick="openEditModal()"></i>
+                            </div>
+                            <p class="text-xs text-[#d4af37] font-medium mt-0.5" id="displayCaptainName">Captain Name</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="text-xs text-red-900 hover:text-red-500 border border-red-900/30 hover:border-red-500 px-4 py-2 rounded-sm transition uppercase tracking-wider font-bold">
+                    Log Out
+                </button>
+            </nav>
+
+            <!-- Stats Bar -->
+            <div class="bg-[#080808] border-b border-[#1f1f1f] px-6 py-3 flex gap-8 overflow-x-auto scrollbar-hide">
+                <div class="flex-shrink-0">
+                    <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider">Status</span>
+                    <span class="block text-green-500 text-sm font-bold"><i class="fa-solid fa-circle text-[0.5rem] mr-1"></i> Active</span>
+                </div>
+                <div class="flex-grow min-w-[150px]">
+                     <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider mb-1">Quest Completion</span>
+                     <div class="h-1.5 w-full bg-[#111] rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-[#d4af37] to-[#8a7020] w-0 transition-all duration-700"></div>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content (Scrollable Area) -->
+        <div class="flex-grow overflow-y-auto bg-[#030303] relative z-0">
+            <div class="max-w-6xl mx-auto w-full pb-20 pt-8 px-4">
+                
+                <!-- Part A -->
+                <div class="mb-12">
+                    <div class="flex items-center justify-between mb-4 border-b border-[#1f1f1f] pb-2 sticky top-0 bg-[#030303]/95 backdrop-blur-sm z-10 py-2">
+                        <h3 class="text-lg font-ministry font-bold text-ministry-gold uppercase tracking-widest flex items-center">
+                            <i class="fa-solid fa-folder-open mr-3 text-gray-600"></i> Part A: Mandatory Tasks
+                        </h3>
+                        <span class="text-[0.65rem] text-gray-600 uppercase border border-gray-800 px-2 py-1 rounded">Priority: High</span>
+                    </div>
+                    
+                    <!-- Table Header -->
+                    <div class="hidden md:flex px-4 py-2 text-[0.65rem] text-gray-500 uppercase tracking-widest font-bold mb-2">
+                        <div class="w-20">ID</div>
+                        <div class="flex-1">Description</div>
+                        <div class="w-32 text-center">Status</div>
+                        <div class="w-40 text-right">Action</div>
+                    </div>
+
+                    <div id="partA-container" class="space-y-2">
+                        <!-- Tasks injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Part B -->
+                <div>
+                    <div class="flex items-center justify-between mb-4 border-b border-[#1f1f1f] pb-2 sticky top-0 bg-[#030303]/95 backdrop-blur-sm z-10 py-2">
+                        <h3 class="text-lg font-ministry font-bold text-purple-400/80 uppercase tracking-widest flex items-center">
+                            <i class="fa-solid fa-folder-closed mr-3 text-gray-600"></i> Part B:
+                        </h3>
+                        <span class="text-[0.65rem] text-gray-600 uppercase border border-gray-800 px-2 py-1 rounded">Priority: Standard</span>
+                    </div>
+                    
+                    <div id="partB-container" class="space-y-2">
+                        <!-- Tasks injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT PROFILE MODAL (User) -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[60] p-4 backdrop-blur-md">
+        <div class="ministry-panel p-6 rounded-sm max-w-sm w-full relative border border-[#333]">
+            <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-600 hover:text-white transition">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <h2 class="text-xl font-ministry font-bold mb-6 text-ministry-gold uppercase"><i class="fa-solid fa-pen-nib mr-2"></i>Edit Record</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[0.65rem] font-bold text-gray-500 uppercase mb-1">Team Name</label>
+                    <input type="text" id="editTeamInput" class="input-ministry w-full rounded-sm px-4 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-[0.65rem] font-bold text-gray-500 uppercase mb-1">Captain Name</label>
+                    <input type="text" id="editCaptainInput" class="input-ministry w-full rounded-sm px-4 py-2 text-sm">
+                </div>
+                <button onclick="saveProfileChanges()" class="w-full btn-ministry py-3 mt-4 rounded-sm border-green-800 text-green-500 hover:bg-green-900/30">
+                    Update Registry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIEW MODAL (New) -->
+    <div id="media-preview-modal" class="fixed inset-0 bg-black/95 hidden z-[80] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+        <div class="relative w-full max-w-5xl max-h-[95vh] flex flex-col items-center justify-center">
+            <button onclick="closePreview()" class="absolute -top-12 right-0 text-gray-400 hover:text-white text-sm uppercase tracking-widest border border-gray-700 hover:border-white px-4 py-2 rounded-sm transition">
+                <i class="fa-solid fa-xmark mr-2"></i> Close Viewer
+            </button>
+            <div id="media-content" class="w-full h-full flex items-center justify-center">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-[#111] text-gray-200 px-6 py-4 rounded-sm shadow-2xl border-l-4 border-[#d4af37] flex items-center gap-4 transition-all duration-300 opacity-0 translate-y-10 z-[70] min-w-[300px]">
+        <div id="toastIconContainer">
+            <i class="fa-solid fa-info-circle text-[#d4af37] text-xl"></i>
+        </div>
+        <div>
+            <span class="block text-[0.65rem] text-gray-500 uppercase tracking-widest">System Message</span>
+            <span id="toastMsg" class="font-sans text-sm">Notification</span>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        // --- 1. CONFIGURATION ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCut-Qi7scoHnjHyE8UBuN53PHWnMMKqSE",
+            authDomain: "sitee-f6a0c.firebaseapp.com",
+            databaseURL: "https://sitee-f6a0c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sitee-f6a0c",
+            storageBucket: "sitee-f6a0c.firebasestorage.app",
+            messagingSenderId: "284183052545",
+            appId: "1:284183052545:web:ef85ecc7be844cede8db00",
+            measurementId: "G-HZHS31QH07"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // GitHub Config
+        const tokenPart1 = "ghp_"; 
+        const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; 
+        const GITHUB_TOKEN = tokenPart1 + tokenPart2;
+        const GH_USER = "jsdingra11";
+        const GH_REPO = "Panjabans";
+
+        // --- MARKING SCHEME ---
+        // Maps Task IDs to Points
+        const TASK_SCORES = {
+            'A1': 5,  'A2': 10, 'A3': 10,
+            'B1': 10, 'B2': 10, 'B3': 10, 'B4': 5,  'B5': 15, 
+            'B6': 15, 'B7': 10, 'B8': 10, 'B9': 15, 'B10': 15,
+            'B11': 5, 'B12': 5, 'B13': 10, 'B14': 15, 'B15': 15,
+            'B16': 10, 'B17': 10, 'B18': 10, 'B19': 10
+        };
+
+        const getTaskPoints = (taskId) => TASK_SCORES[taskId] || 0;
+
+        // --- 2. DATA ---
+        const tasksA = [
+            { id: 'A1', text: "Each team member must follow @scirox_gndu on Instagram and comment on any two posts and upload a screenshot." },
+            { id: 'A2', text: "Record a 10-second video where the team says one line starting with: “SciRox believes that science...”." },
+            { id: 'A3', text: "Click a photograph pointing at any science-related poster, laboratory, or academic board on campus." }
+        ];
+
+        const tasksB = [
+            { id: 'B1', text: "Draw a small design or symbol on your face using a pen/marker and take a picture." },
+            { id: 'B2', text: "Tie a rakhi (or a simple thread) on a stranger after taking consent, and take a picture." },
+            { id: 'B3', text: "Perform the Titanic pose at Fun Bytes and record a 5-second video." },
+            { id: 'B4', text: "Do five frog jumps near the Law Department and record a video." },
+            { id: 'B5', text: "Do five push-ups in front of Arts Café and record a video." },
+            { id: 'B6', text: "Perform the Mickey Mouse dance for 10 seconds and record a video." },
+            { id: 'B7', text: "Click a picture with a person wearing a green turban." },
+            { id: 'B8', text: "Strike up a short conversation with a stranger using an unusual accent and record a 10-second video." },
+            { id: 'B9', text: "Strike up a conversation with a statue or sculpture, treating it like a real person, and record a 10-second video." },
+            { id: 'B10', text: "Perform the Shin Chan dance for 10 seconds at Back Packers and record a video." },
+            { id: 'B11', text: "Find a person wearing the same colour as you and record a video together saying “SAME PINCH”." },
+            { id: 'B12', text: "Pretend to be a tourist guide and give a brief, humorous description of the University. Record a 10-second video." },
+            { id: 'B13', text: "Sing the lyrics “Sagar di vohti lehndi indica chala” in the back parking in front of any black car, and record a video." },
+            { id: 'B14', text: "Take a selfie with any five cars, excluding vehicles with PB02 registration." },
+            { id: 'B15', text: "Take a selfie with a delivery person (with consent)." },
+            { id: 'B16', text: "Stand in front of the Army tank, salute respectfully, and take a picture." },
+            { id: 'B17', text: "Sing the Gian song (from Doraemon) loudly in a crowded area and record a video." },
+            { id: 'B18', text: "Visit any canteen and ask “FREE KA KYA MILTA HAI YAHAAN?” Record a 10-second video." },
+            { id: 'B19', text: "The same team member must take a selfie at all three GNDU gates." }
+        ];
+
+        // --- 3. STATE & UTILS ---
+        let currentTeam = localStorage.getItem('scirox_team') || null;
+        let currentCaptain = localStorage.getItem('scirox_captain') || null;
+        let currentCode = localStorage.getItem('scirox_code') || null;
+        let isAdmin = localStorage.getItem('scirox_admin_auth') === 'true';
+        let adminDataCache = {}; // Store raw data for detailed view access
+
+        // Expose functions to window
+        window.handleLogin = handleLogin;
+        window.handleLogout = handleLogout;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.saveProfileChanges = saveProfileChanges;
+        window.triggerFileInput = triggerFileInput;
+        window.handleFileSelect = handleFileSelect;
+        window.uploadTask = uploadTask;
+        window.toggleAdminLogin = toggleAdminLogin;
+        window.handleAdminLogin = handleAdminLogin;
+        window.switchAdminTab = switchAdminTab;
+        window.loadAdminData = loadAdminData;
+        window.gradeTask = gradeTask;
+        window.openTeamDetail = openTeamDetail;
+        window.closeTeamDetail = closeTeamDetail;
+        window.openPreview = openPreview;
+        window.closePreview = closePreview;
+
+        // Check Session
+        if (isAdmin) {
+             showAdminPanel();
+             loadAdminData();
+        } else {
+             checkSession();
+        }
+
+        function checkSession() {
+            if (currentTeam && currentCaptain && currentCode) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('flex');
+                
+                document.getElementById('displayTeamName').innerText = currentTeam;
+                document.getElementById('displayCaptainName').innerText = currentCaptain;
+                document.getElementById('teamAvatar').innerText = currentTeam.charAt(0).toUpperCase();
+                
+                renderTasks();
+                loadProgress();
+            } else {
+                document.getElementById('login-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('flex');
+                document.getElementById('admin-dashboard-section').classList.add('hidden');
+                document.getElementById('admin-dashboard-section').classList.remove('flex');
+            }
+        }
+
+        function handleLogin() {
+            const team = document.getElementById('teamNameInput').value.trim();
+            const captain = document.getElementById('captainNameInput').value.trim();
+            const code = document.getElementById('teamCodeInput').value.trim();
+
+            if (!team || !captain || !code) {
+                showToast("Identity verification failed. All fields including Team Code are required.", "error");
+                return;
+            }
+
+            localStorage.setItem('scirox_team', team);
+            localStorage.setItem('scirox_captain', captain);
+            localStorage.setItem('scirox_code', code);
+            
+            currentTeam = team;
+            currentCaptain = captain;
+            currentCode = code;
+            
+            checkSession();
+        }
+
+        function handleLogout() {
+            if(confirm("Terminate Session?")) {
+                localStorage.removeItem('scirox_team');
+                localStorage.removeItem('scirox_captain');
+                localStorage.removeItem('scirox_code');
+                localStorage.removeItem('scirox_admin_auth');
+                location.reload();
+            }
+        }
+
+        // --- PREVIEW LOGIC ---
+        function getFileType(fileName) {
+            const ext = fileName.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) return 'image';
+            if (['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(ext)) return 'video';
+            return 'other';
+        }
+
+        function openPreview(url, fileName) {
+            const modal = document.getElementById('media-preview-modal');
+            const content = document.getElementById('media-content');
+            const type = getFileType(fileName);
+
+            modal.classList.remove('hidden');
+            content.innerHTML = '<div class="text-[#d4af37]"><i class="fa-solid fa-circle-notch fa-spin text-4xl"></i></div>'; // Loading state
+
+            setTimeout(() => {
+                if (type === 'image') {
+                    content.innerHTML = `<img src="${url}" class="max-w-full max-h-[85vh] rounded-sm border border-[#333] shadow-2xl object-contain">`;
+                } else if (type === 'video') {
+                    content.innerHTML = `
+                        <video controls autoplay class="max-w-full max-h-[85vh] rounded-sm border border-[#333] shadow-2xl">
+                            <source src="${url}">
+                            Your browser does not support the video tag.
+                        </video>`;
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center p-10 bg-[#111] border border-[#333] rounded-sm">
+                            <i class="fa-solid fa-file-arrow-down text-4xl text-gray-500 mb-4"></i>
+                            <p class="text-gray-300 mb-4 font-ministry uppercase tracking-wider">Preview unavailable for this format</p>
+                            <a href="${url}" target="_blank" class="btn-ministry px-6 py-2 rounded-sm inline-block">Download File</a>
+                        </div>`;
+                }
+            }, 100);
+        }
+
+        function closePreview() {
+            const modal = document.getElementById('media-preview-modal');
+            const content = document.getElementById('media-content');
+            modal.classList.add('hidden');
+            content.innerHTML = ''; // Clear to stop video playback
+        }
+
+        // --- ADMIN FUNCTIONS ---
+
+        function toggleAdminLogin() {
+            const modal = document.getElementById('admin-login-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+        function handleAdminLogin() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === 'scirox_admin') {
+                localStorage.setItem('scirox_admin_auth', 'true');
+                isAdmin = true;
+                document.getElementById('admin-login-modal').classList.add('hidden');
+                showAdminPanel();
+                loadAdminData();
+            } else {
+                showToast("Access Denied. Incorrect Passkey.", "error");
+            }
+        }
+
+        function showAdminPanel() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('flex');
+            document.getElementById('admin-dashboard-section').classList.remove('hidden');
+            document.getElementById('admin-dashboard-section').classList.add('flex');
+        }
+
+        function switchAdminTab(tabName) {
+            const reviewTab = document.getElementById('tab-review');
+            const leaderTab = document.getElementById('tab-leaderboard');
+            const reviewView = document.getElementById('view-review');
+            const leaderView = document.getElementById('view-leaderboard');
+            const detailView = document.getElementById('view-team-detail');
+
+            if (tabName === 'review') {
+                reviewTab.classList.add('border-red-600', 'text-red-500');
+                reviewTab.classList.remove('border-transparent', 'text-gray-600');
+                leaderTab.classList.remove('border-red-600', 'text-red-500');
+                leaderTab.classList.add('border-transparent', 'text-gray-600');
+                
+                reviewView.classList.remove('hidden');
+                leaderView.classList.add('hidden');
+                detailView.classList.add('hidden'); // Close detail view on tab switch
+            } else {
+                leaderTab.classList.add('border-red-600', 'text-red-500');
+                leaderTab.classList.remove('border-transparent', 'text-gray-600');
+                reviewTab.classList.remove('border-red-600', 'text-red-500');
+                reviewTab.classList.add('border-transparent', 'text-gray-600');
+                
+                leaderView.classList.remove('hidden');
+                reviewView.classList.add('hidden');
+                detailView.classList.add('hidden');
+            }
+        }
+
+        function loadAdminData() {
+            const container = document.getElementById('admin-teams-container');
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            
+            container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-red-500"></i><p class="mt-2 text-xs uppercase tracking-widest text-gray-500">Syncing with Archives...</p></div>';
+            leaderboardBody.innerHTML = '';
+
+            const dbRef = ref(db, 'submissions');
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    container.innerHTML = '<div class="text-center py-10 text-gray-600">No team data available.</div>';
+                    return;
+                }
+
+                adminDataCache = data; // Cache for detail view
+                container.innerHTML = '';
+                
+                // Process Teams
+                const teams = [];
+                Object.keys(data).forEach(teamKey => {
+                    const submissions = data[teamKey];
+                    let teamInfo = { name: 'Unknown', captain: 'Unknown', code: 'N/A', score: 0, hasPending: false, key: teamKey };
+
+                    Object.values(submissions).forEach(sub => {
+                        if (sub.team) teamInfo.name = sub.team;
+                        if (sub.captain) teamInfo.captain = sub.captain;
+                        if (sub.teamCode) teamInfo.code = sub.teamCode;
+                        if (sub.status === 'accepted') teamInfo.score += (sub.score || 0);
+                        if (sub.status === 'completed') teamInfo.hasPending = true;
+                    });
+                    teams.push(teamInfo);
+                });
+
+                // Render in Groups of 6
+                for (let i = 0; i < teams.length; i += 6) {
+                    const chunk = teams.slice(i, i + 6);
+                    const groupNum = Math.floor(i / 6) + 1;
+                    
+                    // Create Sector Box
+                    const sectorBox = document.createElement('div');
+                    sectorBox.className = "ministry-panel rounded-sm p-6 border-t-2 border-t-[#333]";
+                    
+                    const sectorTitle = document.createElement('h3');
+                    sectorTitle.className = "text-sm font-bold uppercase tracking-widest text-gray-500 mb-6 flex items-center";
+                    sectorTitle.innerHTML = `<i class="fa-solid fa-layer-group mr-2"></i> Sector ${groupNum}`;
+                    sectorBox.appendChild(sectorTitle);
+
+                    // Grid for Cards
+                    const grid = document.createElement('div');
+                    grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+
+                    chunk.forEach(team => {
+                        const cardClass = team.hasPending ? 'card-active-glow border-l-4 border-l-[#d4af37]' : 'border border-[#333] hover:border-gray-500';
+                        const glowIcon = team.hasPending ? '<i class="fa-solid fa-bell fa-shake text-yellow-500 absolute top-4 right-4"></i>' : '';
+                        
+                        const card = document.createElement('div');
+                        card.className = `bg-[#0a0a0a] rounded-sm p-5 cursor-pointer relative transition-all duration-300 ${cardClass}`;
+                        card.onclick = () => openTeamDetail(team.key);
+                        
+                        card.innerHTML = `
+                            ${glowIcon}
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 bg-[#1f1f1f] rounded flex items-center justify-center text-lg font-bold font-ministry text-[#d4af37] border border-[#333] shadow-inner">
+                                    ${team.code || '?'}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-200 uppercase tracking-wider text-sm truncate max-w-[120px]">${team.name}</h4>
+                                    <p class="text-[0.6rem] text-gray-500 uppercase">${team.captain}</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-end border-t border-[#1f1f1f] pt-3">
+                                <span class="text-[0.6rem] text-gray-600">Total Score</span>
+                                <span class="text-xl font-bold text-[#d4af37] font-ministry">${team.score}</span>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+
+                    sectorBox.appendChild(grid);
+                    container.appendChild(sectorBox);
+                }
+
+                // Populate Leaderboard
+                const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+                leaderboardBody.innerHTML = '';
+                sortedTeams.forEach((team, index) => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-[#111] transition";
+                    let rankColor = "text-gray-500";
+                    if(index === 0) rankColor = "text-yellow-400";
+                    if(index === 1) rankColor = "text-gray-300";
+                    if(index === 2) rankColor = "text-orange-700";
+
+                    row.innerHTML = `
+                        <td class="px-4 py-3 font-bold text-center ${rankColor}">${index + 1}</td>
+                        <td class="px-4 py-3 font-mono text-gray-500">${team.code}</td>
+                        <td class="px-4 py-3 font-medium text-gray-300">${team.name}</td>
+                        <td class="px-4 py-3 text-gray-500">${team.captain}</td>
+                        <td class="px-4 py-3 font-bold text-right text-[#d4af37]">${team.score}</td>
+                    `;
+                    leaderboardBody.appendChild(row);
+                });
+            });
+        }
+
+        function openTeamDetail(teamKey) {
+            const data = adminDataCache[teamKey];
+            if (!data) return;
+
+            // Gather Info
+            let name = 'Unknown', captain = 'Unknown', score = 0;
+            Object.values(data).forEach(sub => {
+                if (sub.team) name = sub.team;
+                if (sub.captain) captain = sub.captain;
+                if (sub.status === 'accepted') score += (sub.score || 0);
+            });
+
+            // Update UI
+            document.getElementById('detail-team-name').innerText = name;
+            document.getElementById('detail-captain-name').innerText = captain;
+            document.getElementById('detail-score').innerText = score;
+            document.getElementById('detail-tasks-body').innerHTML = generateTaskRows(teamKey, data);
+
+            // Switch Views
+            document.getElementById('view-review').classList.add('hidden');
+            document.getElementById('view-team-detail').classList.remove('hidden');
+        }
+
+        function closeTeamDetail() {
+            document.getElementById('view-team-detail').classList.add('hidden');
+            document.getElementById('view-review').classList.remove('hidden');
+        }
+
+        function generateTaskRows(teamKey, submissions) {
+            const allTasks = [...tasksA, ...tasksB];
+            
+            return allTasks.map(task => {
+                const sub = submissions[task.id];
+                const isSubmitted = !!sub;
+                const status = sub ? sub.status : 'pending';
+                const maxPoints = getTaskPoints(task.id);
+                
+                let statusBadge = `<span class="text-[0.65rem] uppercase tracking-wider text-gray-700">Not Submitted</span>`;
+                let proofBtn = `<span class="text-gray-800"><i class="fa-solid fa-ban"></i></span>`;
+                let actionBtns = `<span class="text-[0.65rem] text-gray-700 italic">No Data</span>`;
+
+                // Row Highlighting Logic
+                let rowSpecialClass = isSubmitted ? "hover:bg-[#0f0f0f]" : "opacity-50";
+                
+                if (isSubmitted) {
+                    // Status Badge Logic
+                    if (status === 'completed') {
+                        statusBadge = `<span class="text-yellow-500 font-bold text-[0.65rem] uppercase tracking-wider animate-pulse">Pending Review</span>`;
+                        // Highlight Row Yellow
+                        rowSpecialClass = "pending-submission-row"; 
+                    }
+                    else if (status === 'accepted') statusBadge = `<span class="text-green-500 font-bold text-[0.65rem] uppercase tracking-wider">Accepted (+${sub.score})</span>`;
+                    else if (status === 'rejected') statusBadge = `<span class="text-red-500 font-bold text-[0.65rem] uppercase tracking-wider">Rejected</span>`;
+
+                    // Proof Button - MODIFIED FOR PREVIEW
+                    proofBtn = `<button onclick="openPreview('${sub.fileUrl}', '${sub.fileName}')" class="text-blue-400 hover:text-white transition w-8 h-8 rounded border border-blue-900/30 flex items-center justify-center bg-blue-900/10"><i class="fa-solid fa-eye"></i></button>`;
+
+                    // Actions
+                    actionBtns = `
+                        <div class="flex items-center justify-end gap-2">
+                             <button onclick="gradeTask('${teamKey}', '${task.id}', 0)" title="Reject" class="w-8 h-8 rounded flex items-center justify-center bg-red-900/20 hover:bg-red-500 text-red-500 hover:text-white transition border border-red-900">
+                                <i class="fa-solid fa-xmark"></i>
+                             </button>
+                             <button onclick="gradeTask('${teamKey}', '${task.id}', ${maxPoints})" title="Accept" class="w-8 h-8 rounded flex items-center justify-center bg-green-900/20 hover:bg-green-500 text-green-500 hover:text-white transition border border-green-900">
+                                <i class="fa-solid fa-check"></i>
+                             </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <tr class="${rowSpecialClass} transition border-l-[3px] border-l-transparent">
+                        <td class="px-6 py-4 text-center font-bold text-gray-600 border-r border-[#1f1f1f]">${task.id}</td>
+                        <td class="px-6 py-4 text-xs leading-relaxed">${task.text}</td>
+                        <td class="px-6 py-4 text-center">${proofBtn}</td>
+                        <td class="px-6 py-4 text-center">${statusBadge}</td>
+                        <td class="px-6 py-4 text-right">${actionBtns}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function gradeTask(teamKey, taskId, points) {
+            const status = points > 0 ? 'accepted' : 'rejected';
+            const updates = {};
+            updates[`submissions/${teamKey}/${taskId}/status`] = status;
+            updates[`submissions/${teamKey}/${taskId}/score`] = points;
+            
+            update(ref(db), updates)
+                .then(() => {
+                    showToast(`Task ${status} updated for ${teamKey}`, "success");
+                    // Refresh current view if open
+                    if (!document.getElementById('view-team-detail').classList.contains('hidden')) {
+                        openTeamDetail(teamKey); 
+                    }
+                })
+                .catch(err => showToast("Error updating score", "error"));
+        }
+
+        // --- USER FUNCTIONS ---
+
+        function openEditModal() {
+            document.getElementById('editTeamInput').value = currentTeam;
+            document.getElementById('editCaptainInput').value = currentCaptain;
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            document.getElementById('edit-modal').classList.remove('flex');
+        }
+
+        function saveProfileChanges() {
+            const newTeam = document.getElementById('editTeamInput').value.trim();
+            const newCaptain = document.getElementById('editCaptainInput').value.trim();
+
+            if (!newTeam || !newCaptain) {
+                showToast("Fields cannot be empty", "error");
+                return;
+            }
+            
+            if (newTeam !== currentTeam && !confirm("Changing Designation will reset session tracking view. Proceed?")) {
+                return;
+            }
+
+            localStorage.setItem('scirox_team', newTeam);
+            localStorage.setItem('scirox_captain', newCaptain);
+            
+            currentTeam = newTeam;
+            currentCaptain = newCaptain;
+            
+            document.getElementById('displayTeamName').innerText = currentTeam;
+            document.getElementById('displayCaptainName').innerText = currentCaptain;
+            document.getElementById('teamAvatar').innerText = currentTeam.charAt(0).toUpperCase();
+            
+            loadProgress();
+            closeEditModal();
+            showToast("Personnel Records Updated.", "success");
+        }
+
+        function renderTasks() {
+            const containerA = document.getElementById('partA-container');
+            const containerB = document.getElementById('partB-container');
+            
+            containerA.innerHTML = '';
+            containerB.innerHTML = '';
+
+            tasksA.forEach(task => containerA.appendChild(createTaskElement(task)));
+            tasksB.forEach(task => containerB.appendChild(createTaskElement(task)));
+        }
+
+        function createTaskElement(task) {
+            const div = document.createElement('div');
+            // Theme: Dark row similar to the screenshot list items
+            div.className = "task-row px-4 py-4 md:py-3 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group";
+            div.id = `card-${task.id}`;
+
+            div.innerHTML = `
+                <div class="flex items-center gap-4 flex-1">
+                    <div class="w-20 hidden md:block">
+                        <span class="text-[0.6rem] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded-sm">${task.id}</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="md:hidden mb-1">
+                            <span class="text-[0.6rem] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded-sm">${task.id}</span>
+                        </div>
+                        <p class="text-sm text-gray-300 font-light leading-relaxed">${task.text}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between w-full md:w-auto gap-6">
+                    <div class="w-32 text-center hidden md:block">
+                         <span id="status-${task.id}" class="text-[0.65rem] font-bold text-gray-700 uppercase tracking-wider">Pending</span>
+                    </div>
+                    
+                    <div class="w-full md:w-40 flex justify-end">
+                        <input type="file" id="file-${task.id}" class="hidden" onchange="handleFileSelect('${task.id}', this)">
+                        
+                        <!-- Select Button -->
+                        <button id="btn-select-${task.id}" onclick="triggerFileInput('${task.id}')" 
+                            class="w-full md:w-auto btn-ministry px-4 py-2 rounded-sm flex items-center justify-center gap-2 hover:brightness-110">
+                            <span>Select File</span>
+                        </button>
+                        
+                        <!-- Upload Button -->
+                        <button id="btn-upload-${task.id}" onclick="uploadTask('${task.id}')" 
+                            class="hidden w-full md:w-auto btn-ministry px-4 py-2 rounded-sm border-blue-800 text-blue-400 hover:bg-blue-900/30 flex items-center justify-center gap-2">
+                            <span>Upload</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        function triggerFileInput(taskId) {
+            document.getElementById(`file-${taskId}`).click();
+        }
+
+        function handleFileSelect(taskId, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 90 * 1024 * 1024) {
+                showToast("File size exceeds protocol limits (90MB).", "error");
+                input.value = ""; 
+                return;
+            }
+
+            const selectBtn = document.getElementById(`btn-select-${taskId}`);
+            const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
+            
+            selectBtn.classList.add('hidden');
+            uploadBtn.classList.remove('hidden');
+            uploadBtn.innerHTML = `<span>Submit (${(file.size/1024/1024).toFixed(1)}MB)</span> <i class="fa-solid fa-arrow-up"></i>`;
+        }
+
+        async function uploadTask(taskId) {
+            const input = document.getElementById(`file-${taskId}`);
+            const file = input.files[0];
+            
+            if (!file) return;
+
+            if (!confirm(`Initialize secure upload for Entry ${taskId}?\nFile: ${file.name}`)) return;
+
+            const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
+            const originalContent = uploadBtn.innerHTML;
+            
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            uploadBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Encrypting...`;
+
+            try {
+                const base64Content = await toBase64(file);
+                const safeTeamName = currentTeam.replace(/[^a-zA-Z0-9]/g, '_');
+                const path = `uploads/${safeTeamName}/${taskId}/${Date.now()}_${file.name}`; 
+
+                const ghUrl = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${path}`;
+                
+                const response = await fetch(ghUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Archive Entry ${taskId} - ${currentTeam}`,
+                        content: base64Content,
+                        branch: 'main' 
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || "Transfer Interrupted");
+                }
+
+                const ghData = await response.json();
+                const publicUrl = ghData.content.download_url;
+
+                const dbPath = `submissions/${safeTeamName}/${taskId}`;
+                await set(ref(db, dbPath), {
+                    team: currentTeam,
+                    captain: currentCaptain,
+                    teamCode: currentCode, // Saving code for admin view
+                    task: taskId,
+                    fileName: file.name,
+                    fileUrl: publicUrl,
+                    timestamp: Date.now(),
+                    status: 'completed'
+                });
+
+                showToast(`Entry ${taskId} Archived Successfully.`, "success");
+                // Update with "completed" status + file info immediately for preview
+                markTaskAsDone(taskId, 'completed', publicUrl, file.name);
+
+            } catch (error) {
+                console.error(error);
+                showToast("Upload Error: " + error.message, "error");
+                uploadBtn.disabled = false;
+                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                uploadBtn.innerHTML = originalContent;
+            }
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const result = reader.result.split(',')[1];
+                    resolve(result);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function loadProgress() {
+            if (!currentTeam) return;
+            const safeTeamName = currentTeam.replace(/[^a-zA-Z0-9]/g, '_');
+            const submissionsRef = ref(db, `submissions/${safeTeamName}`);
+
+            onValue(submissionsRef, (snapshot) => {
+                const data = snapshot.val();
+                let completedCount = 0;
+                
+                if (data) {
+                    Object.keys(data).forEach(taskId => {
+                        const taskData = data[taskId];
+                        // Pass fileUrl and fileName to enable preview button
+                        markTaskAsDone(taskId, taskData.status, taskData.fileUrl, taskData.fileName);
+                        if (taskData.status === 'completed' || taskData.status === 'accepted') {
+                            completedCount++;
+                        }
+                    });
+                }
+
+                const totalTasks = tasksA.length + tasksB.length;
+                const pct = (completedCount / totalTasks) * 100;
+                document.getElementById('progressBar').style.width = `${pct}%`;
+            });
+        }
+
+        function markTaskAsDone(taskId, status = 'completed', fileUrl = null, fileName = null) {
+            const card = document.getElementById(`card-${taskId}`);
+            const statusEl = document.getElementById(`status-${taskId}`);
+            const uploadBtn = document.getElementById(`btn-upload-${taskId}`);
+            const selectBtn = document.getElementById(`btn-select-${taskId}`);
+
+            if (card) {
+                let statusColor = '#4ade80'; // Green default
+                let statusText = '<span class="text-green-500"><i class="fa-solid fa-check mr-1"></i> Archived</span>';
+                
+                if (status === 'accepted') {
+                    statusColor = '#d4af37';
+                    statusText = '<span class="text-[#d4af37]"><i class="fa-solid fa-star mr-1"></i> Approved</span>';
+                } else if (status === 'rejected') {
+                    statusColor = '#ef4444';
+                    statusText = '<span class="text-red-500"><i class="fa-solid fa-times mr-1"></i> Rejected</span>';
+                }
+
+                card.style.borderLeftColor = statusColor;
+                if(statusEl) statusEl.innerHTML = statusText;
+
+                if (uploadBtn) uploadBtn.classList.add('hidden');
+                if (selectBtn) selectBtn.classList.add('hidden');
+                
+                // Add a "view proof" button that triggers the modal
+                if (fileUrl && fileName) {
+                    const actionArea = card.querySelector('.w-full.md\\:w-40');
+                    if(actionArea) {
+                        actionArea.innerHTML = `
+                            <button onclick="openPreview('${fileUrl}', '${fileName}')" class="w-full md:w-auto bg-[#111] hover:bg-[#222] text-gray-400 hover:text-white border border-[#333] hover:border-[#d4af37] px-4 py-2 rounded-sm transition flex items-center justify-center gap-2 text-xs uppercase tracking-widest">
+                                <i class="fa-solid fa-eye"></i> View Entry
+                            </button>
+                        `;
+                    }
+                }
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toastMsg');
+            const iconContainer = document.getElementById('toastIconContainer');
+            
+            msgEl.innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            
+            if (type === 'error') {
+                toast.classList.add('border-l-red-500');
+                toast.classList.remove('border-l-green-500', 'border-l-[#d4af37]');
+                iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>';
+            } else if (type === 'success') {
+                toast.classList.add('border-l-green-500');
+                toast.classList.remove('border-l-red-500', 'border-l-[#d4af37]');
+                iconContainer.innerHTML = '<i class="fa-solid fa-circle-check text-green-500 text-xl"></i>';
+            } else {
+                toast.classList.add('border-l-[#d4af37]');
+                toast.classList.remove('border-l-red-500', 'border-l-green-500');
+                iconContainer.innerHTML = '<i class="fa-solid fa-info-circle text-[#d4af37] text-xl"></i>';
+            }
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
