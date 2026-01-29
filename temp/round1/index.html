@@ -309,9 +309,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // GitHub Config - REPACE PART 2 WITH VALID TOKEN
+        // GitHub Config
         const tokenPart1 = "ghp_"; 
-        const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; // <--- THIS TOKEN IS LIKELY INVALID. REPLACE IT.
+        const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; 
         const GITHUB_TOKEN = tokenPart1 + tokenPart2;
         const GH_USER = "jsdingra11";
         const GH_REPO = "Panjabans";
@@ -623,13 +623,6 @@
             if (!file) {
                 showToast("No file selected.", "error");
                 return;
-            }
-
-            // Check if token is still placeholder
-            if (tokenPart2.startsWith("DisK8")) {
-                 if(!confirm("WARNING: The GitHub Token seems to be the default invalid one. Upload will likely fail. Continue anyway?")) {
-                     return;
-                 }
             }
 
             const isMulti = taskId.includes('_');
