@@ -290,8 +290,8 @@
 
     <script type="module">
         // --- 1. CONFIGURATION ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // Firebase Config
         const firebaseConfig = {
@@ -309,9 +309,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // GitHub Config
+        // GitHub Config - REPACE PART 2 WITH VALID TOKEN
         const tokenPart1 = "ghp_"; 
-        const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; 
+        const tokenPart2 = "DisK8aMwPwV6k1KS2AJ7QCmKF17l7y3CN9IN"; // <--- THIS TOKEN IS LIKELY INVALID. REPLACE IT.
         const GITHUB_TOKEN = tokenPart1 + tokenPart2;
         const GH_USER = "jsdingra11";
         const GH_REPO = "Panjabans";
@@ -351,6 +351,7 @@
         let currentCaptain = localStorage.getItem('scirox_captain') || null;
         let currentCode = localStorage.getItem('scirox_code') || null;
 
+        // Expose functions to window immediately
         window.handleLogin = handleLogin;
         window.handleLogout = handleLogout;
         window.openEditModal = openEditModal;
@@ -577,8 +578,10 @@
             const file = input.files[0];
             if (!file) return;
 
-            if (file.size > 90 * 1024 * 1024) {
-                showToast("File size exceeds protocol limits (90MB).", "error");
+            // GitHub max upload limit via API is strictly 100MB, but Base64 adds 33%. 
+            // Limiting to 50MB to be safe for network and encoding overhead.
+            if (file.size > 50 * 1024 * 1024) {
+                showToast("File exceeds 50MB safe limit for browser upload.", "error");
                 input.value = ""; 
                 return;
             }
@@ -591,7 +594,7 @@
             uploadBtn.classList.remove('hidden');
             cancelBtn.classList.remove('hidden'); 
             
-            // Adjust button text for mobile length
+            // Update the button text, preserving the ID and onClick
             if (window.innerWidth < 768) {
                 uploadBtn.innerHTML = `<span>Submit</span> <i class="fa-solid fa-arrow-up"></i>`;
             } else {
@@ -613,10 +616,21 @@
         }
 
         async function uploadTask(taskId) {
+            console.log("Upload initiated for", taskId);
             const input = document.getElementById(`file-${taskId}`);
             const file = input.files[0];
             
-            if (!file) return;
+            if (!file) {
+                showToast("No file selected.", "error");
+                return;
+            }
+
+            // Check if token is still placeholder
+            if (tokenPart2.startsWith("DisK8")) {
+                 if(!confirm("WARNING: The GitHub Token seems to be the default invalid one. Upload will likely fail. Continue anyway?")) {
+                     return;
+                 }
+            }
 
             const isMulti = taskId.includes('_');
             const displayId = isMulti ? taskId.replace('_', ' (Part ') + ')' : taskId;
@@ -630,34 +644,45 @@
             uploadBtn.disabled = true;
             uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
             uploadBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i>`;
-            
             cancelBtn.classList.add('hidden');
 
             try {
                 const base64Content = await toBase64(file);
+                // Sanitize team name for folder creation
                 const safeTeamName = currentTeam.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // GitHub Path: If A1_1, stores in A1/1_filename...
                 let ghPath = `uploads/${safeTeamName}/${taskId}/${Date.now()}_${file.name}`; 
-
                 const ghUrl = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${ghPath}`;
                 
+                // Add Timeout to fetch (60 seconds)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
+
                 const response = await fetch(ghUrl, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify({
                         message: `Archive Entry ${taskId} - ${currentTeam}`,
                         content: base64Content,
                         branch: 'main' 
-                    })
+                    }),
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     const errData = await response.json();
-                    throw new Error(errData.message || "Transfer Interrupted");
+                    let errMsg = errData.message || "Unknown Error";
+                    if(response.status === 401) errMsg = "Bad Credentials (Invalid Token)";
+                    if(response.status === 404) errMsg = "Repository/Branch Not Found";
+                    if(response.status === 422) errMsg = "Validation Failed (File exists or too large)";
+                    
+                    throw new Error(errMsg);
                 }
 
                 const ghData = await response.json();
@@ -678,12 +703,17 @@
                 markTaskAsDone(taskId);
 
             } catch (error) {
-                console.error(error);
-                showToast("Upload Error: " + error.message, "error");
+                console.error("Upload failed:", error);
+                
+                let userMsg = error.message;
+                if(error.name === 'AbortError') userMsg = "Network Timeout (Upload took too long)";
+                
+                showToast("Upload Error: " + userMsg, "error");
+                
+                // Reset button state on failure
                 uploadBtn.disabled = false;
                 uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 uploadBtn.innerHTML = originalContent;
-                
                 cancelBtn.classList.remove('hidden');
             }
         }
