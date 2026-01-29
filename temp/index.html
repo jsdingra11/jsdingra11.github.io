@@ -137,140 +137,14 @@
             <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">SciRox - Science Club | Department of Mysteries</h2>
             <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-2">The Dark Mark</h1>
             <h3 class="text-lg md:text-xl text-[#c5a059] font-serif mb-6 uppercase tracking-widest">Treasure Hunt <span class="text-gray-500 mx-2">|</span> GNDU</h3>
-            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 29th January 2026</p>
+            
             <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">EVENT DATE: 30th January 2026</p>
             <div class="h-[1px] w-48 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto"></div>
         </header>
 
-        <div id="app-content" class="glass-panel p-8 rounded-sm relative overflow-hidden mb-12">
-            
-            <div id="loading-screen" class="flex flex-col items-center justify-center py-12">
-                <div class="w-10 h-10 border-4 border-[#74c7d5]/20 border-l-[#74c7d5] rounded-full animate-spin mb-4"></div>
-                <p class="text-cyan-100 animate-pulse font-serif tracking-widest">Consulting the Sorting Hat...</p>
-            </div>
 
-            <div id="registration-view" class="hidden">
-                <div class="text-center border-b border-[#c5a059]/30 pb-4 mb-6">
-                    <h3 class="text-2xl text-[#c5a059] font-bold font-serif uppercase tracking-widest">W.O.M.B.A.T. Registration</h3>
-                    <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 29th January 2026</p>
-                </div>
-                
-                <form id="reg-form" class="space-y-6" novalidate>
-                    
-                    <div id="form-step-1">
-                        <div class="mb-6">
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">House / Team Name</label>
-                            <input type="text" id="teamName" required class="w-full p-3 rounded-sm input-field" placeholder="e.g. Dumbledore's Army">
-                        </div>
-
-                        <div class="mb-6 p-4 border border-[#c5a059]/20 bg-black/30 rounded-sm">
-                            <label class="block text-[#c5a059] text-xs mb-2 uppercase tracking-widest flex items-center gap-2">
-                                Referral Code (Existing Team Name)<br>
-                               <small style="color:white;">Get <span style="font-weight:bold;">+5 points</span> in Round 1 per referral</small>
-
-                            </label>
-                            <div class="flex gap-2">
-                                <input type="text" id="referralCode" class="w-full p-3 rounded-sm input-field" placeholder="Enter Team Name of friend">
-                                <button type="button" id="checkRefBtn" class="px-4 py-2 bg-[#1a2a35] border border-[#c5a059] text-[#c5a059] font-cinzel text-xs uppercase hover:bg-[#c5a059] hover:text-black transition-all">
-                                    Check
-                                </button>
-                            </div>
-                            <p id="referralMsg" class="text-xs mt-2 italic h-4"></p>
-                        </div>
-                        <div class="bg-black/20 p-4 border border-[#c5a059]/20 rounded-sm mb-6">
-                            <h4 class="text-[#c5a059] text-sm uppercase mb-3 font-bold tracking-wider">Captain (Team Head)</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="col-span-1 md:col-span-2">
-                                    <input type="text" id="captainName" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Name">
-                                </div>
-                                <div>
-                                    <input type="email" id="email" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Email (Owl Post)">
-                                </div>
-                                <div>
-                                    <input type="tel" id="captainPhone" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Phone">
-                                </div>
-                                <div class="col-span-1 md:col-span-2">
-                                    <input type="text" id="captainDept" required class="w-full p-3 rounded-sm input-field" placeholder="Captain's Department (e.g. Physics)">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Party Size</label>
-                            <select id="teamSize" class="w-full p-3 rounded-sm input-field">
-                                <option value="">Select</option>
-                                <option value="2">Dynamic Duo (2)</option>
-                                <option value="3">Golden Trio (3)</option>
-                            </select>
-                        </div>
-
-                        <div id="extra-members-container" class="space-y-4 mb-6">
-                            
-                            <div id="member2-group" class="hidden bg-black/20 p-4 border border-gray-700 rounded-sm">
-                                <h4 class="text-gray-400 text-xs uppercase mb-3 font-bold">Member 2 Details</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <input type="text" id="member2Name" class="w-full p-3 rounded-sm input-field" placeholder="Name">
-                                    <input type="tel" id="member2Phone" class="w-full p-3 rounded-sm input-field" placeholder="Phone Number">
-                                    <div class="col-span-1 md:col-span-2">
-                                        <input type="text" id="member2Dept" class="w-full p-3 rounded-sm input-field" placeholder="Department">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="member3-group" class="hidden bg-black/20 p-4 border border-gray-700 rounded-sm">
-                                <h4 class="text-gray-400 text-xs uppercase mb-3 font-bold">Member 3 Details</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <input type="text" id="member3Name" class="w-full p-3 rounded-sm input-field" placeholder="Name">
-                                    <input type="tel" id="member3Phone" class="w-full p-3 rounded-sm input-field" placeholder="Phone Number">
-                                    <div class="col-span-1 md:col-span-2">
-                                        <input type="text" id="member3Dept" class="w-full p-3 rounded-sm input-field" placeholder="Department">
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="pt-2">
-                            <button type="button" id="proceed-btn" class="w-full py-3 text-lg font-bold btn-magic group rounded-sm border-dashed">
-                                Enter 9¾ &rarr;
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="form-step-2" class="hidden space-y-6">
-                        <div class="text-center bg-black/40 p-6 rounded border border-[#c5a059]/30">
-                            <p class="text-gray-400 text-sm mb-2 uppercase tracking-widest">Gringotts Goblin Fee</p>
-                            <h2 id="display-amount" class="text-4xl font-bold text-[#c5a059] font-serif mb-4">₹50</h2>
-                            
-                            <div class="flex justify-center mb-4">
-                                <img src="qr.png" 
-                                     alt="Payment QR Code" 
-                                     id="payment-qr"
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'text-xs\'>Payment QR</span>'"
-                                     class="w-48 h-48 border-4 border-white rounded-lg shadow-[0_0_20px_rgba(197,160,89,0.5)]">
-                            </div>
-                            <p class="text-xs text-gray-500 italic">Scan with any muggle app (GPay, Paytm, PhonePe)</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-500 text-xs mb-2 uppercase tracking-widest">Upload Payment Screenshot <span id="upload-optional-tag" class="hidden text-[#c5a059]">(Optional if unchanged)</span></label>
-                            <input type="file" id="paymentScreenshot" accept="image/*" required class="w-full p-3 rounded-sm input-field text-sm">
-                        </div>
-
-                        <div class="flex gap-4 pt-4">
-                            <button type="button" id="back-btn" class="w-1/3 py-3 text-sm font-bold border border-gray-600 text-gray-400 hover:text-white hover:border-white transition-all rounded-sm">
-                                &larr; Back
-                            </button>
-                            <button type="submit" id="final-submit-btn" class="w-2/3 py-4 text-xl font-bold btn-magic group rounded-sm">
-                                <span class="group-hover:hidden" id="submit-btn-text">Confirm Registration</span>
-                                <span class="hidden group-hover:block">Expecto Patronum!</span>
-                            </button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-
+            <h2 class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">REGISTRATIONS ARE CLOSED! </h2>
+        
             <div id="dashboard-view" class="hidden text-center">
                 
                 <div class="mb-10 animate-fade-in-down">
