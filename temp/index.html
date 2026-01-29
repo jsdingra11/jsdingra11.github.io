@@ -137,10 +137,9 @@
             <h2 class="text-gray-500 tracking-[0.5em] text-xs uppercase mb-4 font-serif">SciRox - Science Club | Department of Mysteries</h2>
             <h1 class="text-5xl md:text-7xl font-bold uppercase title-font mb-2">The Dark Mark</h1>
             <h3 class="text-lg md:text-xl text-[#c5a059] font-serif mb-6 uppercase tracking-widest">Treasure Hunt <span class="text-gray-500 mx-2">|</span> GNDU</h3>
-            <!-- Updated Header Text -->
-            <p class="text-xs text-red-500 font-bold mt-2 uppercase tracking-[0.2em] border-b border-red-900 inline-block pb-1">REGISTRATIONS CLOSED</p>
-            <p class="text-xs text-gray-500 font-bold mt-2 uppercase tracking-[0.2em]">EVENT DATE: 30th January 2026</p>
-            <div class="h-[1px] w-48 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto mt-4"></div>
+            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">Deadline: 29th January 2026</p>
+            <p class="text-xs text-red-400 font-bold mt-2 uppercase tracking-[0.2em] animate-pulse">EVENT DATE: 30th January 2026</p>
+            <div class="h-[1px] w-48 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto"></div>
         </header>
 
         <div id="app-content" class="glass-panel p-8 rounded-sm relative overflow-hidden mb-12">
@@ -148,19 +147,6 @@
             <div id="loading-screen" class="flex flex-col items-center justify-center py-12">
                 <div class="w-10 h-10 border-4 border-[#74c7d5]/20 border-l-[#74c7d5] rounded-full animate-spin mb-4"></div>
                 <p class="text-cyan-100 animate-pulse font-serif tracking-widest">Consulting the Sorting Hat...</p>
-            </div>
-
-            <!-- New View: Registration Closed -->
-            <div id="closed-view" class="hidden text-center py-8">
-                <div class="mb-6 text-[#c5a059] text-6xl opacity-80">🔒</div>
-                <h3 class="text-3xl text-red-500 font-bold font-serif uppercase tracking-widest mb-4">The Gate is Shut</h3>
-                <p class="text-gray-400 font-serif text-lg leading-relaxed max-w-md mx-auto mb-8">
-                    The owls have completed their rounds. The parchment is rolled up.<br>
-                    <span class="text-[#c5a059] mt-2 block">No further entries are being accepted.</span>
-                </p>
-                <div class="border-t border-[#c5a059]/20 pt-6">
-                    <p class="text-xs text-gray-600 font-serif italic">Already registered? Contact the Ministry if you cannot see your dashboard.</p>
-                </div>
             </div>
 
             <div id="registration-view" class="hidden">
@@ -479,7 +465,6 @@
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
         const registrationView = document.getElementById('registration-view');
-        const closedView = document.getElementById('closed-view'); // New Element
         const dashboardView = document.getElementById('dashboard-view');
         const regForm = document.getElementById('reg-form');
         const userTeamNameDisplay = document.getElementById('user-team-name');
@@ -523,7 +508,6 @@
             loadingScreen.classList.add('hidden');
             registrationView.classList.add('hidden');
             dashboardView.classList.add('hidden');
-            closedView.classList.add('hidden');
             document.getElementById(viewId).classList.remove('hidden');
         };
 
@@ -594,9 +578,7 @@
                 } else {
                     currentEntryKey = null;
                     currentEntryData = null;
-                    // REGISTRATIONS CLOSED LOGIC
-                    // Original: switchView('registration-view');
-                    switchView('closed-view');
+                    switchView('registration-view');
                 }
             });
         };
