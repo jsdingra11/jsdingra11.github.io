@@ -24,10 +24,8 @@
             background-image: 
                 linear-gradient(rgba(20, 20, 20, 0.9), rgba(5, 5, 5, 1)),
                 url('https://www.transparenttextures.com/patterns/cubes.png');
-            /* Fix for mobile browser height issues */
             min-height: 100dvh; 
             height: 100dvh;
-            /* Prevent rubber-banding on iOS */
             overscroll-behavior-y: none;
         }
 
@@ -94,32 +92,31 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px; /* Thinner on mobile */
+        ::-webkit-scrollbar { width: 4px; }
+        @media (min-width: 768px) { ::-webkit-scrollbar { width: 8px; } }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Timer Pulse Animation */
+        @keyframes pulse-red {
+            0% { text-shadow: 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { text-shadow: 0 0 10px rgba(239, 68, 68, 0.8); }
+            100% { text-shadow: 0 0 0 rgba(239, 68, 68, 0.4); }
         }
-        @media (min-width: 768px) {
-            ::-webkit-scrollbar {
-                width: 8px;
-            }
-        }
-        ::-webkit-scrollbar-track {
-            background: #050505; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d4af37;
+        .timer-danger {
+            color: #ef4444 !important;
+            animation: pulse-red 1s infinite;
         }
         
-        /* Utility to hide scrollbar but keep functionality */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        /* Disabled State */
+        .locked-out {
+            pointer-events: none;
+            opacity: 0.5;
+            filter: grayscale(1);
         }
     </style>
 </head>
@@ -127,7 +124,6 @@
 
     <div class="bg-[#d4af37] text-black text-[0.65rem] font-bold py-2 md:py-1 z-[60] border-b border-[#b5952f] text-center flex-shrink-0 shadow-lg pt-[calc(0.25rem+env(safe-area-inset-top))]">
         <div class="uppercase tracking-widest flex flex-col md:flex-row gap-0.5 md:gap-4 items-center justify-center px-2 leading-tight">
-            
             <span class="font-extrabold text-[0.6rem]">CAUTION: Only one chance to upload.</span>
         </div>
     </div>
@@ -183,29 +179,38 @@
                         </div>
                         <div class="flex-grow min-w-0 overflow-hidden"> 
                             <div class="flex flex-col">
-                                <span class="text-[0.55rem] text-gray-500 uppercase tracking-widest leading-none mb-0.5">Authenticated User</span>
-                                <div class="flex items-center gap-2">
-                                    <h2 class="font-ministry font-bold text-base text-[#e5e5e5] leading-tight truncate" id="displayTeamName">TEAM NAME</h2>
-                                    <i class="fa-solid fa-pen text-[0.6rem] text-[#333] hover:text-[#d4af37] cursor-pointer transition flex-shrink-0 p-1" onclick="openEditModal()"></i>
+                                <span id="timerLabel" class="text-[0.55rem] text-gray-500 uppercase tracking-widest leading-none mb-0.5">Time Remaining</span>
+                                <div class="flex items-center gap-3">
+                                    <h2 id="timerDisplay" class="font-mono font-bold text-xl text-[#d4af37] leading-tight truncate tracking-widest">60:00</h2>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <button onclick="handleLogout()" class="text-xs text-red-900 hover:text-red-500 border border-red-900/30 hover:border-red-500 px-3 md:px-4 py-2 rounded-sm transition uppercase tracking-wider font-bold whitespace-nowrap">
-                        <span class="md:hidden"><i class="fa-solid fa-power-off"></i></span>
-                        <span class="hidden md:inline">Log Out</span>
-                    </button>
+                    <div class="flex items-center gap-4">
+                        <div class="hidden md:flex flex-col items-end">
+                            <span class="text-[0.55rem] text-gray-500 uppercase tracking-widest leading-none mb-0.5">Submitted</span>
+                            <span id="submissionCountDisplay" class="font-ministry font-bold text-[#e5e5e5] text-sm">0 / 27</span>
+                        </div>
+
+                        <button onclick="handleLogout()" class="text-xs text-red-900 hover:text-red-500 border border-red-900/30 hover:border-red-500 px-3 md:px-4 py-2 rounded-sm transition uppercase tracking-wider font-bold whitespace-nowrap">
+                            <span class="md:hidden"><i class="fa-solid fa-power-off"></i></span>
+                            <span class="hidden md:inline">Log Out</span>
+                        </button>
+                    </div>
                 </nav>
 
                 <div class="bg-[#080808] border-t border-[#1f1f1f] px-4 md:px-6 py-2 md:py-3 flex gap-4 md:gap-8 items-center">
                     <div class="flex-shrink-0 hidden md:block">
                         <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider">Status</span>
-                        <span class="block text-green-500 text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-circle text-[0.5rem] mr-1"></i> Active</span>
+                        <span id="statusIndicator" class="block text-green-500 text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-circle text-[0.5rem] mr-1"></i> Active</span>
                     </div>
                     <div class="flex-grow">
                          <div class="flex justify-between items-end mb-1">
-                             <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider">Quest Progress</span>
+                             <div class="flex items-center gap-2">
+                                 <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider">Quest Progress</span>
+                                 <span class="md:hidden text-[0.6rem] text-gray-500 uppercase tracking-wider font-bold" id="mobileSubmissionCount">(0/27)</span>
+                             </div>
                              <span id="progressText" class="text-[0.6rem] text-[#d4af37] font-bold">0%</span>
                          </div>
                          <div class="h-1.5 w-full bg-[#111] rounded-full overflow-hidden">
@@ -268,7 +273,6 @@
                 <i class="fa-solid fa-times text-lg"></i>
             </button>
             <h2 class="text-xl font-ministry font-bold mb-6 text-ministry-gold uppercase"><i class="fa-solid fa-pen-nib mr-2"></i>Edit Record</h2>
-            
             <div class="space-y-4">
                 <div>
                     <label class="block text-[0.65rem] font-bold text-gray-500 uppercase mb-1">Team Name</label>
@@ -295,6 +299,15 @@
         </div>
     </div>
 
+    <div id="lockout-modal" class="hidden fixed inset-0 bg-black/90 z-[90] flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="text-center">
+            <i class="fa-solid fa-hourglass-end text-6xl text-red-600 mb-6 animate-pulse"></i>
+            <h1 class="text-3xl md:text-5xl font-ministry text-red-600 font-bold tracking-widest mb-4">TIME EXPIRED</h1>
+            <p class="text-gray-400 tracking-widest uppercase text-sm">Upload portal has been closed.</p>
+            <button onclick="document.getElementById('lockout-modal').classList.add('hidden')" class="mt-8 border border-red-900 text-red-500 px-6 py-2 text-xs uppercase hover:bg-red-900/20">Close Overlay</button>
+        </div>
+    </div>
+
     <script type="module">
         // --- 1. CONFIGURATION ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -312,7 +325,6 @@
             measurementId: "G-HZHS31QH07"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
@@ -330,7 +342,6 @@
             { id: 'A3', text: "Click a photograph pointing at any science-related poster, laboratory, or academic board on campus." }
         ];
 
-        // UPDATED TASK LIST BASED ON ROUND_1.PDF
         const tasksB = [
             { id: 'B1', text: "Draw a small design or symbol on your face using a pen/marker and take a picture.", points: 5 },
             { id: 'B2', text: "Capture a picture of an \"invisibility cloak\" using creative hiding (e.g., using a duppata).", points: 5 },
@@ -358,8 +369,10 @@
         let currentTeam = localStorage.getItem('scirox_team') || null;
         let currentCaptain = localStorage.getItem('scirox_captain') || null;
         let currentCode = localStorage.getItem('scirox_code') || null;
+        let timerInterval;
+        let isLocked = false;
 
-        // Expose functions to window immediately
+        // Expose functions to window
         window.handleLogin = handleLogin;
         window.handleLogout = handleLogout;
         window.openEditModal = openEditModal;
@@ -378,12 +391,11 @@
                 document.getElementById('dashboard-section').classList.remove('hidden');
                 document.getElementById('dashboard-section').classList.add('flex');
                 
-                document.getElementById('displayTeamName').innerText = currentTeam;
-                // document.getElementById('displayCaptainName').innerText = currentCaptain; // Removed for cleaner mobile header
                 document.getElementById('teamAvatar').innerText = currentTeam.charAt(0).toUpperCase();
                 
                 renderTasks();
                 loadProgress();
+                startTimer();
             } else {
                 document.getElementById('login-section').classList.remove('hidden');
                 document.getElementById('dashboard-section').classList.add('hidden');
@@ -399,6 +411,10 @@
             if (!team || !captain || !code) {
                 showToast("Identity verification failed. All fields including Team Code are required.", "error");
                 return;
+            }
+
+            if (!localStorage.getItem('scirox_start_time')) {
+                localStorage.setItem('scirox_start_time', Date.now());
             }
 
             localStorage.setItem('scirox_team', team);
@@ -417,8 +433,79 @@
                 localStorage.removeItem('scirox_team');
                 localStorage.removeItem('scirox_captain');
                 localStorage.removeItem('scirox_code');
+                localStorage.removeItem('scirox_start_time'); 
                 location.reload();
             }
+        }
+
+        function startTimer() {
+            if (isLocked) return;
+
+            const startTime = localStorage.getItem('scirox_start_time');
+            if (!startTime) return;
+
+            const duration = 3600000; // 1 Hour
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (isLocked) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                const now = Date.now();
+                const elapsed = now - parseInt(startTime);
+                const remaining = duration - elapsed;
+
+                const timerDisplay = document.getElementById('timerDisplay');
+
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.innerText = "00:00";
+                    timerDisplay.classList.add('timer-danger');
+                    // --- TIME UP LOGIC ---
+                    lockInterface();
+                    return;
+                }
+
+                // Format Time
+                const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (remaining < 300000) { 
+                    timerDisplay.classList.add('text-red-500');
+                    timerDisplay.classList.remove('text-[#d4af37]');
+                }
+
+            }, 1000);
+        }
+
+        function lockInterface() {
+            isLocked = true;
+            const statusInd = document.getElementById('statusIndicator');
+            
+            statusInd.innerHTML = '<i class="fa-solid fa-lock text-[0.5rem] mr-1"></i> LOCKED (Time Expired)';
+            statusInd.classList.remove('text-green-500');
+            statusInd.classList.add('text-red-500');
+
+            // Disable all inputs and buttons
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(input => input.disabled = true);
+
+            const selectBtns = document.querySelectorAll('[id^="btn-select-"]');
+            selectBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('locked-out');
+                btn.innerHTML = '<span class="font-bold">LOCKED</span>';
+                btn.classList.remove('btn-ministry');
+                btn.classList.add('bg-gray-800', 'text-gray-500', 'border-gray-700');
+            });
+
+            // Show lockout message
+            showToast("TIME EXPIRED. UPLOAD PORTAL CLOSED.", "error");
+            document.getElementById('lockout-modal').classList.remove('hidden');
         }
 
         function openEditModal() {
@@ -452,7 +539,6 @@
             currentTeam = newTeam;
             currentCaptain = newCaptain;
             
-            document.getElementById('displayTeamName').innerText = currentTeam;
             document.getElementById('teamAvatar').innerText = currentTeam.charAt(0).toUpperCase();
             
             loadProgress();
@@ -473,7 +559,6 @@
 
         function createTaskElement(task) {
             const div = document.createElement('div');
-            // Changed rounded logic for better mobile look: rounded-none on mobile usually cleaner for lists, but added spacing
             div.className = "task-row px-4 py-5 md:py-3 flex flex-col md:flex-row gap-4 md:gap-4 items-start md:items-center justify-between group md:border-b-0 border-b border-[#1a1a1a]";
             div.id = `card-${task.id}`;
 
@@ -484,7 +569,6 @@
             let actionAreaHTML = '';
             let statusAreaHTML = '';
             
-            // Special handling for A1 and B14 (GNDU Gates, moved from B19)
             if (task.id === 'A1' || task.id === 'B14') {
                 const subLabels = task.id === 'A1' 
                     ? ['Member 1', 'Member 2', 'Member 3'] 
@@ -493,7 +577,7 @@
                 let subRowsHTML = '';
                 subLabels.forEach((label, index) => {
                     const subId = `${task.id}_${index + 1}`;
-                    const controlHTML = getUploadControls(subId, label, true); // true for condensed mode
+                    const controlHTML = getUploadControls(subId, label, true);
                     subRowsHTML += `
                         <div class="flex items-center justify-between gap-3 w-full border-b border-[#1f1f1f] last:border-0 py-3" id="subrow-${subId}">
                             <div class="flex items-center gap-2">
@@ -510,7 +594,6 @@
                 actionAreaHTML = `<div class="w-full md:w-auto flex flex-col mt-2 md:mt-0 bg-[#070707] md:bg-transparent rounded px-2 md:px-0">${subRowsHTML}</div>`;
                 statusAreaHTML = `<div class="w-32 text-center hidden md:block"><span class="text-[0.6rem] text-gray-600">Multipart Task</span></div>`;
             } 
-            // Standard Single Upload
             else {
                 const controlHTML = getUploadControls(task.id, 'Select File');
                 actionAreaHTML = `
@@ -554,6 +637,11 @@
         }
 
         function getUploadControls(taskId, btnLabel, isCompact = false) {
+            if (isLocked) {
+                // Return disabled state immediately if locked
+                return `<button disabled class="w-full px-4 py-2 text-xs rounded-sm bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed font-bold">LOCKED</button>`;
+            }
+
             const compactClass = isCompact ? 'py-2 text-xs' : 'py-3.5 md:py-2';
             return `
                 <input type="file" id="file-${taskId}" class="hidden" onchange="handleFileSelect('${taskId}', this)">
@@ -577,15 +665,16 @@
         }
 
         function triggerFileInput(taskId) {
+            if (isLocked) return;
             document.getElementById(`file-${taskId}`).click();
         }
 
         function handleFileSelect(taskId, input) {
+            if (isLocked) return;
+
             const file = input.files[0];
             if (!file) return;
 
-            // GitHub max upload limit via API is strictly 100MB, but Base64 adds 33%. 
-            // Limiting to 50MB to be safe for network and encoding overhead.
             if (file.size > 50 * 1024 * 1024) {
                 showToast("File exceeds 50MB safe limit for browser upload.", "error");
                 input.value = ""; 
@@ -600,7 +689,6 @@
             uploadBtn.classList.remove('hidden');
             cancelBtn.classList.remove('hidden'); 
             
-            // Update the button text, preserving the ID and onClick
             if (window.innerWidth < 768) {
                 uploadBtn.innerHTML = `<span class="font-bold">SUBMIT</span> <i class="fa-solid fa-paper-plane ml-1"></i>`;
             } else {
@@ -622,6 +710,11 @@
         }
 
         async function uploadTask(taskId) {
+            if (isLocked) {
+                showToast("Time Expired. Uploads Disabled.", "error");
+                return;
+            }
+
             console.log("Upload initiated for", taskId);
             const input = document.getElementById(`file-${taskId}`);
             const file = input.files[0];
@@ -647,13 +740,11 @@
 
             try {
                 const base64Content = await toBase64(file);
-                // Sanitize team name for folder creation
                 const safeTeamName = currentTeam.replace(/[^a-zA-Z0-9]/g, '_');
                 
                 let ghPath = `uploads/${safeTeamName}/${taskId}/${Date.now()}_${file.name}`; 
                 const ghUrl = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${ghPath}`;
                 
-                // Add Timeout to fetch (60 seconds)
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 60000);
 
@@ -687,6 +778,9 @@
                 const ghData = await response.json();
                 const publicUrl = ghData.content.download_url;
 
+                const startTime = localStorage.getItem('scirox_start_time') || Date.now();
+                const timeTakenMs = Date.now() - parseInt(startTime);
+
                 const dbPath = `submissions/${safeTeamName}/${taskId}`;
                 await set(ref(db, dbPath), {
                     team: currentTeam,
@@ -695,6 +789,7 @@
                     fileName: file.name,
                     fileUrl: publicUrl,
                     timestamp: Date.now(),
+                    timeElapsed: timeTakenMs,
                     status: 'completed'
                 });
 
@@ -709,7 +804,6 @@
                 
                 showToast("Upload Error: " + userMsg, "error");
                 
-                // Reset button state on failure
                 uploadBtn.disabled = false;
                 uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 uploadBtn.innerHTML = originalContent;
@@ -738,10 +832,9 @@
                 const data = snapshot.val();
                 let completedSubtasks = 0;
                 
-                // Calculate total slots including the multipart tasks
-                // Standard tasks count as 1. A1 counts as 3. B14 counts as 3.
-                // Total = (A_Length - 1 + 3) + (B_Length - 1 + 3) = Total + 4 extra slots
-                const totalSlots = tasksA.length + tasksB.length + 4; 
+                // Total slots calculation:
+                // tasksA (3 items) + tasksB (20 items) + A1 extras (2) + B14 extras (2) = 27
+                const totalSlots = 27; 
 
                 if (data) {
                     Object.keys(data).forEach(taskId => {
@@ -753,29 +846,45 @@
                 const pct = Math.min(100, Math.round((completedSubtasks / totalSlots) * 100));
                 document.getElementById('progressBar').style.width = `${pct}%`;
                 document.getElementById('progressText').innerText = `${pct}%`;
+                
+                document.getElementById('submissionCountDisplay').innerText = `${completedSubtasks} / ${totalSlots}`;
+                document.getElementById('mobileSubmissionCount').innerText = `(${completedSubtasks}/${totalSlots})`;
+
+                // --- MISSION COMPLETE CHECK ---
+                if (completedSubtasks === totalSlots) {
+                    isLocked = true; // Prevents timer from running further
+                    clearInterval(timerInterval);
+                    
+                    const timerDisplay = document.getElementById('timerDisplay');
+                    timerDisplay.classList.remove('text-[#d4af37]', 'text-red-500', 'timer-danger');
+                    timerDisplay.classList.add('text-green-500');
+                    
+                    document.getElementById('timerLabel').innerText = "FINAL TIME";
+                    
+                    showToast("MISSION ACCOMPLISHED! ALL TASKS VERIFIED.", "success");
+                    
+                    const statusInd = document.getElementById('statusIndicator');
+                    statusInd.innerHTML = '<i class="fa-solid fa-flag-checkered text-[0.5rem] mr-1"></i> COMPLETED';
+                }
             });
         }
 
         function markTaskAsDone(taskId) {
-            // Check if it's a multipart subtask (e.g., A1_1) or standard
             const isMulti = taskId.includes('_');
             const doneHtml = '<span class="text-green-500 text-xs font-bold bg-green-900/20 px-2 py-1 rounded border border-green-800"><i class="fa-solid fa-check mr-1"></i> Done</span>';
             const proofHtml = `<div class="proof-icon flex items-center justify-end w-full py-2"><button class="text-gray-500 hover:text-white transition flex items-center gap-2 text-xs"><i class="fa-solid fa-file-circle-check text-green-600 text-lg"></i> <span class="md:hidden">Archived</span></button></div>`;
 
             if (isMulti) {
-                // Handle Subtask
                 const actionArea = document.getElementById(`action-area-${taskId}`);
                 const statusSpan = document.getElementById(`status-${taskId}`);
                 
                 if (actionArea) actionArea.innerHTML = proofHtml;
                 if (statusSpan) statusSpan.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
                 
-                // Check if all parts are done to color the main border
                 const baseId = taskId.split('_')[0];
                 checkMultipartCompletion(baseId);
 
             } else {
-                // Handle Standard Task
                 const card = document.getElementById(`card-${taskId}`);
                 const status = document.getElementById(`status-${taskId}`);
                 const mobileStatus = document.getElementById(`mobile-status-${taskId}`);
@@ -789,12 +898,8 @@
         }
 
         function checkMultipartCompletion(baseId) {
-            // Checks if all 3 parts of A1 or B14 are done to light up the main border
             const card = document.getElementById(`card-${baseId}`);
             if (!card) return;
-
-            // Simple check: do we have 3 checkmarks in this card?
-            // This relies on the DOM state set by markTaskAsDone
             const checks = card.querySelectorAll('.fa-check.text-green-500');
             if (checks.length >= 3) {
                 card.classList.add('completed');
