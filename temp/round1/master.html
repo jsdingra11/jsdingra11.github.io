@@ -141,7 +141,6 @@
 </head>
 <body class="flex flex-col overflow-hidden selection:bg-[#d4af37] selection:text-black">
 
-    <!-- TOP HEADER -->
     <div class="bg-[#d4af37] text-black text-[0.65rem] font-bold py-2 md:py-1 z-[60] border-b border-[#b5952f] text-center flex-shrink-0 shadow-lg pt-[calc(0.25rem+env(safe-area-inset-top))]">
         <div class="uppercase tracking-widest flex flex-col md:flex-row gap-0.5 md:gap-4 items-center justify-center px-2 leading-tight">
             <span>
@@ -152,10 +151,8 @@
         </div>
     </div>
 
-    <!-- MAIN CONTENT AREA (Scrollable) -->
     <div id="main-content-scroll" class="flex-grow overflow-y-auto relative w-full flex flex-col" style="-webkit-overflow-scrolling: touch;">
         
-        <!-- LOGIN SECTION -->
         <div id="login-section" class="flex-grow flex items-center justify-center p-4 min-h-[500px]">
             <div class="ministry-panel p-6 md:p-10 rounded-sm shadow-2xl max-w-lg w-full text-center border-t-2 border-t-[#d4af37] mx-2 my-auto">
                 <div class="mb-8">
@@ -198,7 +195,6 @@
                 </div>
             </div>
 
-            <!-- Admin Login Modal -->
             <div id="admin-login-modal" class="absolute inset-0 bg-black/95 hidden items-center justify-center z-50 p-4">
                 <div class="ministry-panel p-6 rounded-sm max-w-sm w-full relative border border-red-900/50">
                     <button onclick="toggleAdminLogin()" class="absolute top-4 right-4 text-gray-600 hover:text-white transition">
@@ -211,9 +207,7 @@
             </div>
         </div>
 
-        <!-- ADMIN DASHBOARD SECTION -->
         <div id="admin-dashboard-section" class="hidden flex-col min-h-full w-full relative bg-[#050505]">
-            <!-- Admin Header -->
             <div class="flex-none bg-[#0a0a0a] border-b border-red-900/30 px-4 md:px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
                 <div class="flex items-center gap-3">
                     <div class="bg-red-900/20 w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center border border-red-900 text-red-500">
@@ -234,7 +228,6 @@
                 </div>
             </div>
 
-            <!-- Admin Tabs -->
             <div class="flex-none bg-[#030303] border-b border-[#1f1f1f] px-4 md:px-6 sticky top-[60px] z-40">
                 <div class="flex gap-6">
                     <button onclick="switchAdminTab('review')" id="tab-review" class="py-3 md:py-4 text-xs font-bold uppercase tracking-widest border-b-2 border-red-600 text-red-500">Team Monitor</button>
@@ -242,24 +235,24 @@
                 </div>
             </div>
 
-            <!-- Admin Content -->
             <div class="flex-grow p-4 md:p-8 pb-32">
-                <!-- REVIEW / TEAM MONITOR VIEW -->
                 <div id="view-review" class="max-w-7xl mx-auto space-y-8">
                     <div id="admin-teams-container" class="space-y-8 md:space-y-12">
                         <div class="text-center text-gray-600 py-10 italic">Initializing Uplink...</div>
                     </div>
                 </div>
 
-                <!-- TEAM DETAIL VIEW (Drill Down) -->
                 <div id="view-team-detail" class="hidden max-w-6xl mx-auto flex flex-col">
                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 border-b border-[#333] pb-4 gap-4">
                         <div>
                             <button onclick="closeTeamDetail()" class="text-xs text-gray-400 hover:text-white flex items-center gap-2 mb-2 transition uppercase tracking-widest">
                                 <i class="fa-solid fa-arrow-left"></i> Return to Monitor
                             </button>
-                            <h2 class="text-xl md:text-2xl font-ministry font-bold text-[#d4af37]" id="detail-team-name">Team Name</h2>
-                            <p class="text-xs text-gray-500 uppercase tracking-widest" id="detail-captain-name">Captain Info</p>
+                            <div class="flex items-center gap-3">
+                                <h2 class="text-xl md:text-2xl font-ministry font-bold text-[#d4af37]" id="detail-team-name">Team Name</h2>
+                                <span class="text-xs border border-[#333] bg-[#111] text-gray-400 px-2 py-0.5 rounded font-mono" id="detail-team-code">CODE</span>
+                            </div>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest mt-1" id="detail-captain-name">Captain Info</p>
                         </div>
                         <div class="flex items-center justify-between md:block md:text-right bg-[#111] md:bg-transparent p-3 md:p-0 rounded border border-[#333] md:border-0">
                             <span class="block text-[0.6rem] text-gray-600 uppercase tracking-widest">Total Score</span>
@@ -280,14 +273,12 @@
                                     </tr>
                                 </thead>
                                 <tbody id="detail-tasks-body" class="divide-y divide-[#1f1f1f]">
-                                    <!-- Rows injected here -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- LEADERBOARD -->
                 <div id="view-leaderboard" class="hidden max-w-4xl mx-auto">
                     <div class="ministry-panel p-4 md:p-6 rounded-sm">
                         <h3 class="text-lg md:text-xl font-ministry font-bold text-[#d4af37] mb-6 text-center uppercase tracking-[0.2em] border-b border-[#1f1f1f] pb-4">
@@ -305,8 +296,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="leaderboard-body" class="divide-y divide-[#1f1f1f]">
-                                    <!-- Rows -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
@@ -314,10 +304,8 @@
             </div>
         </div>
 
-        <!-- USER DASHBOARD SECTION -->
         <div id="dashboard-section" class="hidden flex-col min-h-full w-full relative pb-10">
             
-            <!-- Navbar -->
             <div class="flex-none z-50 bg-[#030303] sticky top-0 border-b border-[#1f1f1f] shadow-lg">
                 <nav class="px-4 md:px-6 py-3 md:py-4 flex flex-row justify-between items-center gap-4 bg-[#050505]">
                     <div class="flex items-center gap-3 md:gap-4 min-w-0">
@@ -341,7 +329,6 @@
                     </button>
                 </nav>
 
-                <!-- Status Bar -->
                 <div class="bg-[#080808] border-t border-[#1f1f1f] px-4 md:px-6 py-2 md:py-3 flex gap-4 md:gap-8 items-center">
                     <div class="flex-shrink-0 hidden md:block">
                         <span class="block text-[0.6rem] text-gray-600 uppercase tracking-wider">Status</span>
@@ -359,7 +346,6 @@
                 </div>
             </div>
 
-            <!-- Tasks Area -->
             <div class="flex-grow bg-[#030303] relative z-0 w-full">
                 <div class="max-w-6xl mx-auto w-full pb-32 pt-4 px-0 md:px-4">
                     
@@ -379,8 +365,7 @@
                         </div>
 
                         <div id="partA-container" class="space-y-1 md:space-y-2">
-                            <!-- Tasks injected here -->
-                        </div>
+                            </div>
                     </div>
 
                     <div>
@@ -392,8 +377,7 @@
                         </div>
                         
                         <div id="partB-container" class="space-y-1 md:space-y-2">
-                            <!-- Tasks injected here -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -401,7 +385,6 @@
 
     </div>
 
-    <!-- BOTTOM FOOTER (Fixed for Safe Area) -->
     <div class="bg-[#0a0a0a] text-gray-600 text-[0.6rem] font-bold py-3 z-[60] border-t border-[#1f1f1f] text-center flex-shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div class="uppercase tracking-widest flex gap-2 items-center justify-center">
             <span>
@@ -410,7 +393,6 @@
         </div>
     </div>
 
-    <!-- EDIT PROFILE MODAL (User) -->
     <div id="edit-modal" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[70] p-4 backdrop-blur-md">
         <div class="ministry-panel p-6 rounded-sm max-w-sm w-full relative border border-[#333]">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-600 hover:text-white transition p-2">
@@ -434,19 +416,16 @@
         </div>
     </div>
 
-    <!-- PREVIEW MODAL (Universal) -->
     <div id="media-preview-modal" class="fixed inset-0 bg-black/95 hidden z-[90] flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
         <div class="relative w-full max-w-5xl max-h-[95vh] flex flex-col items-center justify-center">
             <button onclick="closePreview()" class="absolute -top-12 right-0 text-gray-400 hover:text-white text-sm uppercase tracking-widest border border-gray-700 hover:border-white px-4 py-2 rounded-sm transition">
                 <i class="fa-solid fa-xmark mr-2"></i> Close
             </button>
             <div id="media-content" class="w-full h-full flex items-center justify-center">
-                <!-- Content injected here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- TOAST -->
     <div id="toast" class="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-5 right-5 left-5 md:left-auto bg-[#111] text-gray-200 px-6 py-4 rounded-sm shadow-2xl border-l-4 border-[#d4af37] flex items-center gap-4 transition-all duration-300 opacity-0 translate-y-10 z-[80] md:min-w-[300px]">
         <div id="toastIconContainer">
             <i class="fa-solid fa-info-circle text-[#d4af37] text-xl"></i>
@@ -488,10 +467,10 @@
         // --- SCORING SYSTEM ---
         const TASK_SCORES = {
             'A1': 5,  'A2': 10, 'A3': 10,
-            'B1': 5,  'B2': 10, 'B3': 10, 'B4': 10, 'B5': 10, 
-            'B6': 10, 'B7': 5,  'B8': 15, 'B9': 15, 'B10': 10,
-            'B11': 10, 'B12': 15, 'B13': 15, 'B14': 5, 'B15': 5,
-            'B16': 10, 'B17': 15, 'B18': 15, 'B19': 10, 'B20': 10
+            'B1': 5,  'B2': 5,  'B3': 5,  'B4': 5,  'B5': 5, 
+            'B6': 5,  'B7': 5,  'B8': 10, 'B9': 10, 'B10': 10,
+            'B11': 10, 'B12': 10, 'B13': 10, 'B14': 10, 'B15': 15,
+            'B16': 15, 'B17': 15, 'B18': 15, 'B19': 15, 'B20': 20
         };
         const getTaskPoints = (taskId) => TASK_SCORES[taskId] || 0;
 
@@ -502,27 +481,28 @@
             { id: 'A3', text: "Click a photograph pointing at any science-related poster, laboratory, or academic board on campus." }
         ];
 
+        // UPDATED TASKS B LIST TO MATCH PDF
         const tasksB = [
             { id: 'B1', text: "Draw a small design or symbol on your face using a pen/marker and take a picture.", points: 5 },
-            { id: 'B2', text: "Tie a rakhi (or a simple thread) on a stranger after taking consent, and take a picture.", points: 10 },
-            { id: 'B3', text: "Perform the Titanic pose at Fun Bytes and record a 5-second video.", points: 10 },
-            { id: 'B4', text: "Do five frog jumps near the Law Department and record a video.", points: 10 },
-            { id: 'B5', text: "Do five push-ups in front of Arts Café and record a video.", points: 10 },
-            { id: 'B6', text: "Perform the Mickey Mouse dance for 10 seconds and record a video.", points: 10 },
-            { id: 'B7', text: "Click a picture with a person wearing a green turban.", points: 5 },
-            { id: 'B8', text: "Strike up a short conversation with a stranger using an unusual accent and record a 10-second video.", points: 15 },
-            { id: 'B9', text: "Strike up a conversation with a statue or sculpture, treating it like a real person, and record a 10-second video.", points: 15 },
-            { id: 'B10', text: "Perform the Shin Chan dance for 10 seconds at Back Packers and record a video.", points: 10 },
-            { id: 'B11', text: "Find a person wearing the same colour as you and record a video together saying “SAME PINCH”.", points: 10 },
-            { id: 'B12', text: "Pretend to be a tourist guide and give a brief, humorous description of the University. Record a 10-second video.", points: 15 },
-            { id: 'B13', text: "Sing the lyrics “Sagar di vohti lehndi indica chala” in the back parking in front of any black car, and record a video.", points: 15 },
-            { id: 'B14', text: "Take a selfie with any five cars, excluding vehicles with PB02 registration.", points: 5 },
-            { id: 'B15', text: "Take a selfie with a delivery person (with consent).", points: 5 },
-            { id: 'B16', text: "Stand in front of the Army tank, salute respectfully, and take a picture.", points: 10 },
-            { id: 'B17', text: "Sing the Gian song (from Doraemon) loudly in a crowded area and record a video.", points: 15 },
-            { id: 'B18', text: "Visit any canteen and ask “FREE KA KYA MILTA HAI YAHAAN?” Record a 10-second video.", points: 15 },
-            { id: 'B19', text: "The same team member must take a selfie at all three GNDU gates.", points: 10 },
-            { id: 'B20', text: "Click a creative team selfie using reflection or shadows", points: 10 }
+            { id: 'B2', text: "Capture a picture of an \"invisibility cloak\" using creative hiding (e.g., using a duppata).", points: 5 },
+            { id: 'B3', text: "Perform the Titanic pose at Fun Bytes and record a 5-second video.", points: 5 },
+            { id: 'B4', text: "Capture a picture in which one team member acts as a Dementor and another member appears frightened by it.", points: 5 },
+            { id: 'B5', text: "Click a picture with a person wearing a green turban.", points: 5 },
+            { id: 'B6', text: "Show a \"spell duel\" between two members while the third records in Panjabi.", points: 5 },
+            { id: 'B7', text: "Act like Hermione correcting a team member (dramatically).", points: 5 },
+            { id: 'B8', text: "Do five frog jumps near the Law Department and record a video.", points: 10 },
+            { id: 'B9', text: "Do five push-ups in front of Arts Café and record a video.", points: 10 },
+            { id: 'B10', text: "Strike up a conversation with a statue or sculpture, treating it like a real person, and record a 10-second video.", points: 10 },
+            { id: 'B11', text: "Perform the Shin Chan dance for 10 seconds at Back Packers and record a video.", points: 10 },
+            { id: 'B12', text: "Pretend to ride a broomstick for 10 seconds.", points: 10 },
+            { id: 'B13', text: "Stand in front of the Army tank, salute respectfully, and take a picture.", points: 10 },
+            { id: 'B14', text: "The same team member must take a selfie at all three GNDU gates.", points: 10 },
+            { id: 'B15', text: "Pretend to be a tourist guide and give a brief, humorous description of the University. Record a 10-second video.", points: 15 },
+            { id: 'B16', text: "Make a 10-second video role-playing Dobby accepting the socks from a master.", points: 15 },
+            { id: 'B17', text: "Visit any canteen and ask \"FREE KA KYA MILTA HAI YAHAAN?\" Record a 10-second video.", points: 15 },
+            { id: 'B18', text: "Act a debate between Dumbledore and Voldemort in Panjabi for 20 seconds.", points: 15 },
+            { id: 'B19', text: "Pretend to drink Felix Felicis and say 2 lines ending with \"Join SciRox!!\"", points: 15 },
+            { id: 'B20', text: "Act out a 15-second Parsel tongue conversation with a group of strangers.", points: 20 }
         ];
 
         // --- 3. STATE & UTILS ---
@@ -860,16 +840,18 @@
             if (!data) return;
 
             // Gather Info
-            let name = 'Unknown', captain = 'Unknown', score = 0;
+            let name = 'Unknown', captain = 'Unknown', score = 0, code = 'N/A';
             Object.values(data).forEach(sub => {
                 if (sub.team) name = sub.team;
                 if (sub.captain) captain = sub.captain;
+                if (sub.teamCode) code = sub.teamCode;
                 if (sub.status === 'accepted') score += (sub.score || 0);
             });
 
             // Update UI
             document.getElementById('detail-team-name').innerText = name;
             document.getElementById('detail-captain-name').innerText = captain;
+            document.getElementById('detail-team-code').innerText = code; // Added Team Code here
             document.getElementById('detail-score').innerText = score;
             document.getElementById('detail-tasks-body').innerHTML = generateTaskRows(teamKey, data);
 
@@ -891,28 +873,10 @@
             const allTasks = [...tasksA, ...tasksB];
             
             return allTasks.map(task => {
-                // Handle Multipart keys (A1_1 etc) vs Simple keys
-                // For admin view, simpler to just show the main IDs unless we want deep detail
-                // For simplicity, we check if the task ID exists in submissions directly
-                // OR if it's a multipart (like A1) we might look for A1_1, A1_2.
-                // Current admin code assumes simple mapping. Let's support simple mapping first.
-                
-                // Hack for Multipart: Check if ANY sub-task exists if main doesn't
                 let sub = submissions[task.id];
-                let isMultipart = false;
                 
-                if (!sub && (task.id === 'A1' || task.id === 'B19')) {
-                   // It's multipart, we might have A1_1, A1_2 etc.
-                   // For admin simplicity, we will just show them as individual rows if we iterate all keys?
-                   // Better approach: Iterate allTasks. If task is A1, show 3 rows? 
-                   // Let's keep it simple: Show the main task row. If user submitted parts, show them.
-                }
-
-                // Better strategy: Just list ALL keys in submissions that match?
-                // No, let's stick to the list so we see what is MISSING too.
-                
-                // If multipart, we need to generate 3 rows?
-                if (task.id === 'A1' || task.id === 'B19') {
+                // If multipart, we need to generate 3 rows
+                if (task.id === 'A1' || task.id === 'B14') {
                     let rows = '';
                     for(let i=1; i<=3; i++) {
                         const subId = `${task.id}_${i}`;
@@ -1010,8 +974,8 @@
             let actionAreaHTML = '';
             let statusAreaHTML = '';
             
-            // Special handling for A1 and B19
-            if (task.id === 'A1' || task.id === 'B19') {
+            // Special handling for A1 and B14 (updated from B19)
+            if (task.id === 'A1' || task.id === 'B14') {
                 const subLabels = task.id === 'A1' 
                     ? ['Member 1', 'Member 2', 'Member 3'] 
                     : ['Gate 1', 'Gate 2', 'Gate 3'];
@@ -1053,20 +1017,18 @@
 
             div.innerHTML = `
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 flex-1 w-full">
-                    <!-- Desktop ID -->
                     <div class="w-20 hidden md:flex flex-col items-center flex-shrink-0">
                         <span class="text-[0.6rem] font-bold text-gray-600 border border-gray-800 px-2 py-1 rounded-sm">${task.id}</span>
                         ${pointsBadge}
                     </div>
                     
                     <div class="flex-1 w-full">
-                        <!-- Mobile Header: ID + Points + Status -->
                         <div class="md:hidden mb-2 flex justify-between items-center w-full bg-[#0d0d0d] p-2 rounded border border-[#1a1a1a]">
                             <div class="flex items-center">
                                 <span class="text-xs font-bold text-gray-400 bg-[#1a1a1a] px-2 py-0.5 rounded-sm">${task.id}</span>
                                 ${mobilePointsBadge}
                             </div>
-                            ${ (task.id !== 'A1' && task.id !== 'B19') ? `<span id="mobile-status-${task.id}" class="text-[0.65rem] font-bold text-gray-700 uppercase tracking-wider">Pending</span>` : '<span class="text-[0.65rem] text-gray-600 uppercase">Multipart</span>' }
+                            ${ (task.id !== 'A1' && task.id !== 'B14') ? `<span id="mobile-status-${task.id}" class="text-[0.65rem] font-bold text-gray-700 uppercase tracking-wider">Pending</span>` : '<span class="text-[0.65rem] text-gray-600 uppercase">Multipart</span>' }
                         </div>
                         
                         <p class="text-[0.9rem] md:text-sm text-gray-300 font-normal leading-relaxed pl-1">${task.text}</p>
