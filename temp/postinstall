@@ -1,0 +1,28 @@
+#!/bin/bash
+
+APP="/Applications/TexWolf.app"
+LATEX="$APP/Contents/Resources/latex"
+
+# real console user
+USER_NAME=$(stat -f%Su /dev/console)
+USER_GROUP=$(id -gn "$USER_NAME")
+
+# 1. Fix ownership of whole app (not only latex)
+if [ -d "$APP" ]; then
+    chown -R "$USER_NAME":"$USER_GROUP" "$APP"
+fi
+
+# 2. Remove any macOS ACL locks
+if [ -d "$APP" ]; then
+    chmod -RN "$APP"
+fi
+
+# 3. Now set write permissions where needed
+if [ -d "$LATEX" ]; then
+    chmod -R 777 "$LATEX"
+fi
+
+# 4. Remove quarantine flags
+xattr -dr com.apple.quarantine "$APP" 2>/dev/null
+
+exit 0
