@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starry Night Experience | SciRox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+    <style>
+        :root {
+            --vangogh-blue: #1c325b;
+            --vangogh-yellow: #f5d63d;
+            --vangogh-accent: #e08e24;
+            --dark-overlay: rgba(10, 20, 40, 0.75);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050a14;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- THE LIVING PAINT CANVAS --- */
+        #painting-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: contrast(1.1) brightness(1.0);
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, .poster-font {
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .subtitle-font {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        /* --- GLASSMOPHISM & UI --- */
+        .glass-card {
+            background: rgba(13, 20, 40, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 214, 61, 0.1);
+            border-color: rgba(245, 214, 61, 0.3);
+        }
+
+        .title-giant {
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 0.9;
+            background: linear-gradient(180deg, #fff 0%, #f5d63d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a1428;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--vangogh-accent);
+            border-radius: 4px;
+        }
+
+        /* --- FORM STYLING --- */
+        .custom-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s;
+        }
+        .custom-input:focus {
+            background: rgba(0, 0, 0, 0.6);
+            border-color: var(--vangogh-yellow);
+            outline: none;
+            box-shadow: 0 0 15px rgba(245, 214, 61, 0.3);
+        }
+
+        .checkbox-card {
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .checkbox-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .hidden-checkbox:checked + .checkbox-card {
+            background: rgba(245, 214, 61, 0.2);
+            border-color: var(--vangogh-yellow);
+        }
+        
+        .moon-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245, 214, 61, 0.8) 0%, rgba(224, 142, 36, 0.4) 40%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(40px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: pulseMoon 5s infinite alternate;
+        }
+
+        @keyframes pulseMoon {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* No Spin Button on Number Input */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="painting-canvas"></canvas>
+
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 p-4" id="navbar">
+        <div class="max-w-7xl mx-auto glass-card px-6 py-3 flex justify-between items-center rounded-full">
+            <div class="flex items-center">
+                <span class="poster-font text-2xl tracking-widest text-white">Starry Night</span>
+            </div>
+            
+            <div class="hidden md:flex gap-8 subtitle-font uppercase text-sm tracking-wider font-bold items-center">
+                <a href="#home" class="hover:text-yellow-400 transition-colors">Home</a>
+                <a href="#attractions" class="hover:text-yellow-400 transition-colors">Attractions</a>
+                <a href="#register" class="bg-yellow-500 text-black px-6 py-2 rounded-full hover:bg-yellow-400 transition-transform hover:scale-105">Register</a>
+            </div>
+
+            <button id="hamburger-btn" class="md:hidden text-white text-2xl focus:outline-none" onclick="toggleMobileMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-[#050a14]/95 backdrop-blur-xl transform translate-x-full transition-transform duration-300 flex flex-col items-center justify-center gap-8 md:hidden">
+        <button class="absolute top-8 right-8 text-white/50 hover:text-white text-4xl" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="flex flex-col items-center gap-8 poster-font text-4xl tracking-widest">
+            <a href="#home" onclick="toggleMobileMenu()" class="hover:text-yellow-400 transition-colors">Home</a>
+            <a href="#attractions" onclick="toggleMobileMenu()" class="hover:text-yellow-400 transition-colors">Attractions</a>
+            <a href="#register" onclick="toggleMobileMenu()" class="text-yellow-400">Register</a>
+        </div>
+    </div>
+
+    <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden pt-24">
+        <div class="moon-glow top-1/4 right-1/4"></div>
+
+        <div class="text-center z-10 px-4 max-w-6xl mx-auto floating-element flex flex-col items-center">
+            
+            <div class="mb-6 relative group">
+                <div class="absolute inset-0 bg-yellow-400 blur-[40px] opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
+                <img src="https://lh3.googleusercontent.com/sitesv/APaQ0SRFdoMb0NvNTpeb1Jgh0cOqIRkwCtigoEHe0JTStIQQ1xw_NrqQrnkj3lZ3_U-EIoVU5gloJmqr_6hqHsx6oj4ewDFslVzSBerJG-VasZLgTHKEXH87KiQIur10QvGVjs8qCBXJG-lJKn96PJlWJWt9SJfTIvL_chY=w16383" alt="SciRox Club Logo" class="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-yellow-400 shadow-[0_0_50px_rgba(245,214,61,0.4)] object-cover z-10">
+            </div>
+
+            <h3 class="poster-font text-2xl md:text-3xl text-yellow-300 mb-2 tracking-[0.5em] uppercase">SciRox Presents</h3>
+            <h1 class="title-giant mb-2">STARRY NIGHT</h1>
+            <h2 class="poster-font text-4xl md:text-6xl text-white mb-8 border-t border-b border-yellow-500/50 py-4 inline-block">& Karaoke Night</h2>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 text-lg font-light tracking-wide mt-8">
+                <div class="glass-card px-6 py-3 flex items-center gap-3">
+                    <i class="fa-regular fa-calendar-check text-yellow-400 text-xl"></i>
+                    <span>FEB 20, 2026</span>
+                </div>
+                <div class="glass-card px-6 py-3 flex items-center gap-3">
+                    <i class="fa-regular fa-clock text-yellow-400 text-xl"></i>
+                    <span>4:00 PM - 9:30 PM</span>
+                </div>
+            </div>
+
+            <div class="mt-12">
+                <a href="#register" class="group relative inline-flex items-center justify-center px-12 py-4 text-lg font-bold text-black transition-all duration-200 bg-yellow-400 font-pj rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 overflow-hidden">
+                    <span class="absolute top-0 right-0 w-8 h-8 -mr-3 -mt-3 bg-white rounded-full transform rotate-45 group-hover:scale-150 transition-transform duration-500 ease-in-out opacity-20"></span>
+                    <span class="relative poster-font text-2xl tracking-wide">Get Your Ticket</span>
+                    <i class="fa-solid fa-arrow-right ml-3 relative"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="attractions" class="py-20 px-4 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="poster-font text-5xl md:text-7xl mb-4 text-white drop-shadow-lg">The Experience</h2>
+                <div class="h-1 w-24 bg-yellow-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-yellow-500/20 transition-colors"></div>
+                    <i class="fa-solid fa-microphone-lines text-5xl text-yellow-400 mb-6 group-hover:scale-110 transition-transform duration-300 block"></i>
+                    <h3 class="poster-font text-3xl mb-3">Karaoke Open Mic</h3>
+                    <p class="text-gray-300 mb-4 font-light leading-relaxed">Step into the spotlight. Poetry, Music, Dance. The stage is yours under the stars.</p>
+                    <div class="inline-block bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded text-sm font-bold border border-yellow-500/30">
+                        <i class="fa-solid fa-trophy mr-2"></i>CASH PRIZES
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-green-500/20 rounded-full blur-3xl group-hover:bg-yellow-500/20 transition-colors"></div>
+                    <div class="flex gap-4 mb-6">
+                        <i class="fa-solid fa-gamepad text-5xl text-green-400"></i>
+                        <i class="fa-solid fa-utensils text-5xl text-orange-400"></i>
+                    </div>
+                    <h3 class="poster-font text-3xl mb-3">Games & Feasts</h3>
+                    <p class="text-gray-300 font-light leading-relaxed">Challenge your friends at the game stalls and enjoy delicious treats from our night market.</p>
+                </div>
+
+                <div class="glass-card p-8 group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-yellow-500/20 transition-colors"></div>
+                    <div class="flex gap-4 mb-6">
+                        <i class="fa-solid fa-palette text-5xl text-purple-400"></i>
+                        <i class="fa-solid fa-camera text-5xl text-pink-400"></i>
+                    </div>
+                    <h3 class="poster-font text-3xl mb-3">Art & Memories</h3>
+                    <p class="text-gray-300 font-light leading-relaxed">Visit the art stall for sketches and capture the night at our Van Gogh themed photobooth.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="register" class="py-20 px-4 pb-12">
+        <div class="max-w-4xl mx-auto glass-card relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+            
+            <div class="flex flex-col md:flex-row h-full">
+                <div class="w-full md:w-1/3 bg-black/40 p-8 flex flex-col justify-between border-r border-white/10">
+                    <div>
+                        <h3 class="poster-font text-3xl text-yellow-400 mb-6">Ticket Type</h3>
+                        <div class="space-y-4">
+                            <button type="button" onclick="setType('attendee')" id="btn-attendee" class="w-full text-left p-4 rounded-xl border border-yellow-500 bg-yellow-500/20 text-white transition-all hover:bg-yellow-500/30 relative overflow-hidden group">
+                                <span class="subtitle-font font-bold uppercase text-lg relative z-10">Attendee</span>
+                                <div class="text-xs text-gray-300 relative z-10">Just watching</div>
+                                <div class="absolute inset-0 bg-yellow-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                            </button>
+                            
+                            <button type="button" onclick="setType('participant')" id="btn-participant" class="w-full text-left p-4 rounded-xl border border-gray-600 hover:border-yellow-500 text-gray-400 hover:text-white transition-all relative overflow-hidden group">
+                                <span class="subtitle-font font-bold uppercase text-lg relative z-10">Performer</span>
+                                <div class="text-xs text-gray-500 group-hover:text-gray-300 relative z-10">Open Mic & More</div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-8 pt-8 border-t border-white/10">
+                        <div class="text-xs uppercase text-gray-400 tracking-widest mb-1">Total Fee</div>
+                        <div class="poster-font text-5xl text-white" id="price-tag">₹30</div>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-2/3 p-8">
+                    <form id="regForm" onsubmit="handleSubmit(event)" class="space-y-6">
+                        <h3 class="poster-font text-3xl mb-6">Your Details</h3>
+                        
+                        <div class="space-y-4">
+                            <input type="text" required placeholder="Full Name" class="w-full p-4 rounded-lg custom-input placeholder-gray-400">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="tel" required placeholder="Phone Number" class="w-full p-4 rounded-lg custom-input placeholder-gray-400">
+                                <input 
+                                    type="text" 
+                                    placeholder="Date of Birth" 
+                                    onfocus="(this.type='date')" 
+                                    onblur="(this.value ? this.type='date' : this.type='text')" 
+                                    required 
+                                    class="w-full p-4 rounded-lg custom-input placeholder-gray-400"
+                                >
+                            </div>
+
+                            <input type="email" required placeholder="Email Address" class="w-full p-4 rounded-lg custom-input placeholder-gray-400">
+                        </div>
+
+                        <div id="performer-options" class="hidden animate-fade-in pt-6 border-t border-white/10 mt-6">
+                            
+                            <div class="mb-6 bg-white/5 p-4 rounded-lg border border-white/10">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-yellow-400 text-sm font-bold uppercase tracking-wider">Team Size</label>
+                                    <span class="text-xs text-gray-400">Max 10 members</span>
+                                </div>
+                                <div class="flex items-center gap-4 justify-between bg-black/20 rounded-lg p-2">
+                                    <button type="button" onclick="adjustTeam(-1)" class="w-10 h-10 rounded-lg bg-white/10 text-white hover:bg-yellow-500 hover:text-black transition flex items-center justify-center"><i class="fa-solid fa-minus"></i></button>
+                                    <input type="number" id="team-size" value="1" min="1" max="10" class="bg-transparent text-center text-white text-2xl font-bold w-16 border-none focus:ring-0 font-mono" readonly>
+                                    <button type="button" onclick="adjustTeam(1)" class="w-10 h-10 rounded-lg bg-white/10 text-white hover:bg-yellow-500 hover:text-black transition flex items-center justify-center"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2 text-center">₹100 Base + ₹50 per extra member</p>
+                            </div>
+
+                            <h4 class="subtitle-font font-bold text-gray-300 uppercase tracking-widest mb-4 text-sm">Category (Select all that apply)</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="relative">
+                                    <input type="checkbox" name="cat" value="Poetry" class="hidden-checkbox sr-only">
+                                    <div class="checkbox-card p-3 rounded-lg flex flex-col items-center justify-center text-center h-24 bg-white/5">
+                                        <i class="fa-solid fa-feather mb-2 text-xl"></i>
+                                        <span class="text-sm font-bold">Poetry</span>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="checkbox" name="cat" value="Instrumental" class="hidden-checkbox sr-only">
+                                    <div class="checkbox-card p-3 rounded-lg flex flex-col items-center justify-center text-center h-24 bg-white/5">
+                                        <i class="fa-solid fa-guitar mb-2 text-xl"></i>
+                                        <span class="text-sm font-bold">Instrumental</span>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="checkbox" name="cat" value="Vocal" class="hidden-checkbox sr-only">
+                                    <div class="checkbox-card p-3 rounded-lg flex flex-col items-center justify-center text-center h-24 bg-white/5">
+                                        <i class="fa-solid fa-microphone mb-2 text-xl"></i>
+                                        <span class="text-sm font-bold">Vocal</span>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="checkbox" name="cat" value="Dance" class="hidden-checkbox sr-only">
+                                    <div class="checkbox-card p-3 rounded-lg flex flex-col items-center justify-center text-center h-24 bg-white/5">
+                                        <i class="fa-solid fa-shoe-prints mb-2 text-xl"></i>
+                                        <span class="text-sm font-bold">Dance</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-4 rounded-lg mt-6 poster-font text-2xl tracking-wide transition-all hover:shadow-[0_0_20px_rgba(245,214,61,0.5)]">
+                            Confirm Registration
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 text-center text-gray-400 text-sm relative z-10 border-t border-white/5 bg-black/40 backdrop-blur-sm mt-auto">
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+            <div class="font-light tracking-wider">
+                &copy; 2026 SciRox - The Science Club. All rights reserved.
+            </div>
+            <div class="hidden md:block w-1 h-1 bg-gray-600 rounded-full"></div>
+            <div>
+                Made with <i class="fa-solid fa-heart text-red-500 animate-pulse mx-1"></i> by 
+                <a href="https://www.sitee.in" target="_blank" class="text-yellow-400 hover:text-yellow-300 font-bold tracking-wide transition-all hover:underline">Sitee</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+        <div class="glass-card p-10 max-w-sm text-center transform scale-90 transition-transform duration-300" id="modal-box">
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(34,197,94,0.5)]">
+                <i class="fa-solid fa-check text-3xl"></i>
+            </div>
+            <h2 class="poster-font text-4xl mb-2">You're In!</h2>
+            <p class="text-gray-300 mb-6">Registration successful. Get ready for a magical night.</p>
+            <button onclick="closeModal()" class="bg-white text-black px-8 py-2 rounded-full font-bold hover:bg-gray-200">Close</button>
+        </div>
+    </div>
+
+    <script>
+        /* * ==========================================
+         * VAN GOGH FLOW FIELD ANIMATION ENGINE
+         * ==========================================
+         */
+        const canvas = document.getElementById('painting-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        const particleCount = 300; 
+        let hue = 210; 
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = 0;
+                this.vy = 0;
+                this.size = Math.random() * 2 + 1; 
+                this.life = Math.random() * 100;
+                this.maxLife = Math.random() * 100 + 50;
+                const colors = ['#1c325b', '#0b409c', '#104e8b', '#f5d63d', '#e08e24', '#4b91cc'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update(mouse) {
+                const angle = (Math.cos(this.x * 0.003) + Math.sin(this.y * 0.003)) * Math.PI * 2; 
+                this.vx += Math.cos(angle) * 0.05; 
+                this.vy += Math.sin(angle) * 0.05;
+
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    const force = (150 - dist) / 150;
+                    this.vx += dx * force * 0.02; 
+                    this.vy += dy * force * 0.02;
+                }
+
+                this.vx *= 0.96; 
+                this.vy *= 0.96;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x > width) this.x = 0;
+                if (this.x < 0) this.x = width;
+                if (this.y > height) this.y = 0;
+                if (this.y < 0) this.y = height;
+
+                this.life++;
+                if (this.life > this.maxLife) {
+                    this.life = 0;
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = 0; 
+                    this.vy = 0;
+                }
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - this.vx * 3, this.y - this.vy * 3);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = this.size;
+                ctx.lineCap = 'round';
+                ctx.globalAlpha = 0.5; 
+                ctx.stroke();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        let mouse = { x: -1000, y: -1000 };
+        window.addEventListener('mousemove', e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        function animate() {
+            ctx.fillStyle = 'rgba(5, 10, 20, 0.2)'; 
+            ctx.fillRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                p.update(mouse);
+                p.draw(ctx);
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+
+        /* * ==========================================
+         * APP LOGIC (Registration Form & UI)
+         * ==========================================
+         */
+        
+        // --- Mobile Menu Logic ---
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            // Toggle translate-x-full (hidden) to translate-x-0 (visible)
+            if (menu.classList.contains('translate-x-full')) {
+                menu.classList.remove('translate-x-full');
+            } else {
+                menu.classList.add('translate-x-full');
+            }
+        }
+
+        // --- Form Logic ---
+        let currentType = 'attendee';
+        let teamCount = 1;
+        
+        const priceTag = document.getElementById('price-tag');
+        const perfOptions = document.getElementById('performer-options');
+        const btnAttendee = document.getElementById('btn-attendee');
+        const btnParticipant = document.getElementById('btn-participant');
+        const teamSizeInput = document.getElementById('team-size');
+
+        function setType(type) {
+            currentType = type;
+            if (type === 'attendee') {
+                // UI
+                btnAttendee.classList.add('border-yellow-500', 'bg-yellow-500/20', 'text-white');
+                btnAttendee.classList.remove('border-gray-600', 'text-gray-400');
+                
+                btnParticipant.classList.remove('border-yellow-500', 'bg-yellow-500/20', 'text-white');
+                btnParticipant.classList.add('border-gray-600', 'text-gray-400');
+                
+                perfOptions.classList.add('hidden');
+                
+                // Logic
+                updatePriceDisplay(30);
+            } else {
+                // UI
+                btnParticipant.classList.add('border-yellow-500', 'bg-yellow-500/20', 'text-white');
+                btnParticipant.classList.remove('border-gray-600', 'text-gray-400');
+                
+                btnAttendee.classList.remove('border-yellow-500', 'bg-yellow-500/20', 'text-white');
+                btnAttendee.classList.add('border-gray-600', 'text-gray-400');
+                
+                perfOptions.classList.remove('hidden');
+                
+                // Logic (Reset team count or keep previous? Resetting to 1 for clarity)
+                // teamCount = 1; 
+                // teamSizeInput.value = 1;
+                calcPerformerTotal();
+            }
+        }
+
+        function adjustTeam(delta) {
+            teamCount += delta;
+            if (teamCount < 1) teamCount = 1;
+            if (teamCount > 10) teamCount = 10; // Cap at 10 to be safe
+            
+            teamSizeInput.value = teamCount;
+            calcPerformerTotal();
+        }
+
+        function calcPerformerTotal() {
+            if (currentType === 'attendee') return;
+
+            // Base price 100 for 1 person
+            // Add 50 for every additional person
+            // 1 = 100
+            // 2 = 150 (100 + 50)
+            // 3 = 200 (100 + 100)
+            
+            let price = 100;
+            if (teamCount > 1) {
+                price = 100 + (teamCount - 1) * 50;
+            }
+
+            updatePriceDisplay(price);
+        }
+
+        function updatePriceDisplay(amount) {
+            priceTag.style.opacity = 0;
+            setTimeout(() => {
+                priceTag.innerText = `₹${amount}`;
+                priceTag.style.opacity = 1;
+            }, 200);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            // Validation for performers
+            if (currentType === 'participant') {
+                const catCount = document.querySelectorAll('input[name="cat"]:checked').length;
+                if (catCount === 0) {
+                    alert("Performers must select at least one category type (e.g. Vocal, Dance).");
+                    return;
+                }
+            }
+            
+            const modal = document.getElementById('modal');
+            const box = document.getElementById('modal-box');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-90');
+                box.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const box = document.getElementById('modal-box');
+            modal.classList.add('opacity-0');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-90');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('regForm').reset();
+                teamCount = 1;
+                teamSizeInput.value = 1;
+                setType('attendee');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
